@@ -1,0 +1,6 @@
+# Config file for package des-aodv
+DAEMON_OPTS="/etc/des-aodv.conf"
+TAP_NAME=tapaodv
+TAP_IP=10.0.0.1
+CLI_PORT=4519
+IFACE=eth0,wlan0

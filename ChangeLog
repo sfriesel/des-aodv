@@ -11,3 +11,6 @@
 		 
 20100513 - libdessert1
          - Reimplementation. Symetric Path AODV
+
+20100909 - Cleaned up Makefile and tarball
+         - Updated etc files

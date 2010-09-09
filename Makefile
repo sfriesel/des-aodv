@@ -1,6 +1,6 @@
 DAEMON_NAME = des-aodv
 VERSION_MAJOR = 1
-VERSION_MINOR = 0
+VERSION_MINOR = 1
 VERSION = $(VERSION_MAJOR).$(VERSION_MINOR)
 DESTDIR ?=
 
@@ -58,12 +58,13 @@ install:
 	install -m 755 etc/$(DAEMON_NAME).init $(DIR_ETC_INITD)/$(DAEMON_NAME)
 
 clean:
-	-$(RM) $(OBJS)$(EXECUTABLES)$(C_DEPS) $(DAEMON_NAME) $(DAEMON_NAME)-$(VERSION).tar.gz
+	-$(RM) $(OBJS)$(EXECUTABLES)$(C_DEPS) $(DAEMON_NAME) $(DAEMON_NAME)-$(VERSION).tar.gz $(DAEMON_NAME)-$(VERSION)
 	-@echo ' '
 
 tarball: clean
 	mkdir $(DAEMON_NAME)-$(VERSION)
 	cp -R $(TARFILES) $(DAEMON_NAME)-$(VERSION)
+	find $(DAEMON_NAME)-$(VERSION) -name .svn -exec rm -rf {} +
 	tar -czf $(DAEMON_NAME)-$(VERSION).tar.gz $(DAEMON_NAME)-$(VERSION)
 	rm -rf $(DAEMON_NAME)-$(VERSION)
 

@@ -147,8 +147,7 @@ int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeva
 			_onlb_element_t* head = NULL;
 
 			while(aodv_db_invroute(ether_addr, dhost_ether) == TRUE) {
-				dessert_debug("invalidate route to %x:%x:%x:%x:%x:%x",
-						dhost_ether[0], dhost_ether[1], dhost_ether[2], dhost_ether[3], dhost_ether[4], dhost_ether[5]);
+				dessert_debug("invalidate route to %M", dhost_ether);
 				dest_count++;
 				curr_el = malloc(sizeof(_onlb_element_t));
 				memcpy(curr_el->dhost_ether, dhost_ether, ETH_ALEN);
@@ -160,8 +159,7 @@ int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeva
 				while(head != NULL) {
 				dessert_msg_t* rerr_msg = aodv_create_rerr(&head, dest_count);
 					if (rerr_msg != NULL) {
-						dessert_debug("link to %x:%x:%x:%x:%x:%x break -> send RERR",
-								ether_addr[0], ether_addr[1], ether_addr[2], ether_addr[3], ether_addr[4], ether_addr[5]);
+						dessert_debug("link to %M break -> send RERR", ether_addr);
 						dessert_meshsend_fast(rerr_msg, NULL);
 						dessert_msg_destroy(rerr_msg);
 						aodv_db_putrerr(&timestamp);

@@ -27,12 +27,35 @@ For further information and questions please use the web site
 #include "database/aodv_database.h"
 #include "config.h"
 #include <dessert-extra.h>
+#include <printf.h>
 
 int be_verbose = BE_VERBOSE;
-int cli_port = 1023;
 char* routing_log_file = NULL;
 
+int print_macaddress_arginfo(const struct printf_info *info, size_t n, int *argtypes) {
+    /* We always take exactly one argument and this is a pointer to the
+     structure.. */
+    if (n > 0)
+        argtypes[0] = PA_POINTER;
+    return 1;
+}
+
+int print_macaddress(FILE *stream, const struct printf_info *info, const void * const *args) {
+    const uint8_t *address;
+    int len;
+
+    address = *(uint8_t **) (args[0]);
+    len = fprintf(stream, "%02x:%02x:%02x:%02x:%02x:%02x", address[0],
+            address[1], address[2], address[3], address[4], address[5]);
+    if (len == -1)
+        return -1;
+
+    return len;
+}
+
 int main(int argc, char** argv) {
+    register_printf_function('M', print_macaddress, print_macaddress_arginfo);
+
 	FILE *cfg = NULL;
 	if ((argc == 2) && (strcmp(argv[1], "-nondaemonize") == 0)) {
 		dessert_info("starting AODV in non daemonize mode");
@@ -55,7 +78,6 @@ int main(int argc, char** argv) {
 
 	// cli initialization
 	struct cli_command* cli_cfg_set = cli_register_command(dessert_cli, NULL, "set", NULL, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set variable");
-	cli_register_command(dessert_cli, cli_cfg_set, "port", cli_setport, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "configure TCP port the daemon is listening on");
 	cli_register_command(dessert_cli, dessert_cli_cfg_iface, "sys", dessert_cli_cmd_addsysif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize sys interface");
 	cli_register_command(dessert_cli, dessert_cli_cfg_iface, "mesh", dessert_cli_cmd_addmeshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize mesh interface");
 	cli_register_command(dessert_cli, cli_cfg_set, "verbose", cli_beverbose, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "be more verbose");
@@ -73,7 +95,7 @@ int main(int argc, char** argv) {
 	dessert_meshrxcb_add(aodv_handle_rreq, 50);
 	dessert_meshrxcb_add(aodv_handle_rerr, 60);
 	dessert_meshrxcb_add(aodv_handle_rrep, 70);
-	//dessert_meshrxcb_add(dessert_rx_trace, 75);
+    dessert_meshrxcb_add(dessert_mesh_ipttl, 75);
 	dessert_meshrxcb_add(aodv_fwd2dest, 80);
 	dessert_meshrxcb_add(rp2sys, 100);
 
@@ -95,10 +117,8 @@ int main(int argc, char** argv) {
 	schedule_chec_interval.tv_usec = (SCHEDULE_CHECK_INTERVAL % 1000) * 1000;
 	dessert_periodic_add(aodv_periodic_scexecute, NULL, NULL, &schedule_chec_interval);
 
-	// configure
 	cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
 
-	// DES-SERT and CLI Run!
 	dessert_cli_run();
 	dessert_run();
 

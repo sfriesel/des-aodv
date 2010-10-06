@@ -53,9 +53,7 @@ neighbor_entry_t* db_neighbor_entry_create(u_int8_t ether_neighbor_addr[ETH_ALEN
 
 void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void* object) {
 	neighbor_entry_t* curr_entry = object;
-	dessert_debug("%s <= x => %x:%x:%x:%x:%x:%x",
-			curr_entry->iface->if_name, curr_entry->ether_neighbor[0], curr_entry->ether_neighbor[1],
-			curr_entry->ether_neighbor[2], curr_entry->ether_neighbor[3], curr_entry->ether_neighbor[4], curr_entry->ether_neighbor[5]);
+	dessert_debug("%s <= x => %M", curr_entry->iface->if_name, curr_entry->ether_neighbor);
 	HASH_DEL(nt.entrys, curr_entry);
 	// add schedule
 	struct timeval curr_time;
@@ -87,9 +85,7 @@ int db_nt_cap2Dneigh(u_int8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshi
 		curr_entry = db_neighbor_entry_create(ether_neighbor_addr, iface);
 		if (curr_entry == NULL) return FALSE;
 		HASH_ADD_KEYPTR(hh, nt.entrys, curr_entry->ether_neighbor, ETH_ALEN + sizeof(void*), curr_entry);
-		dessert_debug("%s <=====> %x:%x:%x:%x:%x:%x",
-				iface->if_name, ether_neighbor_addr[0], ether_neighbor_addr[1],
-				ether_neighbor_addr[2], ether_neighbor_addr[3], ether_neighbor_addr[4], ether_neighbor_addr[5]);
+		dessert_debug("%s <=====> %M", iface->if_name, ether_neighbor_addr);
 	}
 	timeslot_addobject(nt.ts, timestamp, curr_entry);
 	return TRUE;

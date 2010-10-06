@@ -89,7 +89,6 @@ enum bool {TRUE = 1, FALSE = 0};
 #define MAX_MESH_IFACES_COUNT		8
 
 extern int 							be_verbose;
-extern int 							cli_port;
 extern char*						routing_log_file;
 
 #endif

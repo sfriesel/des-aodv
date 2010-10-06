@@ -138,7 +138,7 @@ void aodv_send_rreq(u_int8_t dhost_ether[ETH_ALEN], struct timeval* ts, u_int8_t
 	}
 	aodv_db_putrreq(ts);
 	if (be_verbose == TRUE)
-		dessert_debug("RREQ to *:%x:%x ttl=%i", dhost_ether[4], dhost_ether[5], (ttl > TTL_THRESHOLD) ? 255 : ttl);
+		dessert_debug("RREQ to %M ttl=%i", dhost_ether, (ttl > TTL_THRESHOLD) ? 255 : ttl);
 	// send out and destroy
 	dessert_meshsend_fast(rreq_msg, NULL);
 	dessert_msg_destroy(rreq_msg);
@@ -154,33 +154,14 @@ void rlfile_log(const u_int8_t src_addr[ETH_ALEN], const u_int8_t dest_addr[ETH_
 	FILE* f = fopen(routing_log_file, "a+");
 	if (f == NULL) dessert_debug("file = 0");
 	if (out_iface == NULL) {
-		fprintf(f, "%02x:%02x:%02x:%02x:%02x:%02x\t%02x:%02x:%02x:%02x:%02x:%02x\t%u\t%u\t%02x:%02x:%02x:%02x:%02x:%02x\t%s\t%s\n",
-			src_addr[0], src_addr[1], src_addr[2], src_addr[3], src_addr[4], src_addr[5],
-			dest_addr[0], dest_addr[1], dest_addr[2], dest_addr[3], dest_addr[4], dest_addr[5],
-			seq_num, hop_count,
-			in_iface[0], in_iface[1], in_iface[2],
-			in_iface[3], in_iface[4], in_iface[5],
-			"NULL", "NULL");
+		fprintf(f, "%M\t%M\t%u\t%u\t%M\t%s\t%s\n",
+			src_addr, dest_addr, seq_num, hop_count, in_iface, "NULL", "NULL");
 	} else if (in_iface == NULL) {
-		fprintf(f, "%02x:%02x:%02x:%02x:%02x:%02x\t%02x:%02x:%02x:%02x:%02x:%02x\t%u\t%u\t%s\t%02x:%02x:%02x:%02x:%02x:%02x\t%02x:%02x:%02x:%02x:%02x:%02x\n",
-			src_addr[0], src_addr[1], src_addr[2], src_addr[3], src_addr[4], src_addr[5],
-			dest_addr[0], dest_addr[1], dest_addr[2], dest_addr[3], dest_addr[4], dest_addr[5],
-			seq_num, hop_count, "NULL",
-			out_iface[0], out_iface[1], out_iface[2],
-			out_iface[3], out_iface[4], out_iface[5],
-			next_hop_addr[0], next_hop_addr[1], next_hop_addr[2],
-			next_hop_addr[3], next_hop_addr[4], next_hop_addr[5]);
+		fprintf(f, "%M\t%M\t%u\t%u\t%s\t%M\t%M\n",
+			src_addr, dest_addr, seq_num, hop_count, "NULL", out_iface, next_hop_addr);
 	} else {
-		fprintf(f, "%02x:%02x:%02x:%02x:%02x:%02x\t%02x:%02x:%02x:%02x:%02x:%02x\t%u\t%u\t%02x:%02x:%02x:%02x:%02x:%02x\t%02x:%02x:%02x:%02x:%02x:%02x\t%02x:%02x:%02x:%02x:%02x:%02x\n",
-			src_addr[0], src_addr[1], src_addr[2], src_addr[3], src_addr[4], src_addr[5],
-			dest_addr[0], dest_addr[1], dest_addr[2], dest_addr[3], dest_addr[4], dest_addr[5],
-			seq_num, hop_count,
-			in_iface[0], in_iface[1], in_iface[2],
-			in_iface[3], in_iface[4], in_iface[5],
-			out_iface[0], out_iface[1], out_iface[2],
-			out_iface[3], out_iface[4], out_iface[5],
-			next_hop_addr[0], next_hop_addr[1], next_hop_addr[2],
-			next_hop_addr[3], next_hop_addr[4], next_hop_addr[5]);
+		fprintf(f, "%M\t%M\t%u\t%u\t%M\t%M\t%M\n",
+			src_addr, dest_addr, seq_num, hop_count, in_iface, out_iface, next_hop_addr);
 	}
 	fclose(f);
 	pthread_rwlock_unlock(&rlflock);

@@ -76,16 +76,6 @@ int aodv_cli_print_rt(struct cli_def* cli, char* command, char* argv[], int argc
 }
 // -------------------- common cli functions ----------------------------------------------
 
-int cli_setport(struct cli_def *cli, char *command, char *argv[], int argc) {
-    uint16_t t = (uint16_t) atoi(argv[0]);
-    if(t < 1024 || t > 49151) {
-        dessert_err("Port number has to be in [1024, 49151]");
-        return CLI_ERROR;
-    }
-    dessert_set_cli_port(t);
-    return (CLI_OK);
-}
-
 int cli_setrouting_log(struct cli_def *cli, char *command, char *argv[], int argc) {
 	routing_log_file = malloc(strlen(argv[0]));
 	strcpy(routing_log_file, argv[0]);

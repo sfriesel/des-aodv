@@ -67,8 +67,9 @@ int main(int argc, char** argv) {
 			return EXIT_FAILURE;
 		}
 	} else {
-		dessert_init("AODV", 0x03, DESSERT_OPT_DAEMONIZE);
+		dessert_info("starting AODV in daemonize mode");
 		cfg = dessert_cli_get_cfg(argc, argv);
+		dessert_init("AODV", 0x03, DESSERT_OPT_DAEMONIZE);
 	}
 	// routing table initialisation
 	aodv_db_init();

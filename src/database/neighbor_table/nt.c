@@ -1,26 +1,3 @@
-/******************************************************************************
-Copyright 2009, Freie Universitaet Berlin (FUB). All rights reserved.
-
-These sources were developed at the Freie Universitaet Berlin,
-Computer Systems and Telematics / Distributed, embedded Systems (DES) group
-(http://cst.mi.fu-berlin.de, http://www.des-testbed.net)
--------------------------------------------------------------------------------
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program. If not, see http://www.gnu.org/licenses/ .
---------------------------------------------------------------------------------
-For further information and questions please use the web site
-       http://www.des-testbed.net
-*******************************************************************************/
-
 #include "nt.h"
 #include "../timeslot.h"
 #include "../../config.h"
@@ -55,6 +32,7 @@ void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void*
 	neighbor_entry_t* curr_entry = object;
 	dessert_debug("%s <= x => %M", curr_entry->iface->if_name, curr_entry->ether_neighbor);
 	HASH_DEL(nt.entrys, curr_entry);
+
 	// add schedule
 	struct timeval curr_time;
 	gettimeofday(&curr_time, NULL);
@@ -65,11 +43,10 @@ void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void*
 int db_nt_init() {
 	timeslot_t* new_ts;
 	struct timeval timeout;
-	u_int32_t hello_int_msek = HELLO_INTERVAL  * (ALLOWED_HELLO_LOST +1);
+	u_int32_t hello_int_msek = HELLO_INTERVAL  * (ALLOWED_HELLO_LOST + 1);
 	timeout.tv_sec = hello_int_msek / 1000;
 	timeout.tv_usec = (hello_int_msek % 1000) * 1000;
-	if (timeslot_create(&new_ts, &timeout, NULL, db_nt_on_neigbor_timeout) != TRUE)
-		return FALSE;
+	if (timeslot_create(&new_ts, &timeout, NULL, db_nt_on_neigbor_timeout) != TRUE) return FALSE;
 	nt.entrys = NULL;
 	nt.ts = new_ts;
 	return TRUE;

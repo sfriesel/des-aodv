@@ -18,3 +18,6 @@
 20101006 - Minor changes
          - Added TTL decrease callback
          - Current version 1.2
+
+20110114 - aodv and aodv-mp merged
+         - more parameter flexibilty

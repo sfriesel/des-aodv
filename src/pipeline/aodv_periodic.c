@@ -124,7 +124,7 @@ int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeva
 				dessert_msg_t* buffered_msg = aodv_db_pop_packet(ether_addr);
 				if (buffered_msg != NULL) {
 					if (aodv_db_getroute2dest(ether_addr, ether_next_hop, &output_iface, &timestamp) == TRUE) {
-						if (be_verbose == TRUE) dessert_debug("send out packet from buffer");
+						if (verbose == TRUE) dessert_debug("send out packet from buffer");
 						/* // no need to search for next hop. Next hop is the last_hop that send RREP */
 						memcpy(buffered_msg->l2h.ether_dhost, ether_next_hop, ETH_ALEN);
 						if (routing_log_file != NULL) {

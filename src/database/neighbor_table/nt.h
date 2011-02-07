@@ -26,6 +26,7 @@ For further information and questions please use the web site
 
 #include <dessert.h>
 
+
 /** initialize neighbor table */
 int db_nt_init();
 
@@ -41,5 +42,7 @@ int db_nt_cap2Dneigh(u_int8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshi
 int db_nt_check2Dneigh(u_int8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif_t* iface, struct timeval* timestamp);
 
 int db_nt_cleanup(struct timeval* timestamp);
+
+void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void* object);
 
 #endif

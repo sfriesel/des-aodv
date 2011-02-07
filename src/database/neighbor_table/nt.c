@@ -43,7 +43,7 @@ void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void*
 int db_nt_init() {
 	timeslot_t* new_ts;
 	struct timeval timeout;
-	u_int32_t hello_int_msek = HELLO_INTERVAL  * (ALLOWED_HELLO_LOST + 1);
+	u_int32_t hello_int_msek = hello_interval * (ALLOWED_HELLO_LOST + 1);
 	timeout.tv_sec = hello_int_msek / 1000;
 	timeout.tv_usec = (hello_int_msek % 1000) * 1000;
 	if (timeslot_create(&new_ts, &timeout, NULL, db_nt_on_neigbor_timeout) != TRUE) return FALSE;

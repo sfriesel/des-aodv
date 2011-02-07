@@ -104,7 +104,7 @@ void purge_rt_entry(struct timeval* timestamp, void* src_object, void* del_objec
 		}
 	}
 	// delete routing entry
-	if (be_verbose == TRUE)
+	if (verbose == TRUE)
 		dessert_debug("delete route to *:%02x:%02x", rt_entry->dhost_ether[4], rt_entry->dhost_ether[5]);
 	HASH_DEL(rt.entrys, rt_entry);
 	free(rt_entry);

@@ -1,11 +1,12 @@
 #ifndef AODV_CONFIG
 #define AODV_CONFIG
 
+#include <dessert.h>
+
 enum bool {TRUE = 1, FALSE = 0};
 
 #define RREQ_RETRIES				2
 #define RREQ_RATELIMIT				10
-#define TIMEOUT_BUFFER				2
 #define TTL_START					2
 #define TTL_INCREMENT				2
 #define TTL_THRESHOLD				7
@@ -17,12 +18,7 @@ enum bool {TRUE = 1, FALSE = 0};
 #define NET_DIAMETER				20
 #define NET_TRAVERSAL_TIME			2 * NODE_TRAVERSAL_TIME * NET_DIAMETER
 #define BLACKLIST_TIMEOUT			RREQ_RETRIES * NET_TRAVERSAL_TIME
-#define HELLO_INTERVAL				500 	// msec
-#define LOCAL_ADD_TTL				2
-#define MAX_REPAIR_TTL				0.3 * NET_DIAMETER
-#define MIN_REPAIR_TTL				1
 #define MY_ROUTE_TIMEOUT			2 * ACTIVE_ROUTE_TIMEOUT
-#define NEXT_HOP_WAIT				NODE_TRAVERSAL_TIME + 10
 #define PATH_DESCOVERY_TIME			2 * NET_TRAVERSAL_TIME
 #define RERR_RATELIMIT				10
 
@@ -57,8 +53,10 @@ enum bool {TRUE = 1, FALSE = 0};
  */
 #define AODV_SC_SEND_OUT_RERR		3
 #define MULTIPATH					FALSE
-#define BE_VERBOSE					FALSE
+#define VERBOSE						FALSE
 #define HELLO_SIZE					128
+#define HELLO_INTERVAL				2000 	// milliseconds
+#define RREQ_SIZE					128
 
 // --- Database Flags
 
@@ -69,9 +67,12 @@ enum bool {TRUE = 1, FALSE = 0};
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 
+extern dessert_periodic_t *			periodic_send_hello;
 extern int 							multipath;
-extern int 							be_verbose;
+extern int 							verbose;
 extern char*						routing_log_file;
 extern int 							hello_size;
+extern int 							hello_interval;
+extern int 							rreq_size;
 
 #endif

@@ -9,19 +9,19 @@
 # Description:       Start des-aodv daemon
 ### END INIT INFO
 
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/home/ferhat
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/home/fb13
 NAME=des-aodv
-DAEMON=/home/ferhat/$NAME
+DAEMON=/home/fb13/$NAME
 DESC="$NAME, a daemon based on libdessert"
 
 test -x $DAEMON || exit 0
 
-LOGDIR=/home/ferhat/log/$NAME
-PIDFILE=/home/ferhat/$NAME.pid 	# Default may be overwritten by /etc/default/$NAME
+LOGDIR=/var/log/$NAME
+PIDFILE=/var/run/$NAME.pid 	# Default may be overwritten by /etc/default/$NAME
 DODTIME=1                  	# Time to wait for the server to die, in seconds
-				# If this value is set too low you might not
-				# let some servers to die gracefully and
-				# 'restart' will not work
+							# If this value is set too low you might not
+							# let some servers to die gracefully and
+							# 'restart' will not work
 HOSTNAME=$(hostname)
 
 # Include default configuration if available

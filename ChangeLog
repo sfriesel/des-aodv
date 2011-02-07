@@ -21,3 +21,8 @@
 
 20110114 - aodv and aodv-mp merged
          - more parameter flexibilty
+
+20110207 - cleared code e.g. deleted unused variables
+         - more cli getter and setter for some daemon parameters
+		 - hello_size/hello_interval
+		 - rreq_size

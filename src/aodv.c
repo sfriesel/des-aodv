@@ -7,13 +7,17 @@
 #include "pipeline/aodv_pipeline.h"
 #include "database/aodv_database.h"
 
-int 	multipath 			= MULTIPATH;
-int 	be_verbose 			= BE_VERBOSE;
-char* 	routing_log_file 	= NULL;
 int 	hello_size 			= HELLO_SIZE;
+int 	hello_interval		= HELLO_INTERVAL;
+int		rreq_size			= RREQ_SIZE;
+int 	verbose 			= VERBOSE;
+int 	multipath 			= MULTIPATH;
+char* 	routing_log_file 	= NULL;
+
+dessert_periodic_t* periodic_send_hello;
 
 int print_macaddress_arginfo(const struct printf_info *info, size_t n, int *argtypes) {
-    if (n > 0) argtypes[0] = PA_POINTER;  // We always take exactly one argument and this is a pointer to the structure..
+    if (n > 0) argtypes[0] = PA_POINTER;  		// we always take exactly one argument (pointer to the structure)
     return 1;
 }
 
@@ -31,41 +35,19 @@ int main(int argc, char** argv) {
 
     /* initialize daemon with correct parameters */
     FILE *cfg = NULL;
-	if (argc == 1) {
-		dessert_info("starting DES-AODV in daemonize mode, auto config file");
-		dessert_init("aodv", 0x03, DESSERT_OPT_DAEMONIZE);
+	if ((argc == 2) && (strcmp(argv[1], "-nondaemonize") == 0)) {
+		dessert_info("starting AODV in non daemonize mode");
+		dessert_init("AODV", 0x03, DESSERT_OPT_NODAEMONIZE);
 		char cfg_file_name[] = "/etc/des-aodv.conf";
 		cfg = fopen(cfg_file_name, "r");
-		if (!cfg) {
+		if (cfg == NULL) {
 			printf("Config file '%s' not found. Exit ...\n", cfg_file_name);
 			return EXIT_FAILURE;
 		}
 	} else {
-		if (argc == 2) {
-			if (strcmp(argv[1], "-nondaemonize") == 0) {
-				dessert_info("starting DES-AODV in nondaemonize mode, auto config file");
-				dessert_init("aodv", 0x03, DESSERT_OPT_NODAEMONIZE);
-				char cfg_file_name[] = "/etc/des-aodv.conf";
-				cfg = fopen(cfg_file_name, "r");
-				if (!cfg) {
-					printf("Config file '%s' not found. Exit ...\n", cfg_file_name);
-					return EXIT_FAILURE;
-				}
-			} else {
-				dessert_info("starting DES-AODV in daemonize mode, manual config file");
-				dessert_init("aodv", 0x03, DESSERT_OPT_DAEMONIZE);
-				cfg = dessert_cli_get_cfg(argc, argv);
-			}
-		} else {
-			if (argc == 3) {
-				dessert_info("starting DES-AODV in nondaemonize mode, manual config file");
-				dessert_init("aodv", 0x03, DESSERT_OPT_NODAEMONIZE);
-				cfg = dessert_cli_get_cfg(argc, argv);
-			} else {
-				dessert_info("USAGE: des-aodv [config file] [-nondaemonize]");
-				return EXIT_FAILURE;
-			}
-		}
+		dessert_info("starting AODV in daemonize mode");
+		cfg = dessert_cli_get_cfg(argc, argv);
+		dessert_init("AODV", 0x03, DESSERT_OPT_DAEMONIZE);
 	}
 
 	/* routing table initialization */
@@ -78,20 +60,25 @@ int main(int argc, char** argv) {
 	struct cli_command* cli_cfg_set = cli_register_command(dessert_cli, NULL, "set", NULL, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set variable");
 	cli_register_command(dessert_cli, dessert_cli_cfg_iface, "sys", dessert_cli_cmd_addsysif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize sys interface");
 	cli_register_command(dessert_cli, dessert_cli_cfg_iface, "mesh", dessert_cli_cmd_addmeshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize mesh interface");
-	cli_register_command(dessert_cli, cli_cfg_set, "verbose", cli_beverbose, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "be more verbose");
-	cli_register_command(dessert_cli, cli_cfg_set, "routinglog", cli_setrouting_log, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set path to routing logging file");
-	cli_register_command(dessert_cli, NULL, "rreq", aodv_cli_sendrreq, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "send RREQ to destination");
-	cli_register_command(dessert_cli, NULL, "multipath", cli_multipath, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "activate/deactivate multipath");
-	cli_register_command(dessert_cli, NULL, "hello_size", cli_sethellosize, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "set size of hello packet");
+	cli_register_command(dessert_cli, cli_cfg_set, "hello_size", cli_set_hello_size, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set HELLO packet size");
+	cli_register_command(dessert_cli, cli_cfg_set, "hello_interval", cli_set_hello_interval, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set HELLO packet interval");
+	cli_register_command(dessert_cli, cli_cfg_set, "rreq_size", cli_set_rreq_size, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set RREQ packet size");
+	cli_register_command(dessert_cli, cli_cfg_set, "verbose", cli_set_verbose, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set verbose mode");
+	cli_register_command(dessert_cli, cli_cfg_set, "multipath", cli_set_multipath, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set multipath variant");
+	cli_register_command(dessert_cli, cli_cfg_set, "routing_log", cli_set_routing_log, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set path to routing logging file");
 
 	struct cli_command* cli_command_print = cli_register_command(dessert_cli, NULL, "print", NULL, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print table");
-	cli_register_command(dessert_cli, cli_command_print, "rt", aodv_cli_print_rt, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print routing table");
-	cli_register_command(dessert_cli, cli_command_print, "multipath", cli_showmultipath, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print whether multipath is set");
-	cli_register_command(dessert_cli, cli_command_print, "hello_size", cli_showhellosize, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print hello packet size");
+	cli_register_command(dessert_cli, cli_command_print, "hello_size", cli_print_hello_size, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print HELLO packet size");
+	cli_register_command(dessert_cli, cli_command_print, "hello_interval", cli_print_hello_interval, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print HELLO packet interval");
+	cli_register_command(dessert_cli, cli_command_print, "rreq_size", cli_print_rreq_size, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print RREQ packet size");
+	cli_register_command(dessert_cli, cli_command_print, "rt", cli_print_rt, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print routing table");
+	cli_register_command(dessert_cli, cli_command_print, "multipath", cli_print_multipath, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print multipath variant");
+
+	cli_register_command(dessert_cli, NULL, "rreq", cli_send_rreq, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "send RREQ to destination");
 
 	/* registering callbacks */
-	dessert_meshrxcb_add(dessert_msg_check_cb, 10); 		// check message
-	dessert_meshrxcb_add(dessert_msg_ifaceflags_cb, 20); 	// set lflags
+	dessert_meshrxcb_add(dessert_msg_check_cb, 10);
+	dessert_meshrxcb_add(dessert_msg_ifaceflags_cb, 20);
 	dessert_meshrxcb_add(aodv_drop_errors, 30);
 	dessert_meshrxcb_add(aodv_handle_hello, 40);
 	dessert_meshrxcb_add(aodv_handle_rreq, 50);
@@ -104,10 +91,10 @@ int main(int argc, char** argv) {
 	dessert_sysrxcb_add(aodv_sys2rp, 10);
 
 	/* registering periodic tasks */
-	struct timeval hello_interval;
-	hello_interval.tv_sec = HELLO_INTERVAL / 1000;
-	hello_interval.tv_usec = (HELLO_INTERVAL % 1000) * 1000;
-	dessert_periodic_add(aodv_periodic_send_hello, NULL, NULL, &hello_interval);
+	struct timeval hello_interval_t;
+	hello_interval_t.tv_sec = hello_interval / 1000;
+	hello_interval_t.tv_usec = (hello_interval % 1000) * 1000;
+	periodic_send_hello = dessert_periodic_add(aodv_periodic_send_hello, NULL, NULL, &hello_interval_t);
 
 	struct timeval cleanup_interval;
 	cleanup_interval.tv_sec = DB_CLEANUP_INTERVAL / 1000;

@@ -26,3 +26,6 @@
          - more cli getter and setter for some daemon parameters
 		 - hello_size/hello_interval
 		 - rreq_size
+
+20110209 - minor changes
+         - time intervals now are specified in milliseconds

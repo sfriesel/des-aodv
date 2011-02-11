@@ -58,7 +58,8 @@ int aodv_db_init() {
 	int pb = pb_init();
 	int rerrl = aodv_db_rerrl_init();
 	aodv_db_unlock();
-	return (rl == TRUE) && (nt == TRUE) && (brct == TRUE) && (rt == TRUE) && (pb == TRUE) && (rerrl == TRUE);
+	return (rl == TRUE) && (nt == TRUE) && (brct == TRUE) &&
+			(rt == TRUE) && (pb == TRUE) && (rerrl == TRUE);
 }
 
 int aodv_db_cleanup(struct timeval* timestamp){
@@ -104,8 +105,7 @@ int aodv_db_capt_rreq (u_int8_t dhost_ether[ETH_ALEN], u_int8_t shost_ether[ETH_
 		u_int8_t shost_prev_hop[ETH_ALEN], const dessert_meshif_t* output_iface,
 		u_int32_t shost_seq_num, struct timeval* timestamp){
 	aodv_db_wlock();
-	int result = aodv_db_rt_capt_rreq(dhost_ether, shost_ether, shost_prev_hop, output_iface,
-			shost_seq_num, timestamp);
+	int result = aodv_db_rt_capt_rreq(dhost_ether, shost_ether, shost_prev_hop, output_iface, shost_seq_num, timestamp);
 	aodv_db_unlock();
 	return result;
 }

@@ -107,8 +107,7 @@ void aodv_send_rreq(u_int8_t dhost_ether[ETH_ALEN], struct timeval* ts, u_int8_t
 	// fist check if we have sent more then RREQ_LIMITH RREQ messages at last 1 sek.
 	u_int32_t rreq_count;
 	aodv_db_getrreqcount(ts, &rreq_count);
-	if (rreq_count >= RREQ_RATELIMIT) {
-		// we have reached RREQ_RATELIMIT -> send this RREQ later(try in 100ms)!
+	if (rreq_count >= RREQ_RATELIMIT) { // we have reached RREQ_RATELIMIT -> send this RREQ later(try in 100ms)!
 		struct timeval retry_time;
 		retry_time.tv_sec = 0;
 		retry_time.tv_usec = (100) * 1000;
@@ -116,8 +115,8 @@ void aodv_send_rreq(u_int8_t dhost_ether[ETH_ALEN], struct timeval* ts, u_int8_t
 		aodv_db_addschedule(&retry_time, dhost_ether, AODV_SC_REPEAT_RREQ, ttl);
 		return;
 	}
-	// create RREQ
-	dessert_msg_t* rreq_msg = _create_rreq(dhost_ether, (ttl <= TTL_THRESHOLD)? ttl : 255);
+
+	dessert_msg_t* rreq_msg = _create_rreq(dhost_ether, (ttl <= TTL_THRESHOLD)? ttl : 255); // create RREQ
 
 	// add task to repeat RREQ after
 	u_int32_t rep_time = (ttl > TTL_THRESHOLD)? NET_TRAVERSAL_TIME : (2 * NODE_TRAVERSAL_TIME * ttl);
@@ -126,8 +125,7 @@ void aodv_send_rreq(u_int8_t dhost_ether[ETH_ALEN], struct timeval* ts, u_int8_t
 	rreq_repeat_time.tv_usec = (rep_time % 1000) * 1000;
 	hf_add_tv(ts, &rreq_repeat_time, &rreq_repeat_time);
 
-	if (ttl <= TTL_THRESHOLD) {
-		// TTL_THRESHOLD + 1 means: this is a first try from RREQ_RETRIES
+	if (ttl <= TTL_THRESHOLD) { // TTL_THRESHOLD + 1 means: this is a first try from RREQ_RETRIES
 		aodv_db_addschedule(&rreq_repeat_time, dhost_ether, AODV_SC_REPEAT_RREQ,
 				(ttl + TTL_INCREMENT > TTL_THRESHOLD)? TTL_THRESHOLD + 1 : ttl + TTL_INCREMENT);
 	} else {
@@ -137,8 +135,9 @@ void aodv_send_rreq(u_int8_t dhost_ether[ETH_ALEN], struct timeval* ts, u_int8_t
 		}
 	}
 	aodv_db_putrreq(ts);
-	if (verbose == TRUE)
+	if (verbose == TRUE) {
 		dessert_debug("RREQ to %M ttl=%i", dhost_ether, (ttl > TTL_THRESHOLD) ? 255 : ttl);
+	}
 
 	void* payload;
 	uint16_t size = max(rreq_size - sizeof(dessert_msg_t) - sizeof(struct ether_header) - 2, 0);
@@ -159,9 +158,18 @@ void rlfile_log(const u_int8_t src_addr[ETH_ALEN], const u_int8_t dest_addr[ETH_
 	pthread_rwlock_wrlock(&rlflock);
 	FILE* f = fopen(routing_log_file, "a+");
 	if (f == NULL) dessert_debug("file = 0");
-	if (out_iface == NULL) fprintf(f, "%M\t%M\t%u\t%u\t%M\t%s\t%s\n", src_addr, dest_addr, seq_num, hop_count, in_iface, "NULL", "NULL");
-	else if (in_iface == NULL) fprintf(f, "%M\t%M\t%u\t%u\t%s\t%M\t%M\n", src_addr, dest_addr, seq_num, hop_count, "NULL", out_iface, next_hop_addr);
-	else fprintf(f, "%M\t%M\t%u\t%u\t%M\t%M\t%M\n", src_addr, dest_addr, seq_num, hop_count, in_iface, out_iface, next_hop_addr);
+	if (out_iface == NULL) {
+		fprintf(f, "%M\t%M\t%u\t%u\t%M\t%s\t%s\n",
+				src_addr, dest_addr, seq_num, hop_count, in_iface, "NULL", "NULL");
+	}
+	else if (in_iface == NULL) {
+		fprintf(f, "%M\t%M\t%u\t%u\t%s\t%M\t%M\n",
+				src_addr, dest_addr, seq_num, hop_count, "NULL", out_iface, next_hop_addr);
+	}
+	else {
+		fprintf(f, "%M\t%M\t%u\t%u\t%M\t%M\t%M\n",
+				src_addr, dest_addr, seq_num, hop_count, in_iface, out_iface, next_hop_addr);
+	}
 	fclose(f);
 	pthread_rwlock_unlock(&rlflock);
 }
@@ -173,8 +181,7 @@ void aodv_send_packets_from_buffer(u_int8_t ether_dhost[ETH_ALEN], u_int8_t next
 	// send out packets from buffer
 	dessert_msg_t* buffered_msg;
 	while((buffered_msg = aodv_db_pop_packet(ether_dhost)) != NULL) {
-		// routing log
-		if (routing_log_file != NULL) {
+		if (routing_log_file) {
 			struct ether_header* l25h = dessert_msg_getl25ether(buffered_msg);
 			u_int32_t seq_num = 0;
 			pthread_rwlock_wrlock(&rlseqlock);
@@ -187,8 +194,11 @@ void aodv_send_packets_from_buffer(u_int8_t ether_dhost[ETH_ALEN], u_int8_t next
 			rl_data->hop_count = 0;
 			rlfile_log(dessert_l25_defsrc, l25h->ether_dhost, seq_num, 0, NULL, iface->hwaddr, next_hop);
 		}
-		if (verbose == TRUE) dessert_debug("rout found. send out packet from buffer");
-		/* // no need to search for next hop. Next hop is the last_hop that send RREP */
+		if (verbose == TRUE) {
+			dessert_debug("rout found. send out packet from buffer");
+		}
+
+		/*  no need to search for next hop. Next hop is the last_hop that send RREP */
 		memcpy(buffered_msg->l2h.ether_dhost, next_hop, ETH_ALEN);
 		dessert_meshsend_fast(buffered_msg, iface);
 		dessert_msg_destroy(buffered_msg);
@@ -221,8 +231,9 @@ int aodv_drop_errors(dessert_msg_t* msg, size_t len,
 	// Hint: RERR must be resend in all ways.
 	if ((dessert_msg_getext(msg, &ext, RREQ_EXT_TYPE, 0) != 0)
 			|| (dessert_msg_getext(msg, &ext, RREP_EXT_TYPE, 0) != 0)) {
-		if (aodv_db_check2Dneigh(msg->l2h.ether_shost, iface, &ts) != TRUE)
+		if (aodv_db_check2Dneigh(msg->l2h.ether_shost, iface, &ts) != TRUE) {
 			return DESSERT_MSG_DROP;
+		}
 	}
 
 	// drop broadcast errors (packet with given brc_id is were already processed)
@@ -231,8 +242,9 @@ int aodv_drop_errors(dessert_msg_t* msg, size_t len,
 		struct aodv_msg_broadcast* brc_msg = (struct aodv_msg_broadcast*) ext->data;
 
 		// Drop all broadcasts with broadcast extensions send from me
-		if (memcmp(l25h->ether_shost, dessert_l25_defsrc, ETH_ALEN) == 0)
+		if (memcmp(l25h->ether_shost, dessert_l25_defsrc, ETH_ALEN) == 0) {
 			return DESSERT_MSG_DROP;
+		}
 
 		// or if packet were already processed
 		if (aodv_db_add_brcid(l25h->ether_shost, brc_msg->id, &ts) != TRUE) {
@@ -247,8 +259,7 @@ int aodv_handle_hello(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, 
 
 	if (dessert_msg_getext(msg, &hallo_ext, HELLO_EXT_TYPE, 0) != 0) {
 		msg->ttl--;
-		if (msg->ttl >= 1) {
-			// send hello msg back
+		if (msg->ttl >= 1) { // send hello msg back
 			memcpy(msg->l2h.ether_dhost, msg->l2h.ether_shost, ETH_ALEN);
 			dessert_meshsend(msg, iface);
 		} else {
@@ -282,16 +293,22 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 				if (!(rreq_msg->flags & AODV_FLAGS_RREQ_D) && !(rreq_msg->flags & AODV_FLAGS_RREQ_U) &&	(aodv_db_getrouteseqnum(l25h->ether_dhost, &dhost_seq_num) == TRUE) && dhost_seq_num > rreq_msg->seq_num_dest) {
 					// i know route to destination that have seq_num greater then that of source (route is newer)
 					dessert_msg_t* rrep_msg = _create_rrep(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, dhost_seq_num, AODV_FLAGS_RREP_A);
-					if (verbose == TRUE) dessert_debug("repair link to *:%02x:%02x", l25h->ether_dhost[4], l25h->ether_dhost[5]);
+					if (verbose == TRUE) {
+						dessert_debug("repair link to *:%02x:%02x", l25h->ether_dhost[4], l25h->ether_dhost[5]);
+					}
 					dessert_meshsend_fast(rrep_msg, iface);
 					dessert_msg_destroy(rrep_msg);
 				} else if (msg->ttl > 0 && cap_result == TRUE) {	// good route to this host is unknown for me -> rebroadcast RREQ
-					if (verbose == TRUE) dessert_debug("rebroadcast RREQ to *:%02x:%02x", l25h->ether_dhost[4], l25h->ether_dhost[5]);
+					if (verbose == TRUE) {
+						dessert_debug("rebroadcast RREQ to *:%02x:%02x", l25h->ether_dhost[4], l25h->ether_dhost[5]);
+					}
 					dessert_meshsend_fast(msg, NULL);
 				}
 			} else {
-				if (verbose == TRUE) dessert_debug("incoming RREQ from *:%02x:%02x -> answer with RREP", l25h->ether_shost[4], l25h->ether_shost[5]);
-				// RREQ for me -> answer with RREP with "Aknowledgement required" flag
+				if (verbose == TRUE) {
+					dessert_debug("incoming RREQ from *:%02x:%02x -> answer with RREP", l25h->ether_shost[4], l25h->ether_shost[5]);
+				}
+				/* RREQ for me -> answer with RREP with "Aknowledgement required" flag */
 
 				pthread_rwlock_wrlock(&pp_rwlock);
 				u_int8_t seq_num_copy = ++seq_num;
@@ -311,18 +328,22 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 			u_int8_t prev_hop[ETH_ALEN];
 			memcpy(prev_hop, msg->l2h.ether_shost, ETH_ALEN);
 
-			if (memcmp(dessert_l25_defsrc, l25h->ether_dhost, ETH_ALEN) != 0) {		// RREQ not for me
+			if (memcmp(dessert_l25_defsrc, l25h->ether_dhost, ETH_ALEN) != 0) {	// RREQ not for me
 				u_int32_t dhost_seq_num;
 				int cap_result = aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->seq_num_src, &ts);
 
 				if (!(rreq_msg->flags & AODV_FLAGS_RREQ_D) && !(rreq_msg->flags & AODV_FLAGS_RREQ_U) && (aodv_db_getrouteseqnum(l25h->ether_dhost, &dhost_seq_num) == TRUE) && hf_seq_comp_i_j(dhost_seq_num, rreq_msg->seq_num_dest) > 0) {
-					// i know route to destination that have seq_num greater then that of source (route is newer)
+					// I know route to destination that have seq_num greater then that of source (route is newer)
 					dessert_msg_t* rrep_msg = _create_rrep(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, dhost_seq_num, AODV_FLAGS_RREP_A);
-					if (verbose == TRUE) dessert_debug("repair link to *:%02x:%02x", l25h->ether_dhost[4], l25h->ether_dhost[5]);
+					if (verbose == TRUE) {
+						dessert_debug("repair link to *:%02x:%02x", l25h->ether_dhost[4], l25h->ether_dhost[5]);
+					}
 					dessert_meshsend_fast(rrep_msg, iface);
 					dessert_msg_destroy(rrep_msg);
-				} else if (msg->ttl > 0 && cap_result == TRUE) {		// good route to this host is unknown for me -> rebroadcast RREQ
-					if (verbose == TRUE) dessert_debug("rebroadcast RREQ from *:%02x:%02x", l25h->ether_dhost[4], l25h->ether_dhost[5]);
+				} else if (msg->ttl > 0 && cap_result == TRUE) {    // good route to this host is unknown for me -> rebroadcast RREQ
+					if (verbose == TRUE) {
+						dessert_debug("rebroadcast RREQ from *:%02x:%02x", l25h->ether_dhost[4], l25h->ether_dhost[5]);
+					}
 					dessert_meshsend_fast(msg, NULL);
 				}
 			} else {
@@ -339,9 +360,9 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 					dessert_msg_destroy(rrep_msg);
 				}
 			}
-
-			if (aodv_db_capt_rrep(l25h->ether_shost, prev_hop, iface, rreq_msg->seq_num_src, rreq_msg->hop_count, &ts) == TRUE) {	// RREQ gives route to his source. Process RREQ also as RREP
-				aodv_send_packets_from_buffer(l25h->ether_shost, prev_hop, iface);		// no need to search for next hop. Next hop is RREQ.prev_hop
+			/* RREQ gives route to his source. Process RREQ also as RREP */
+			if (aodv_db_capt_rrep(l25h->ether_shost, prev_hop, iface, rreq_msg->seq_num_src, rreq_msg->hop_count, &ts) == TRUE) {
+				aodv_send_packets_from_buffer(l25h->ether_shost, prev_hop, iface); // no need to search for next hop. Next hop is RREQ.prev_hop
 			}
 
 			return DESSERT_MSG_DROP;
@@ -406,7 +427,9 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 	dessert_ext_t* rrep_ext;
 
 	if (dessert_msg_getext(msg, &rrep_ext, RREP_EXT_TYPE, 0) != 0) {
-		if (memcmp(msg->l2h.ether_dhost, iface->hwaddr, ETH_ALEN) != 0) return DESSERT_MSG_DROP;
+		if (memcmp(msg->l2h.ether_dhost, iface->hwaddr, ETH_ALEN) != 0) {
+			return DESSERT_MSG_DROP;
+		}
 		msg->ttl--;
 		struct ether_header* l25h = dessert_msg_getl25ether(msg);
 		struct aodv_msg_rrep* rrep_msg = (struct aodv_msg_rrep*) rrep_ext->data;
@@ -432,8 +455,12 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 
 						if (gph_res) {
 							if (verbose) {
-								if (rrep_msg->flags & AODV_FLAGS_RREP_A) dessert_debug("re-send RREP to *:%02x:%02x", l25h->ether_dhost[4], l25h->ether_dhost[5]);
-								else dessert_debug("re-send RREP-ACK to *:%02x:%02x", l25h->ether_dhost[4], l25h->ether_dhost[5]);
+								if (rrep_msg->flags & AODV_FLAGS_RREP_A) {
+									dessert_debug("re-send RREP to *:%02x:%02x", l25h->ether_dhost[4], l25h->ether_dhost[5]);
+								}
+								else {
+									dessert_debug("re-send RREP-ACK to *:%02x:%02x", l25h->ether_dhost[4], l25h->ether_dhost[5]);
+								}
 							}
 
 							memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
@@ -447,9 +474,9 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 						}
 					}
 				}
-			} else {												// this RREP is for me! -> pop all packets from FIFO buffer and send to destination
+			} else {    // this RREP is for me! -> pop all packets from FIFO buffer and send to destination
 				if (multipath) {
-					if (rrep_msg->flags & AODV_FLAGS_RREP_A) {		// communication partner has requested RREP-ACK
+					if (rrep_msg->flags & AODV_FLAGS_RREP_A) {    // communication partner has requested RREP-ACK
 						pthread_rwlock_wrlock(&pp_rwlock);
 						u_int32_t seq_num_copy = ++seq_num;
 						pthread_rwlock_unlock(&pp_rwlock);
@@ -457,8 +484,14 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 						dessert_msg_t* rrep_ack = _create_rrep(dessert_l25_defsrc, l25h->ether_shost, msg->l2h.ether_shost, seq_num_copy, 0);
 						dessert_meshsend_fast(rrep_ack, iface);
 						dessert_msg_destroy(rrep_ack);
-						if (verbose) dessert_debug("RREP from *:%02x:%02x -> send RREP-ACK", l25h->ether_shost[4], l25h->ether_shost[5]);
-					} else if (verbose) dessert_debug("RREP-ACK from *:%02x:%02x", l25h->ether_shost[4], l25h->ether_shost[5]);
+						if (verbose) {
+							dessert_debug("RREP from *:%02x:%02x -> send RREP-ACK", l25h->ether_shost[4], l25h->ether_shost[5]);
+						}
+					} else {
+						if (verbose) {
+							dessert_debug("RREP-ACK from *:%02x:%02x", l25h->ether_shost[4], l25h->ether_shost[5]);
+						}
+					}
 
 					struct timeval send_out_time;
 					send_out_time.tv_sec = BUFFER_SENDOUT_DELAY / 1000;
@@ -467,8 +500,11 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 					aodv_db_addschedule(&send_out_time, l25h->ether_shost, AODV_SC_SEND_OUT_PACKET, 0);
 					aodv_db_dropschedule(l25h->ether_shost, AODV_SC_REPEAT_RREQ);
 				} else {
-					if (verbose) dessert_debug("RREP from *:%02x:%02x", l25h->ether_shost[4], l25h->ether_shost[5]);
-					aodv_send_packets_from_buffer(l25h->ether_shost, msg->l2h.ether_shost, iface);		// no need to search for next hop. Next hop is RREP.prev_hop
+					if (verbose) {
+						dessert_debug("RREP from *:%02x:%02x", l25h->ether_shost[4], l25h->ether_shost[5]);
+					}
+					/* no need to search for next hop. Next hop is RREP.prev_hop */
+					aodv_send_packets_from_buffer(l25h->ether_shost, msg->l2h.ether_shost, iface);
 				}
 			}
 		}
@@ -485,22 +521,32 @@ int aodv_fwd2dest(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, cons
 	if (routing_log_file != NULL && dessert_msg_getext(msg, &rl_ext, RL_EXT_TYPE, 0) != 0) {
 		struct rl_seq* rl_data = (struct rl_seq*) rl_ext->data;
 		rl_seq_num = rl_data->seq_num;
-		if (rl_data->hop_count != 255) rl_hop_count = ++rl_data->hop_count;
+		if (rl_data->hop_count != 255) {
+			rl_hop_count = ++rl_data->hop_count;
+		}
 	}
 
 	if (proc->lflags & DESSERT_LFLAG_DST_BROADCAST || proc->lflags & DESSERT_LFLAG_DST_MULTICAST) { // BROADCAST
 		dessert_meshsend_fast(msg, NULL);
 		return DESSERT_MSG_KEEP;
-	} else if (((proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF && !(proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF_OVERHEARD)) || proc->lflags & DESSERT_LFLAG_NEXTHOP_BROADCAST) && !(proc->lflags & DESSERT_LFLAG_DST_SELF)){ // Directed message
+	} else if (((proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF
+			&& !(proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF_OVERHEARD)) || proc->lflags & DESSERT_LFLAG_NEXTHOP_BROADCAST)
+			&& !(proc->lflags & DESSERT_LFLAG_DST_SELF)){ // Directed message
 		u_int8_t dhost_next_hop[ETH_ALEN];
 		const dessert_meshif_t* output_iface;
 		struct timeval timestamp;
 		gettimeofday(&timestamp, NULL);
 
 		if (aodv_db_getroute2dest(l25h->ether_dhost, dhost_next_hop, &output_iface, &timestamp) == TRUE) {
-			if (verbose) dessert_debug(" *:%02x:%02x -------> *:%02x:%02x", l25h->ether_shost[4], l25h->ether_shost[5], l25h->ether_dhost[4], l25h->ether_dhost[5]);
+			if (verbose) {
+				dessert_debug(" *:%02x:%02x -------> *:%02x:%02x",
+						l25h->ether_shost[4], l25h->ether_shost[5], l25h->ether_dhost[4], l25h->ether_dhost[5]);
+			}
 			memcpy(msg->l2h.ether_dhost, dhost_next_hop, ETH_ALEN);
-			if (routing_log_file != NULL) rlfile_log(l25h->ether_shost, l25h->ether_dhost, rl_seq_num, rl_hop_count, iface->hwaddr, output_iface->hwaddr, dhost_next_hop);
+			if (routing_log_file != NULL) {
+				rlfile_log(l25h->ether_shost, l25h->ether_dhost,
+						rl_seq_num, rl_hop_count, iface->hwaddr, output_iface->hwaddr, dhost_next_hop);
+			}
 			dessert_meshsend_fast(msg, output_iface);
 		} else {
 			u_int32_t rerr_count;
@@ -519,7 +565,9 @@ int aodv_fwd2dest(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, cons
 					dessert_msg_destroy(rerr_msg);
 					aodv_db_putrerr(&timestamp);
 				}
-				if (routing_log_file != NULL) rlfile_log(l25h->ether_shost, l25h->ether_dhost, rl_seq_num, rl_hop_count, iface->hwaddr, NULL, NULL);
+				if (routing_log_file) {
+					rlfile_log(l25h->ether_shost, l25h->ether_dhost, rl_seq_num, rl_hop_count, iface->hwaddr, NULL, NULL);
+				}
 			}
 		}
 		return DESSERT_MSG_DROP;
@@ -562,8 +610,8 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, desse
 			}
 			dessert_meshsend_fast(msg, output_iface);
 		} else {
-			aodv_db_push_packet(l25h->ether_dhost, msg, &ts);		// route is unknown -> push packet to FIFO and send RREQ
-			aodv_send_rreq(l25h->ether_dhost, &ts, TTL_START);		// create and send RREQ
+			aodv_db_push_packet(l25h->ether_dhost, msg, &ts);    // route is unknown -> push packet to FIFO and send RREQ
+			aodv_send_rreq(l25h->ether_dhost, &ts, TTL_START);	 // create and send RREQ
 		}
 	}
     return DESSERT_MSG_DROP;
@@ -575,8 +623,9 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, desse
  * Forward packets addressed to me to tun pipeline
  */
 int rp2sys(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
-	if((proc->lflags & DESSERT_LFLAG_DST_SELF && !(proc->lflags & DESSERT_LFLAG_DST_SELF_OVERHEARD)) || proc->lflags & DESSERT_LFLAG_DST_BROADCAST || proc->lflags & DESSERT_LFLAG_DST_MULTICAST ) {
-		if (routing_log_file != NULL && !(proc->lflags & DESSERT_LFLAG_DST_BROADCAST) && !(proc->lflags & DESSERT_LFLAG_DST_MULTICAST)) {
+	if((proc->lflags & DESSERT_LFLAG_DST_SELF&& !(proc->lflags & DESSERT_LFLAG_DST_SELF_OVERHEARD))
+				|| proc->lflags & DESSERT_LFLAG_DST_BROADCAST || proc->lflags & DESSERT_LFLAG_DST_MULTICAST ) {
+		if (routing_log_file && !(proc->lflags & DESSERT_LFLAG_DST_BROADCAST) && !(proc->lflags & DESSERT_LFLAG_DST_MULTICAST)) {
 			struct ether_header* l25h = dessert_msg_getl25ether(msg);
 			dessert_ext_t* rl_ext;
 			u_int32_t rl_seq_num = 0;

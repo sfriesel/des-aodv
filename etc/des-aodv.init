@@ -9,9 +9,9 @@
 # Description:       Start des-aodv daemon
 ### END INIT INFO
 
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/home/fb13
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 NAME=des-aodv
-DAEMON=/home/fb13/$NAME
+DAEMON=/usr/sbin/$NAME
 DESC="$NAME, a daemon based on libdessert"
 
 test -x $DAEMON || exit 0
@@ -25,8 +25,8 @@ DODTIME=1                  	# Time to wait for the server to die, in seconds
 HOSTNAME=$(hostname)
 
 # Include default configuration if available
-if [ -f $NAME.default ] ; then
-    . $NAME.default
+if [ -f /etc/default/$NAME ] ; then
+    . /etc/default/$NAME
 fi
 
 set -e
@@ -35,7 +35,7 @@ build_conf()
 {
     rm -rf /tmp/$NAME.cli
     echo "! File automatically created by $NAME init script." > /tmp/$NAME.cli
-    echo "! Use $NAME.conf and $NAME.default for configuration." >> /tmp/$NAME.cli
+    echo "! Use /etc/$NAME.conf and /etc/default/$NAME for configuration." >> /tmp/$NAME.cli
     echo "! Your changes to this file will be overwritten!!!" >> /tmp/$NAME.cli
     echo "logging file $LOGFILE" >> /tmp/$NAME.cli
     cat $DAEMON_OPTS >> /tmp/$NAME.cli

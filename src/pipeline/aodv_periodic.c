@@ -94,7 +94,9 @@ dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, u_int16_t count) {
 	u_int8_t ext_el_num = 0;
 	void* dl = NULL;
 	u_int8_t max_dl_len = DESSERT_MAXEXTDATALEN / ETH_ALEN;
-	u_int8_t MAX_RERRDL_COUNT = (dessert_maxlen - sizeof(dessert_msg_t) - sizeof(struct ether_header) - sizeof(struct aodv_msg_rerr) - sizeof(struct aodv_msg_broadcast)) / DESSERT_MAXEXTDATALEN;
+	u_int8_t MAX_RERRDL_COUNT = (dessert_maxlen -
+			sizeof(dessert_msg_t) - sizeof(struct ether_header) -
+			sizeof(struct aodv_msg_rerr) - sizeof(struct aodv_msg_broadcast)) / DESSERT_MAXEXTDATALEN;
 
 	while(*head != NULL && rerrdl_count < MAX_RERRDL_COUNT) {
 		if (ext_el_num == 0) {
@@ -134,7 +136,7 @@ int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeva
 	struct timeval timestamp;
 	gettimeofday(&timestamp, NULL);
 
-	if (aodv_db_popschedule(&timestamp, ether_addr, &schedule_type, &schedule_param) == FALSE)  {
+	if (aodv_db_popschedule(&timestamp, ether_addr, &schedule_type, &schedule_param) == FALSE) {
 		return 0;
 	}
 
@@ -148,7 +150,7 @@ int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeva
 				if (buffered_msg != NULL) {
 					if (aodv_db_getroute2dest(ether_addr, ether_next_hop, &output_iface, &timestamp) == TRUE) {
 						if (verbose == TRUE) dessert_debug("send out packet from buffer");
-						/* // no need to search for next hop. Next hop is the last_hop that send RREP */
+						/* no need to search for next hop. Next hop is the last_hop that send RREP */
 						memcpy(buffered_msg->l2h.ether_dhost, ether_next_hop, ETH_ALEN);
 						if (routing_log_file != NULL) {
 							struct ether_header* l25h = dessert_msg_getl25ether(buffered_msg);

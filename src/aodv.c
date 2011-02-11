@@ -40,7 +40,7 @@ char* 	routing_log_file 	= NULL;
 dessert_periodic_t* periodic_send_hello;
 
 int print_macaddress_arginfo(const struct printf_info *info, size_t n, int *argtypes) {
-    if (n > 0) argtypes[0] = PA_POINTER;  		// we always take exactly one argument (pointer to the structure)
+    if (n > 0) argtypes[0] = PA_POINTER; // we always take exactly one argument (pointer to the structure)
     return 1;
 }
 

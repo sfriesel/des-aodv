@@ -33,9 +33,12 @@ int hf_seq_comp_i_j(u_int32_t i, u_int32_t j) {
 }
 
 int hf_compare_tv(struct timeval* tv1, struct timeval* tv2) {
-	if ((tv1->tv_sec == tv2->tv_sec) && (tv1->tv_usec == tv2->tv_usec)) return 0;
-	if (tv1->tv_sec > tv2->tv_sec) return 1;
-	if (tv2->tv_sec > tv1->tv_sec) return -1;
+	if ((tv1->tv_sec == tv2->tv_sec) && (tv1->tv_usec == tv2->tv_usec))
+		return 0;
+	if (tv1->tv_sec > tv2->tv_sec)
+		return 1;
+	if (tv2->tv_sec > tv1->tv_sec)
+		return -1;
 	if (tv1->tv_usec > tv2->tv_usec)
 		return 1;
 	else

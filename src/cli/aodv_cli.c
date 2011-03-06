@@ -138,32 +138,32 @@ int cli_send_rreq(struct cli_def* cli, char* command, char* argv[], int argc) {
 	}
 }
 
-int cli_print_multipath(struct cli_def *cli, char *command, char *argv[], int argc) {
-    cli_print(cli, "Multipath = %d\n", multipath);
-    return CLI_OK;
-}
-
-int cli_print_hello_size(struct cli_def *cli, char *command, char *argv[], int argc) {
+int cli_show_hello_size(struct cli_def *cli, char *command, char *argv[], int argc) {
     cli_print(cli, "HELLO size = %d bytes\n", hello_size);
     return CLI_OK;
 }
 
-int cli_print_hello_interval(struct cli_def *cli, char *command, char *argv[], int argc) {
+int cli_show_hello_interval(struct cli_def *cli, char *command, char *argv[], int argc) {
 	cli_print(cli, "HELLO interval = %d millisec\n", hello_interval);
     return CLI_OK;
 }
 
-int cli_print_rreq_size(struct cli_def *cli, char *command, char *argv[], int argc) {
+int cli_show_rreq_size(struct cli_def *cli, char *command, char *argv[], int argc) {
     cli_print(cli, "RREQ size = %d bytes\n", rreq_size);
     return CLI_OK;
 }
 
-int cli_print_rt(struct cli_def* cli, char* command, char* argv[], int argc){
+int cli_show_rt(struct cli_def* cli, char* command, char* argv[], int argc){
 	char* rt_report;
 	aodv_db_view_routing_table(&rt_report);
 	cli_print(cli, "\n%s\n", rt_report);
 	free(rt_report);
 	return CLI_OK;
+}
+
+int cli_show_multipath(struct cli_def *cli, char *command, char *argv[], int argc) {
+    cli_print(cli, "Multipath = %d\n", multipath);
+    return CLI_OK;
 }
 
 // -------------------- common cli functions ----------------------------------------------

@@ -29,3 +29,8 @@
 
 20110209 - minor changes
          - time intervals now are specified in milliseconds
+
+20110306 - changing CLI "print" parameters to "show"
+         - adding CLI parameter to config file with comments
+         - unifying routing tables to the streucture: destination | next hop | out iface addr | daemon specifc
+

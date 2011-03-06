@@ -80,9 +80,10 @@ int main(int argc, char** argv) {
     dessert_logcfg(DESSERT_LOG_STDERR);
 
 	/* cli initialization */
-	struct cli_command* cli_cfg_set = cli_register_command(dessert_cli, NULL, "set", NULL, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set variable");
 	cli_register_command(dessert_cli, dessert_cli_cfg_iface, "sys", dessert_cli_cmd_addsysif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize sys interface");
 	cli_register_command(dessert_cli, dessert_cli_cfg_iface, "mesh", dessert_cli_cmd_addmeshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize mesh interface");
+
+	struct cli_command* cli_cfg_set = cli_register_command(dessert_cli, NULL, "set", NULL, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set variable");
 	cli_register_command(dessert_cli, cli_cfg_set, "hello_size", cli_set_hello_size, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set HELLO packet size");
 	cli_register_command(dessert_cli, cli_cfg_set, "hello_interval", cli_set_hello_interval, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set HELLO packet interval");
 	cli_register_command(dessert_cli, cli_cfg_set, "rreq_size", cli_set_rreq_size, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set RREQ packet size");
@@ -90,14 +91,13 @@ int main(int argc, char** argv) {
 	cli_register_command(dessert_cli, cli_cfg_set, "multipath", cli_set_multipath, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set multipath variant");
 	cli_register_command(dessert_cli, cli_cfg_set, "routing_log", cli_set_routing_log, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set path to routing logging file");
 
-	struct cli_command* cli_command_print = cli_register_command(dessert_cli, NULL, "print", NULL, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print table");
-	cli_register_command(dessert_cli, cli_command_print, "hello_size", cli_print_hello_size, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print HELLO packet size");
-	cli_register_command(dessert_cli, cli_command_print, "hello_interval", cli_print_hello_interval, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print HELLO packet interval");
-	cli_register_command(dessert_cli, cli_command_print, "rreq_size", cli_print_rreq_size, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print RREQ packet size");
-	cli_register_command(dessert_cli, cli_command_print, "rt", cli_print_rt, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print routing table");
-	cli_register_command(dessert_cli, cli_command_print, "multipath", cli_print_multipath, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "print multipath variant");
+	cli_register_command(dessert_cli, dessert_cli_show, "hello_size", cli_show_hello_size, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show HELLO packet size");
+	cli_register_command(dessert_cli, dessert_cli_show, "hello_interval", cli_show_hello_interval, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show HELLO packet interval");
+	cli_register_command(dessert_cli, dessert_cli_show, "rreq_size", cli_show_rreq_size, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show RREQ packet size");
+	cli_register_command(dessert_cli, dessert_cli_show, "rt", cli_show_rt, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show routing table");
+	cli_register_command(dessert_cli, dessert_cli_show, "multipath", cli_show_multipath, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show multipath variant");
 
-	cli_register_command(dessert_cli, NULL, "rreq", cli_send_rreq, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "send RREQ to destination");
+	cli_register_command(dessert_cli, NULL, "send_rreq", cli_send_rreq, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "send RREQ to destination");
 
 	/* registering callbacks */
 	dessert_meshrxcb_add(dessert_msg_check_cb, 10);

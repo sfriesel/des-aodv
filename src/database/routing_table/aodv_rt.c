@@ -26,7 +26,7 @@ For further information and questions please use the web site
 #include "../../config.h"
 #include "../../helper.h"
 
-#define  REPORT_RT_STR_LEN 90
+#define  REPORT_RT_STR_LEN 150
 
 typedef struct aodv_rt_srclist_entry {
 	u_int8_t					shost_ether[ETH_ALEN]; // ID
@@ -369,36 +369,33 @@ int aodv_db_rt_report(char** str_out) {
 
 	// initialize first byte to \0 to mark output as empty
 	*output = '\0';
-	strcat(output, "+-------------------+---------------+-----------+-------------------+-------------------+\n");
-	strcat(output, "|  destination addr | next hop unkn | route inv |    out iface addr |          next hop |\n");
-	strcat(output, "+-------------------+---------------+-----------+-------------------+-------------------+\n");
-	while(current_entry != NULL) {
-		// first line for best output interface
+	strcat(output, "+-------------------+-------------------+-------------------+-------------+---------------+\n");
+	strcat(output, "|    destination    |      next hop     |  out iface addr   |  route inv  | next hop unkn |\n");
+	strcat(output, "+-------------------+-------------------+-------------------+-------------+---------------+\n");
+	while(current_entry != NULL) {		// first line for best output interface
 		if (current_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN) {
-			snprintf(entry_str, REPORT_RT_STR_LEN + 1, "| %02x:%02x:%02x:%02x:%02x:%02x |          TRUE |     %5s |                   |                   |\n",
+			snprintf(entry_str, REPORT_RT_STR_LEN + 1, "| %02x:%02x:%02x:%02x:%02x:%02x |                   |                   |   %5s     |     TRUE      |\n",
 					current_entry->dhost_ether[0], current_entry->dhost_ether[1],
 					current_entry->dhost_ether[2], current_entry->dhost_ether[3],
 					current_entry->dhost_ether[4], current_entry->dhost_ether[5],
 					(current_entry->flags & AODV_FLAGS_ROUTE_INVALID)? "TRUE" : "FALSE");
 		} else {
-			snprintf(entry_str, REPORT_RT_STR_LEN + 1, "| %02x:%02x:%02x:%02x:%02x:%02x |         FALSE |     %5s | %02x:%02x:%02x:%02x:%02x:%02x | %02x:%02x:%02x:%02x:%02x:%02x |\n",
+			snprintf(entry_str, REPORT_RT_STR_LEN + 1, "| %02x:%02x:%02x:%02x:%02x:%02x | %02x:%02x:%02x:%02x:%02x:%02x | %02x:%02x:%02x:%02x:%02x:%02x |    %5s    |     FALSE     |\n",
 					current_entry->dhost_ether[0], current_entry->dhost_ether[1],
 					current_entry->dhost_ether[2], current_entry->dhost_ether[3],
 					current_entry->dhost_ether[4], current_entry->dhost_ether[5],
-					(current_entry->flags & AODV_FLAGS_ROUTE_INVALID)? "TRUE" : "FALSE",
+					current_entry->dhost_next_hop[0], current_entry->dhost_next_hop[1],
+					current_entry->dhost_next_hop[2], current_entry->dhost_next_hop[3],
+					current_entry->dhost_next_hop[4], current_entry->dhost_next_hop[5],
 					current_entry->output_iface->hwaddr[0], current_entry->output_iface->hwaddr[1],
 					current_entry->output_iface->hwaddr[2], current_entry->output_iface->hwaddr[3],
 					current_entry->output_iface->hwaddr[4], current_entry->output_iface->hwaddr[5],
-					current_entry->dhost_next_hop[0], current_entry->dhost_next_hop[1],
-					current_entry->dhost_next_hop[2], current_entry->dhost_next_hop[3],
-					current_entry->dhost_next_hop[4], current_entry->dhost_next_hop[5]);
+					(current_entry->flags & AODV_FLAGS_ROUTE_INVALID)? "TRUE" : "FALSE");
 		}
 		strcat(output, entry_str);
-		strcat(output, "+-------------------+---------------+-----------+-------------------+-------------------+\n");
+		strcat(output, "+-------------------+-------------------+-------------------+-------------+---------------+\n");
 		current_entry = current_entry->hh.next;
 	}
 	*str_out = output;
 	return TRUE;
 }
-
-

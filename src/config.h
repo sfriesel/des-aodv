@@ -33,7 +33,7 @@ enum bool {TRUE = 1, FALSE = 0};
 #define TTL_START					2
 #define TTL_INCREMENT				2
 #define TTL_THRESHOLD				7
-#define SEQNO_MAX					((1 << 32 ) - 1)
+#define SEQNO_MAX					UINT32_MAX
 
 #define ACTIVE_ROUTE_TIMEOUT		6000 	// milliseconds
 #define ALLOWED_HELLO_LOST			7

@@ -39,7 +39,7 @@ char* 	routing_log_file 	= NULL;
 
 dessert_periodic_t* periodic_send_hello;
 
-int print_macaddress_arginfo(const struct printf_info *info, size_t n, int *argtypes) {
+int print_macaddress_arginfo(const struct printf_info *info, size_t n, int *argtypes, int *size) {
     if (n > 0) argtypes[0] = PA_POINTER; // we always take exactly one argument (pointer to the structure)
     return 1;
 }
@@ -54,7 +54,7 @@ int print_macaddress(FILE *stream, const struct printf_info *info, const void * 
 }
 
 int main(int argc, char** argv) {
-    register_printf_function("M", print_macaddress, print_macaddress_arginfo);
+	register_printf_specifier('M', print_macaddress, print_macaddress_arginfo);
 
     /* initialize daemon with correct parameters */
     FILE *cfg = NULL;

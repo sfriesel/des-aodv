@@ -24,6 +24,10 @@ For further information and questions please use the web site
 #ifndef AODV_PIPELINE
 #define AODV_PIPELINE
 
+#ifdef ANDROID
+#include <linux/if_ether.h>
+#endif
+
 #include <dessert.h>
 #include "../config.h"
 

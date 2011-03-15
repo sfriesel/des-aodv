@@ -1,72 +1,64 @@
-DAEMON_NAME = des-aodv
-VERSION_MAJOR = 1
-VERSION_MINOR = 4
-VERSION = $(VERSION_MAJOR).$(VERSION_MINOR)
-DESTDIR ?=
+DAEMONNAME = des-aodv
+DESTDIR ?= /usr/sbin
+PREFIX ?=
+NAME = "aodv"
 
-DIR_BIN=$(DESTDIR)/usr/sbin
-DIR_ETC=$(DESTDIR)/etc
-DIR_ETC_DEF=$(DIR_ETC)/default
-DIR_ETC_INITD=$(DIR_ETC)/init.d
-TARFILES = src etc Makefile *.mk ChangeLog
+DIR_BIN = $(PREFIX)$(DESTDIR)
+DIR_ETC = $(PREFIX)/etc
+DIR_DEFAULT = $(DIR_ETC)/default
+DIR_INIT = $(DIR_ETC)/init.d
+MODULES = src/aodv src/helper src/cli/aodv_cli src/database/aodv_database src/database/timeslot src/database/broadcast_table/aodv_broadcast_t src/database/neighbor_table/nt \
+	src/database/packet_buffer/packet_buffer src/database/rerr_log/rerr_log src/database/rl_seq_t/rl_seq src/database/routing_table/aodv_rt src/database/rreq_log/rreq_log \
+	src/database/schedule_table/aodv_st src/pipeline/aodv_periodic src/pipeline/aodv_pipeline
 
-CONFIG+=debug
+UNAME = $(shell uname | tr 'a-z' 'A-Z')
+TARFILES = *.c *.h Makefile *.conf *.init *.default *.sh build version major_version ChangeLog *.lua
 
-RM := rm -rf
+FILE_DEFAULT = ./$(DAEMONNAME).default
+FILE_ETC = ./$(DAEMONNAME).conf
+FILE_INIT = ./$(DAEMONNAME).init
 
-# All of the sources participating in the build are defined here
--include sources.mk
--include subdir.mk
--include src/pipeline/subdir.mk
--include src/subdir.mk
--include src/database/subdir.mk
--include src/database/schedule_table/subdir.mk
--include src/database/routing_table/subdir.mk
--include src/database/rl_seq_t/subdir.mk
--include src/database/packet_buffer/subdir.mk
--include src/database/neighbor_table/subdir.mk
--include src/database/iface_table/subdir.mk
--include src/database/broadcast_table/subdir.mk
--include src/database/rreq_log/subdir.mk
--include src/database/rerr_log/subdir.mk
--include src/cli/subdir.mk
--include objects.mk
-
-ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(strip $(C_DEPS)),)
--include $(C_DEPS)
-endif
-endif
+LIBS = dessert dessert-extra
+CFLAGS += -ggdb -Wall -DTARGET_$(UNAME) -D_GNU_SOURCE -I/usr/include
+LDFLAGS += $(addprefix -l,$(LIBS)) -L/usr/lib
 
 all: build
 
-build: $(OBJS) $(USER_OBJS)
-	@echo 'Building target: $@'
-	@echo 'Invoking: GCC C Linker'
-	gcc -O0 -o $(DAEMON_NAME) $(OBJS) $(USER_OBJS) $(LIBS)
-	@echo 'Finished building target: $@'
-	@echo ' '
+clean:
+	rm -f *.o *.tar.gz ||  true
+	find . -name *.o -delete
+	rm -f $(DAEMONNAME) || true
+	rm -rf $(DAEMONNAME).dSYM || true
 
 install:
 	mkdir -p $(DIR_BIN)
-	install -m 755 $(DAEMON_NAME) $(DIR_BIN)
+	install -m 744 $(DAEMONNAME) $(DIR_BIN)
 	mkdir -p $(DIR_ETC)
-	install -m 666 etc/$(DAEMON_NAME).conf $(DIR_ETC)
-	mkdir -p $(DIR_ETC_DEF)
-	install -m 644 etc/$(DAEMON_NAME).default $(DIR_ETC_DEF)/$(DAEMON_NAME)
-	mkdir -p $(DIR_ETC_INITD)
-	install -m 755 etc/$(DAEMON_NAME).init $(DIR_ETC_INITD)/$(DAEMON_NAME)
+	install -m 644 $(FILE_ETC) $(DIR_ETC)
+	mkdir -p $(DIR_DEFAULT)
+	install -m 644 $(FILE_DEFAULT) $(DIR_DEFAULT)/$(DAEMONNAME)
+	mkdir -p $(DIR_INIT)
+	install -m 755 $(FILE_INIT) $(DIR_INIT)/$(DAEMONNAME)
 
-clean:
-	-$(RM) $(OBJS)$(EXECUTABLES)$(C_DEPS) $(DAEMON_NAME) $(DAEMON_NAME)-$(VERSION).tar.gz $(DAEMON_NAME)-$(VERSION)
-	-@echo ' '
+build: $(addsuffix .o,$(MODULES))
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(DAEMONNAME) $(addsuffix .o,$(MODULES))
+
+android: CC=android-gcc
+android: CFLAGS = -I$(DESSERT_LIB)/include
+android: LDFLAGS = -L$(DESSERT_LIB)/lib -Wl,-rpath-link=$(DESSERT_LIB)/lib -ldessert -ldessert-extra
+android: build package
+
+package:
+	mv $(DAEMONNAME) android/daemon
+	zip -j android/$(DAEMONNAME).zip android/*
 
 tarball: clean
-	mkdir $(DAEMON_NAME)-$(VERSION)
-	cp -R $(TARFILES) $(DAEMON_NAME)-$(VERSION)
-	find $(DAEMON_NAME)-$(VERSION) -name .svn -exec rm -rf {} +
-	tar -czf $(DAEMON_NAME)-$(VERSION).tar.gz $(DAEMON_NAME)-$(VERSION)
-	rm -rf $(DAEMON_NAME)-$(VERSION)
+	mkdir des-aodv
+	cp -r $(TARFILES) des-aodv
+	tar -czf des-aodv.tar.gz des-aodv
+	rm -rf des-aodv
 
 debian: tarball
-	cp $(DAEMON_NAME)-$(VERSION).tar.gz ../debian/tarballs/$(DAEMON_NAME)_$(VERSION).orig.tar.gz
+	cp $(DAEMONNAME).tar.gz ../debian/tarballs/$(DAEMONNAME).orig.tar.gz
+
+.SILENT: clean

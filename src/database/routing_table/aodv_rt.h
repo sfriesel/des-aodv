@@ -26,6 +26,10 @@ For further information and questions please use the web site
 
 #include <dessert.h>
 
+#ifdef ANDROID
+#include <linux/if_ether.h>
+#endif
+
 int aodv_db_rt_init();
 
 int aodv_db_rt_capt_rreq (u_int8_t dhost_ether[ETH_ALEN], u_int8_t shost_ether[ETH_ALEN],

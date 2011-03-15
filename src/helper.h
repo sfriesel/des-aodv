@@ -24,6 +24,10 @@ For further information and questions please use the web site
 #ifndef HELPER
 #define HELPER
 
+#ifdef ANDROID
+#include <sys/time.h>
+#endif
+
 #include <linux/if_ether.h>
 #include <stdlib.h>
 

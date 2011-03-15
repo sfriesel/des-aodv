@@ -26,6 +26,10 @@ For further information and questions please use the web site
 
 #include <dessert.h>
 
+#ifdef ANDROID
+#include <linux/if_ether.h>
+#endif
+
 
 /** initialize neighbor table */
 int db_nt_init();

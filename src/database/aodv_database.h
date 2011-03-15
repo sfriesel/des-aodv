@@ -26,6 +26,10 @@ For further information and questions please use the web site
 
 #include <dessert.h>
 
+#ifdef ANDROID
+#include <linux/if_ether.h>
+#endif
+
 /** Make read lock over database to avoid corrupt read/write */
 // void aodv_db_rlock();
 

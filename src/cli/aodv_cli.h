@@ -23,6 +23,10 @@ For further information and questions please use the web site
 
 #include <libcli.h>
 
+#ifdef ANDROID
+#include <linux/if_ether.h>
+#endif
+
 int cli_set_hello_size(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_hello_interval(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_rreq_size(struct cli_def* cli, char* command, char* argv[], int argc);

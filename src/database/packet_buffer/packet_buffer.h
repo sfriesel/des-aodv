@@ -26,6 +26,10 @@ For further information and questions please use the web site
 
 #include <dessert.h>
 
+#ifdef ANDROID
+#include <linux/if_ether.h>
+#endif
+
 int pb_init();
 
 void pb_push_packet(u_int8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct timeval* timestamp);

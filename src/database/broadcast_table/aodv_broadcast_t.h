@@ -27,6 +27,10 @@ For further information and questions please use the web site
 #include <stdlib.h>
 #include <linux/if_ether.h>
 
+#ifdef ANDROID
+#include <sys/time.h>
+#endif
+
 int aodv_db_brct_init();
 
 /**

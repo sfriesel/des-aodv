@@ -30,6 +30,8 @@ For further information and questions please use the web site
 #include "../helper.h"
 #include "../database/rl_seq_t/rl_seq.h"
 
+#define EXPLODE_ARRAY6( ARRAY ) ARRAY[0], ARRAY[1], ARRAY[2], ARRAY[3], ARRAY[4], ARRAY[5]
+
 pthread_rwlock_t pp_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 
 u_int32_t seq_num = 0;
@@ -136,7 +138,11 @@ void aodv_send_rreq(u_int8_t dhost_ether[ETH_ALEN], struct timeval* ts, u_int8_t
 	}
 	aodv_db_putrreq(ts);
 	if (verbose == TRUE) {
+                #ifndef ANDROID
 		dessert_debug("RREQ to %M ttl=%i", dhost_ether, (ttl > TTL_THRESHOLD) ? 255 : ttl);
+                #else
+                dessert_debug("RREQ to %02x:%02x:%02x:%02x:%02x:%02x ttl=%i", EXPLODE_ARRAY6(dhost_ether), (ttl > TTL_THRESHOLD) ? 255 : ttl);
+                #endif
 	}
 
 	void* payload;
@@ -159,16 +165,31 @@ void rlfile_log(const u_int8_t src_addr[ETH_ALEN], const u_int8_t dest_addr[ETH_
 	FILE* f = fopen(routing_log_file, "a+");
 	if (f == NULL) dessert_debug("file = 0");
 	if (out_iface == NULL) {
+                #ifndef ANDROID
 		fprintf(f, "%M\t%M\t%u\t%u\t%M\t%s\t%s\n",
 				src_addr, dest_addr, seq_num, hop_count, in_iface, "NULL", "NULL");
+                #else
+                fprintf(f, "%02x:%02x:%02x:%02x:%02x:%02x\t%02x:%02x:%02x:%02x:%02x:%02x\t%u\t%u\t%02x:%02x:%02x:%02x:%02x:%02x\t%s\t%s\n",
+                                EXPLODE_ARRAY6(src_addr), EXPLODE_ARRAY6(dest_addr), seq_num, hop_count, EXPLODE_ARRAY6(in_iface), "NULL", "NULL");
+                #endif
 	}
 	else if (in_iface == NULL) {
+                #ifndef ANDROID
 		fprintf(f, "%M\t%M\t%u\t%u\t%s\t%M\t%M\n",
 				src_addr, dest_addr, seq_num, hop_count, "NULL", out_iface, next_hop_addr);
+                #else
+                fprintf(f, "%02x:%02x:%02x:%02x:%02x:%02x\t%02x:%02x:%02x:%02x:%02x:%02x\t%u\t%u\t%s\t%02x:%02x:%02x:%02x:%02x:%02x\t%02x:%02x:%02x:%02x:%02x:%02x\n",
+                                EXPLODE_ARRAY6(src_addr), EXPLODE_ARRAY6(dest_addr), seq_num, hop_count, "NULL", EXPLODE_ARRAY6(out_iface), EXPLODE_ARRAY6(next_hop_addr));
+                #endif
 	}
 	else {
+                #ifndef ANDROID
 		fprintf(f, "%M\t%M\t%u\t%u\t%M\t%M\t%M\n",
 				src_addr, dest_addr, seq_num, hop_count, in_iface, out_iface, next_hop_addr);
+                #else
+                fprintf(f, "%02x:%02x:%02x:%02x:%02x:%02x\t%02x:%02x:%02x:%02x:%02x:%02x\t%u\t%u\t%02x:%02x:%02x:%02x:%02x:%02x\t%02x:%02x:%02x:%02x:%02x:%02x\t%02x:%02x:%02x:%02x:%02x:%02x\n",
+                                EXPLODE_ARRAY6(src_addr), EXPLODE_ARRAY6(dest_addr), seq_num, hop_count, EXPLODE_ARRAY6(in_iface), EXPLODE_ARRAY6(out_iface), EXPLODE_ARRAY6(next_hop_addr));
+                #endif
 	}
 	fclose(f);
 	pthread_rwlock_unlock(&rlflock);

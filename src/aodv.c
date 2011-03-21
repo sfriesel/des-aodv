@@ -33,11 +33,11 @@ For further information and questions please use the web site
 #include "database/aodv_database.h"
 
 int     hello_size	        = HELLO_SIZE;
-int     hello_interval          = HELLO_INTERVAL;
+int     hello_interval      = HELLO_INTERVAL;
 int     rreq_size	        = RREQ_SIZE;
 int     verbose 	        = VERBOSE;
 int     multipath 	        = MULTIPATH;
-char*   routing_log_file        = NULL;
+char*   routing_log_file    = NULL;
 
 dessert_periodic_t* periodic_send_hello;
 
@@ -59,8 +59,13 @@ int print_macaddress(FILE *stream, const struct printf_info *info, const void * 
 
 int main(int argc, char** argv) {
     #ifndef ANDROID
-    register_printf_specifier('M', print_macaddress, print_macaddress_arginfo);
+    #ifndef SQUEEZE
+    	register_printf_specifier('M', print_macaddress, print_macaddress_arginfo);
+    #else
+    	register_printf_function('M', print_macaddress, print_macaddress_arginfo);
     #endif
+    #endif
+
     /* initialize daemon with correct parameters */
     FILE *cfg = NULL;
     if ((argc == 2) && (strcmp(argv[1], "-nondaemonize") == 0)) {

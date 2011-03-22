@@ -43,14 +43,15 @@ install:
 build: $(addsuffix .o,$(MODULES))
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(DAEMONNAME) $(addsuffix .o,$(MODULES))
 
-android: CC=android-gcc
-android: CFLAGS = -I$(DESSERT_LIB)/include
-android: LDFLAGS = -L$(DESSERT_LIB)/lib -Wl,-rpath-link=$(DESSERT_LIB)/lib -ldessert -ldessert-extra
-android: build package
+android:
+	CC=android-gcc
+	CFLAGS = -I$(DESSERT_LIB)/include
+	LDFLAGS = -L$(DESSERT_LIB)/lib -Wl,-rpath-link=$(DESSERT_LIB)/lib -ldessert -ldessert-extra
+	build package
 
 package:
-	mv $(DAEMONNAME) android/daemon
-	zip -j android/$(DAEMONNAME).zip android/*
+	mv $(DAEMONNAME) android.files/daemon
+	zip -j ./$(DAEMONNAME).zip android.files/*
 
 tarball: clean
 	mkdir des-aodv

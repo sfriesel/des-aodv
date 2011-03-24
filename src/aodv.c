@@ -59,11 +59,12 @@ int print_macaddress(FILE *stream, const struct printf_info *info, const void * 
 
 int main(int argc, char** argv) {
     #ifndef ANDROID
-    #ifndef SQUEEZE
-    	register_printf_specifier('M', print_macaddress, print_macaddress_arginfo);
-    #else
-    	register_printf_function('M', print_macaddress, print_macaddress_arginfo);
-    #endif
+        #if (__GLIBC_MINOR__ >= 11)	// GNU C library version >= 11
+            register_printf_specifier('M', print_macaddress, print_macaddress_arginfo);
+        #else
+            register_printf_function('M', print_macaddress, print_macaddress_arginfo);
+        #endif
+
     #endif
 
     /* initialize daemon with correct parameters */

@@ -29,8 +29,6 @@ For further information and questions please use the web site
 #include <pthread.h>
 #include <utlist.h>
 
-#define EXPLODE_ARRAY6( ARRAY ) ARRAY[0], ARRAY[1], ARRAY[2], ARRAY[3], ARRAY[4], ARRAY[5]
-
 int aodv_periodic_send_hello(void *data, struct timeval *scheduled, struct timeval *interval) {
         dessert_msg_t* hello_msg;
         dessert_ext_t* ext;

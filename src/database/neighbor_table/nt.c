@@ -26,8 +26,6 @@ For further information and questions please use the web site
 #include "../../config.h"
 #include "../schedule_table/aodv_st.h"
 
-#define EXPLODE_ARRAY6( ARRAY ) ARRAY[0], ARRAY[1], ARRAY[2], ARRAY[3], ARRAY[4], ARRAY[5]
-
 typedef struct neighbor_entry {
 	struct __attribute__ ((__packed__)) { // key
 		u_int8_t 				ether_neighbor[ETH_ALEN];

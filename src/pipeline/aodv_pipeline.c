@@ -30,8 +30,6 @@ For further information and questions please use the web site
 #include "../helper.h"
 #include "../database/rl_seq_t/rl_seq.h"
 
-#define EXPLODE_ARRAY6( ARRAY ) ARRAY[0], ARRAY[1], ARRAY[2], ARRAY[3], ARRAY[4], ARRAY[5]
-
 pthread_rwlock_t pp_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 
 u_int32_t seq_num = 0;

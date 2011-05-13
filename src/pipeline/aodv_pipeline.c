@@ -304,9 +304,9 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 		gettimeofday(&ts, NULL);
 		struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) rreq_ext->data;
 
+		u_int8_t prev_hop[ETH_ALEN];
 		if (!multipath){
 			rreq_msg->hop_count++;
-			u_int8_t prev_hop[ETH_ALEN];
 			memcpy(prev_hop, msg->l2h.ether_shost, ETH_ALEN);
 		}
 

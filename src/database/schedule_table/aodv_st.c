@@ -23,7 +23,6 @@ For further information and questions please use the web site
 
 #include <string.h>
 #include <uthash.h>
-#include <stdio.h>
 #include "../../config.h"
 #include "../../helper.h"
 #include "aodv_st.h"

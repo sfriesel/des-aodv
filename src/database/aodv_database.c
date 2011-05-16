@@ -50,25 +50,26 @@ void aodv_db_unlock() {
 }
 
 int aodv_db_init() {
+	int success = TRUE;
 	aodv_db_wlock();
-	int rl = aodv_db_rl_init();
-	int nt = db_nt_init();
-	int brct = aodv_db_brct_init();
-	int rt = aodv_db_rt_init();
-	int pb = pb_init();
-	int rerrl = aodv_db_rerrl_init();
+	success &= aodv_db_rl_init();
+	success &= db_nt_init();
+	success &= aodv_db_brct_init();
+	success &= aodv_db_rt_init();
+	success &= pb_init();
+	success &= aodv_db_rerrl_init();
 	aodv_db_unlock();
-	return (rl == TRUE) && (nt == TRUE) && (brct == TRUE) &&
-			(rt == TRUE) && (pb == TRUE) && (rerrl == TRUE);
+	return success;
 }
 
-int aodv_db_cleanup(struct timeval* timestamp){
+int aodv_db_cleanup(struct timeval* timestamp) {
+	int success = TRUE;
 	aodv_db_wlock();
-	int rt = aodv_db_rt_cleanup(timestamp);
-	int nt = db_nt_cleanup(timestamp);
-	int pb = pb_cleanup(timestamp);
+	success &= aodv_db_rt_cleanup(timestamp);
+	success &= db_nt_cleanup(timestamp);
+	success &= pb_cleanup(timestamp);
 	aodv_db_unlock();
-	return (rt == TRUE) && (nt == TRUE) && (pb == TRUE);
+	return success;
 }
 
 void aodv_db_push_packet(u_int8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct timeval* timestamp) {

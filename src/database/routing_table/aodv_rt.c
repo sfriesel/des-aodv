@@ -105,7 +105,7 @@ void purge_rt_entry(struct timeval* timestamp, void* src_object, void* del_objec
 	}
 	// delete routing entry
 	if (verbose == TRUE)
-		dessert_debug("delete route to *:%02x:%02x", rt_entry->dhost_ether[4], rt_entry->dhost_ether[5]);
+		dessert_debug("delete route to " MAC, EXPLODE_ARRAY6(rt_entry->dhost_ether));
 	HASH_DEL(rt.entrys, rt_entry);
 	free(rt_entry);
 }
@@ -364,33 +364,25 @@ int aodv_db_rt_report(char** str_out) {
 		current_entry = current_entry->hh.next;
 	}
 	current_entry = rt.entrys;
-	output = malloc(sizeof (char) * REPORT_RT_STR_LEN * (3 + len) + 1);
+	output = malloc(sizeof (char) * REPORT_RT_STR_LEN * (4 + len) + 1);
 	if (output == NULL) return FALSE;
 
 	// initialize first byte to \0 to mark output as empty
-	*output = '\0';
-	strcat(output, "+-------------------+-------------------+-------------------+-------------+---------------+\n");
-	strcat(output, "|    destination    |      next hop     |  out iface addr   |  route inv  | next hop unkn |\n");
-	strcat(output, "+-------------------+-------------------+-------------------+-------------+---------------+\n");
+	output[0] = '\0';
+	strcat(output, "+-------------------+-------------------+-------------------+-------------+---------------+\n"
+	               "|    destination    |      next hop     |  out iface addr   |  route inv  | next hop unkn |\n"
+	               "+-------------------+-------------------+-------------------+-------------+---------------+\n");
 	while(current_entry != NULL) {		// first line for best output interface
 		if (current_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN) {
-			snprintf(entry_str, REPORT_RT_STR_LEN + 1, "| %02x:%02x:%02x:%02x:%02x:%02x |                   |                   |   %5s     |     TRUE      |\n",
-					current_entry->dhost_ether[0], current_entry->dhost_ether[1],
-					current_entry->dhost_ether[2], current_entry->dhost_ether[3],
-					current_entry->dhost_ether[4], current_entry->dhost_ether[5],
-					(current_entry->flags & AODV_FLAGS_ROUTE_INVALID)? "TRUE" : "FALSE");
+			snprintf(entry_str, REPORT_RT_STR_LEN, "| " MAC " |                   |                   |   %5s     |     TRUE      |\n",
+			         EXPLODE_ARRAY6(current_entry->dhost_ether),
+			         (current_entry->flags & AODV_FLAGS_ROUTE_INVALID)? "TRUE" : "FALSE");
 		} else {
-			snprintf(entry_str, REPORT_RT_STR_LEN + 1, "| %02x:%02x:%02x:%02x:%02x:%02x | %02x:%02x:%02x:%02x:%02x:%02x | %02x:%02x:%02x:%02x:%02x:%02x |    %5s    |     FALSE     |\n",
-					current_entry->dhost_ether[0], current_entry->dhost_ether[1],
-					current_entry->dhost_ether[2], current_entry->dhost_ether[3],
-					current_entry->dhost_ether[4], current_entry->dhost_ether[5],
-					current_entry->dhost_next_hop[0], current_entry->dhost_next_hop[1],
-					current_entry->dhost_next_hop[2], current_entry->dhost_next_hop[3],
-					current_entry->dhost_next_hop[4], current_entry->dhost_next_hop[5],
-					current_entry->output_iface->hwaddr[0], current_entry->output_iface->hwaddr[1],
-					current_entry->output_iface->hwaddr[2], current_entry->output_iface->hwaddr[3],
-					current_entry->output_iface->hwaddr[4], current_entry->output_iface->hwaddr[5],
-					(current_entry->flags & AODV_FLAGS_ROUTE_INVALID)? "TRUE" : "FALSE");
+			snprintf(entry_str, REPORT_RT_STR_LEN, "| " MAC " | " MAC " | " MAC " |    %5s    |     FALSE     |\n",
+			         EXPLODE_ARRAY6(current_entry->dhost_ether),
+			         EXPLODE_ARRAY6(current_entry->dhost_next_hop),
+			         EXPLODE_ARRAY6(current_entry->output_iface->hwaddr),
+			         (current_entry->flags & AODV_FLAGS_ROUTE_INVALID)? "TRUE" : "FALSE");
 		}
 		strcat(output, entry_str);
 		strcat(output, "+-------------------+-------------------+-------------------+-------------+---------------+\n");

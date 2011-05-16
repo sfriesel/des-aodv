@@ -30,15 +30,6 @@ For further information and questions please use the web site
 #include <linux/if_ether.h>
 #endif
 
-/** Make read lock over database to avoid corrupt read/write */
-// void aodv_db_rlock();
-
-/** Make write lock over database to avoid currutp read/write */
-// void aodv_db_wlock();
-
-/** Unlock previos locks for this thread */
-// void aodv_db_unlock();
-
 /** initialize all tables of routing database */
 int aodv_db_init();
 

@@ -23,6 +23,7 @@ For further information and questions please use the web site
 
 #include "../../config.h"
 #include "../timeslot.h"
+#include "rerr_log.h"
 
 timeslot_t* rerr_log_ts = NULL;
 
@@ -34,7 +35,7 @@ void rerr_decrement_counter(struct timeval* timestamp, void* src_object, void* o
 }
 
 int aodv_db_rerrl_init() {
-	// 1 sek timeout since we are interested for number of sent RERR in last 1 sek
+	// 1 sec timeout since we are interested for number of sent RERR in last 1 sec
 	struct timeval timeout;
 	timeout.tv_sec = 1;
 	timeout.tv_usec = 0;

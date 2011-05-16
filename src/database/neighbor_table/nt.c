@@ -52,11 +52,7 @@ neighbor_entry_t* db_neighbor_entry_create(u_int8_t ether_neighbor_addr[ETH_ALEN
 
 void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void* object) {
 	neighbor_entry_t* curr_entry = object;
-        #ifndef ANDROID
-	dessert_debug("%s <= x => %M", curr_entry->iface->if_name, curr_entry->ether_neighbor);
-        #else
-        dessert_debug("%s <= x => %02x:%02x:%02x:%02x:%02x:%02x", curr_entry->iface->if_name, EXPLODE_ARRAY6(curr_entry->ether_neighbor));
-        #endif
+	dessert_debug("%s <= x => " MAC, curr_entry->iface->if_name, EXPLODE_ARRAY6(curr_entry->ether_neighbor));
 	HASH_DEL(nt.entrys, curr_entry);
 
 	// add schedule
@@ -88,11 +84,7 @@ int db_nt_cap2Dneigh(u_int8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshi
 		curr_entry = db_neighbor_entry_create(ether_neighbor_addr, iface);
 		if (curr_entry == NULL) return FALSE;
 		HASH_ADD_KEYPTR(hh, nt.entrys, curr_entry->ether_neighbor, ETH_ALEN + sizeof(void*), curr_entry);
-                #ifndef ANDROID
-		dessert_debug("%s <=====> %M", iface->if_name, ether_neighbor_addr);
-                #else
-                dessert_debug("%s <=====> %02x:%02x:%02x:%02x:%02x:%02x", iface->if_name, EXPLODE_ARRAY6(ether_neighbor_addr));
-                #endif
+		dessert_debug("%s <=====> " MAC, iface->if_name, EXPLODE_ARRAY6(ether_neighbor_addr));
 	}
 	timeslot_addobject(nt.ts, timestamp, curr_entry);
 	return TRUE;

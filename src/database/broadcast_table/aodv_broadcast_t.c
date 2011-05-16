@@ -22,7 +22,6 @@ For further information and questions please use the web site
 *******************************************************************************/
 
 #include <uthash.h>
-#include <stdio.h>
 
 #include "aodv_broadcast_t.h"
 #include "../../config.h"

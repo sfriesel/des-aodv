@@ -41,31 +41,8 @@ char*   routing_log_file    = NULL;
 
 dessert_periodic_t* periodic_send_hello;
 
-#ifndef ANDROID
-int print_macaddress_arginfo(const struct printf_info *info, size_t n, int *argtypes, int *size) {
-    if (n > 0) argtypes[0] = PA_POINTER; // we always take exactly one argument (pointer to the structure)
-    return 1;
-}
-
-int print_macaddress(FILE *stream, const struct printf_info *info, const void * const *args) {
-    const uint8_t *address;
-    int len;
-    address = *(uint8_t **) (args[0]);
-    len = fprintf(stream, "%02x:%02x:%02x:%02x:%02x:%02x", address[0], address[1], address[2], address[3], address[4], address[5]);
-    if (len == -1) return -1;
-    return len;
-}
-#endif
 
 int main(int argc, char** argv) {
-    #ifndef ANDROID
-        #if (__GLIBC_MINOR__ >= 11)	// GNU C library version >= 11
-            register_printf_specifier('M', print_macaddress, print_macaddress_arginfo);
-        #else
-            register_printf_function('M', print_macaddress, print_macaddress_arginfo);
-        #endif
-
-    #endif
 
     /* initialize daemon with correct parameters */
     FILE *cfg = NULL;

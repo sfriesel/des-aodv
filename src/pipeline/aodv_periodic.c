@@ -142,33 +142,34 @@ int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeva
 
         if (schedule_type == AODV_SC_SEND_OUT_PACKET) {
                 if (multipath) {
-                        int do_while = TRUE;
                         u_int8_t ether_next_hop[ETH_ALEN];
                         const dessert_meshif_t* output_iface;
-                        while(do_while == TRUE) {
+                        for(;;) {
                                 dessert_msg_t* buffered_msg = aodv_db_pop_packet(ether_addr);
-                                if (buffered_msg != NULL) {
-                                        if (aodv_db_getroute2dest(ether_addr, ether_next_hop, &output_iface, &timestamp) == TRUE) {
-                                                if (verbose == TRUE) dessert_debug("send out packet from buffer");
-                                                /* no need to search for next hop. Next hop is the last_hop that send RREP */
-                                                memcpy(buffered_msg->l2h.ether_dhost, ether_next_hop, ETH_ALEN);
-                                                if (routing_log_file != NULL) {
-                                                        struct ether_header* l25h = dessert_msg_getl25ether(buffered_msg);
-                                                        u_int32_t seq_num = 0;
-                                                        pthread_rwlock_wrlock(&rlseqlock);
-                                                        seq_num = rl_get_nextseq(dessert_l25_defsrc, l25h->ether_dhost);
-                                                        pthread_rwlock_unlock(&rlseqlock);
-                                                        dessert_ext_t* rl_ext;
-                                                        dessert_msg_addext(buffered_msg, &rl_ext, RL_EXT_TYPE, sizeof(struct rl_seq));
-                                                        struct rl_seq* rl_data = (struct rl_seq*) rl_ext->data;
-                                                        rl_data->seq_num = seq_num;
-                                                        rl_data->hop_count = 0;
-                                                        rlfile_log(dessert_l25_defsrc, l25h->ether_dhost, seq_num, 0, NULL, output_iface->hwaddr, ether_next_hop);
-                                                }
-                                                dessert_meshsend_fast(buffered_msg, output_iface);
-                                                dessert_msg_destroy(buffered_msg);
-                                        }
-                                } else {do_while = FALSE;}
+                                if (buffered_msg == NULL) {
+                                        break;
+                                }
+                                if (!aodv_db_getroute2dest(ether_addr, ether_next_hop, &output_iface, &timestamp)) {
+                                        continue;
+                                }
+                                dessert_debug("send out packet from buffer");
+                                /* no need to search for next hop. Next hop is the last_hop that send RREP */
+                                memcpy(buffered_msg->l2h.ether_dhost, ether_next_hop, ETH_ALEN);
+                                if (routing_log_file != NULL) {
+                                        struct ether_header* l25h = dessert_msg_getl25ether(buffered_msg);
+                                        u_int32_t seq_num = 0;
+                                        pthread_rwlock_wrlock(&rlseqlock);
+                                        seq_num = rl_get_nextseq(dessert_l25_defsrc, l25h->ether_dhost);
+                                        pthread_rwlock_unlock(&rlseqlock);
+                                        dessert_ext_t* rl_ext;
+                                        dessert_msg_addext(buffered_msg, &rl_ext, RL_EXT_TYPE, sizeof(struct rl_seq));
+                                        struct rl_seq* rl_data = (struct rl_seq*) rl_ext->data;
+                                        rl_data->seq_num = seq_num;
+                                        rl_data->hop_count = 0;
+                                        rlfile_log(dessert_l25_defsrc, l25h->ether_dhost, seq_num, 0, NULL, output_iface->hwaddr, ether_next_hop);
+                                }
+                                dessert_meshsend_fast(buffered_msg, output_iface);
+                                dessert_msg_destroy(buffered_msg);
                         }
                 }
         }
@@ -183,11 +184,7 @@ int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeva
                         _onlb_element_t* head = NULL;
 
                         while(aodv_db_invroute(ether_addr, dhost_ether) == TRUE) {
-                                #ifndef ANDROID
-                                dessert_debug("invalidate route to %M", dhost_ether);
-                                #else
-                                dessert_debug("invalidate route to %02x:%02x:%02x:%02x:%02x:%02x", EXPLODE_ARRAY6(dhost_ether));
-                                #endif
+                                dessert_debug("invalidate route to " MAC, EXPLODE_ARRAY6(dhost_ether));
                                 dest_count++;
                                 curr_el = malloc(sizeof(_onlb_element_t));
                                 memcpy(curr_el->dhost_ether, dhost_ether, ETH_ALEN);
@@ -197,13 +194,9 @@ int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeva
 
                         if (dest_count > 0) {
                                 while(head != NULL) {
-                                dessert_msg_t* rerr_msg = aodv_create_rerr(&head, dest_count);
+                                        dessert_msg_t* rerr_msg = aodv_create_rerr(&head, dest_count);
                                         if (rerr_msg != NULL) {
-                                                #ifndef ANDROID
-                                                dessert_debug("link to %M break -> send RERR", ether_addr);
-                                                #else
-                                                dessert_debug("link to %02x:%02x:%02x:%02x:%02x:%02x break -> send RERR", EXPLODE_ARRAY6(dhost_ether));
-                                                #endif
+                                                dessert_debug("link to " MAC " break -> send RERR", EXPLODE_ARRAY6(dhost_ether));
                                                 dessert_meshsend_fast(rerr_msg, NULL);
                                                 dessert_msg_destroy(rerr_msg);
                                                 aodv_db_putrerr(&timestamp);

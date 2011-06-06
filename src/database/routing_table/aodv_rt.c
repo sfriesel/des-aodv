@@ -77,8 +77,8 @@ typedef struct nht_entry {
 nht_entry_t*					nht = NULL;
 
 void purge_rt_entry(struct timeval* timestamp, void* src_object, void* del_object) {
-	aodv_rt_entry_t* 			rt_entry = del_object;
-	aodv_rt_srclist_entry_t*	src_list_entry;
+	aodv_rt_entry_t* rt_entry = del_object;
+	aodv_rt_srclist_entry_t* src_list_entry;
 	// delete all src_list entrys from routing entry
 	while (rt_entry->src_list != NULL) {
 		src_list_entry = rt_entry->src_list;
@@ -104,8 +104,7 @@ void purge_rt_entry(struct timeval* timestamp, void* src_object, void* del_objec
 		}
 	}
 	// delete routing entry
-	if (verbose == TRUE)
-		dessert_debug("delete route to " MAC, EXPLODE_ARRAY6(rt_entry->dhost_ether));
+	dessert_debug("delete route to " MAC, EXPLODE_ARRAY6(rt_entry->dhost_ether));
 	HASH_DEL(rt.entrys, rt_entry);
 	free(rt_entry);
 }

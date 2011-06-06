@@ -75,8 +75,6 @@ enum bool {TRUE = 1, FALSE = 0};
  * Schedule type = send out route error for given next hop
  */
 #define AODV_SC_SEND_OUT_RERR		3
-#define MULTIPATH					FALSE
-#define VERBOSE						FALSE
 #define HELLO_SIZE					128
 #define HELLO_INTERVAL				2000 	// milliseconds
 #define RREQ_SIZE					128
@@ -91,8 +89,6 @@ enum bool {TRUE = 1, FALSE = 0};
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 
 extern dessert_periodic_t *			periodic_send_hello;
-extern int 							multipath;
-extern int 							verbose;
 extern char*						routing_log_file;
 extern int 							hello_size;
 extern int 							hello_interval;

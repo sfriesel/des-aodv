@@ -58,8 +58,8 @@ extern u_int32_t broadcast_id;
 struct aodv_msg_rreq {
 	/**
 	 * flags format: J R G D U 0 0 0   0 0 0 0 0 0 0 0
-	 * J - Join flag; reserved for multicast
-	 * R - Repair flag; reserved for multicast
+	 * J - Join flag; reserved for multicast //outdated
+	 * R - Repair flag; reserved for multicast //outdated
 	 * G - Gratuitous RREP flag; indicates whether a gratuitous
 	 * 	   RREP should be unicast to the node specified in the ether_dhost
 	 * D - Destination only flag; indicates only the destiantion may respond to this RREQ

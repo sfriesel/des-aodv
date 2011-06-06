@@ -141,37 +141,7 @@ int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeva
         }
 
         if (schedule_type == AODV_SC_SEND_OUT_PACKET) {
-                if (multipath) {
-                        u_int8_t ether_next_hop[ETH_ALEN];
-                        const dessert_meshif_t* output_iface;
-                        for(;;) {
-                                dessert_msg_t* buffered_msg = aodv_db_pop_packet(ether_addr);
-                                if (buffered_msg == NULL) {
-                                        break;
-                                }
-                                if (!aodv_db_getroute2dest(ether_addr, ether_next_hop, &output_iface, &timestamp)) {
-                                        continue;
-                                }
-                                dessert_debug("send out packet from buffer");
-                                /* no need to search for next hop. Next hop is the last_hop that send RREP */
-                                memcpy(buffered_msg->l2h.ether_dhost, ether_next_hop, ETH_ALEN);
-                                if (routing_log_file != NULL) {
-                                        struct ether_header* l25h = dessert_msg_getl25ether(buffered_msg);
-                                        u_int32_t seq_num = 0;
-                                        pthread_rwlock_wrlock(&rlseqlock);
-                                        seq_num = rl_get_nextseq(dessert_l25_defsrc, l25h->ether_dhost);
-                                        pthread_rwlock_unlock(&rlseqlock);
-                                        dessert_ext_t* rl_ext;
-                                        dessert_msg_addext(buffered_msg, &rl_ext, RL_EXT_TYPE, sizeof(struct rl_seq));
-                                        struct rl_seq* rl_data = (struct rl_seq*) rl_ext->data;
-                                        rl_data->seq_num = seq_num;
-                                        rl_data->hop_count = 0;
-                                        rlfile_log(dessert_l25_defsrc, l25h->ether_dhost, seq_num, 0, NULL, output_iface->hwaddr, ether_next_hop);
-                                }
-                                dessert_meshsend_fast(buffered_msg, output_iface);
-                                dessert_msg_destroy(buffered_msg);
-                        }
-                }
+                //do nothing
         }
         else if (schedule_type == AODV_SC_REPEAT_RREQ) aodv_send_rreq(ether_addr, &timestamp, schedule_param);	// send out rreq
         else if (schedule_type == AODV_SC_SEND_OUT_RERR) {

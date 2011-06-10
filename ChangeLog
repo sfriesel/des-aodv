@@ -37,3 +37,7 @@
 20110315 - removed all .mk files and instead added all dependencies to the top level Makefile
          - added #IFDEFs needed for "android" make target
          - added "android" subdirectory, containing all files needed for the dessert-manager application (android)
+
+20110612 - Renamed CLI commands
+         - Code cleanup
+         - Version 1.5

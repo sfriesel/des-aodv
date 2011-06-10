@@ -1,25 +1,27 @@
 DAEMONNAME = des-aodv
-DESTDIR ?= /usr/sbin
-PREFIX ?=
-NAME = "aodv"
+VERSION_MAJOR = 1
+VERSION_MINOR = 5
+VERSION = $(VERSION_MAJOR).$(VERSION_MINOR)
+DESTDIR ?=
 
-DIR_BIN = $(PREFIX)$(DESTDIR)
-DIR_ETC = $(PREFIX)/etc
+DIR_BIN = $(DESTDIR)/usr/sbin
+DIR_ETC = $(DESTDIR)/etc
 DIR_DEFAULT = $(DIR_ETC)/default
 DIR_INIT = $(DIR_ETC)/init.d
+
 MODULES = src/aodv src/helper src/cli/aodv_cli src/database/aodv_database src/database/timeslot src/database/broadcast_table/aodv_broadcast_t src/database/neighbor_table/nt \
 	src/database/packet_buffer/packet_buffer src/database/rerr_log/rerr_log src/database/rl_seq_t/rl_seq src/database/routing_table/aodv_rt src/database/rreq_log/rreq_log \
 	src/database/schedule_table/aodv_st src/pipeline/aodv_periodic src/pipeline/aodv_pipeline
 
 UNAME = $(shell uname | tr 'a-z' 'A-Z')
-TARFILES = *.c *.h Makefile *.conf *.init *.default *.sh build version major_version ChangeLog *.lua
+TARFILES = src etc Makefile ChangeLog android.files icon.*
 
 FILE_DEFAULT = etc/$(DAEMONNAME).default
 FILE_ETC = etc/$(DAEMONNAME).conf
 FILE_INIT = etc/$(DAEMONNAME).init
 
 LIBS = dessert dessert-extra pthread cli
-CFLAGS += -ggdb -Wall -DTARGET_$(UNAME) -D_GNU_SOURCE -I/usr/include -I/usr/local/include
+CFLAGS += -ggdb -Wall -DTARGET_$(UNAME) -D_GNU_SOURCE -I/usr/include
 LDFLAGS += $(addprefix -l,$(LIBS))
 
 all: build

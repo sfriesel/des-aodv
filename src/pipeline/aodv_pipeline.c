@@ -434,7 +434,7 @@ int aodv_fwd2dest(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, cons
 	if (((proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF
 			&& !(proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF_OVERHEARD)) || proc->lflags & DESSERT_LFLAG_NEXTHOP_BROADCAST)
 			&& !(proc->lflags & DESSERT_LFLAG_DST_SELF)){ // Directed message
-		u_int8_t dhost_next_hop[ETH_ALEN];
+
 		const dessert_meshif_t* output_iface;
 		struct timeval timestamp;
 		gettimeofday(&timestamp, NULL);

@@ -427,7 +427,8 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 
 int aodv_forward_broadcast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
 	if (proc->lflags & DESSERT_LFLAG_DST_BROADCAST) {
-		dessert_meshsend_fast(msg, NULL);
+		dessert_meshsend_fast(msg, NULL); //forward to mesh
+		dessert_syssend_msg(msg); //forward to sys
 		return DESSERT_MSG_DROP;
 	}
 	return DESSERT_MSG_KEEP;
@@ -435,7 +436,8 @@ int aodv_forward_broadcast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *p
 
 int aodv_forward_multicast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
 	if (proc->lflags & DESSERT_LFLAG_DST_MULTICAST) {
-		dessert_meshsend_fast(msg, NULL);
+		dessert_meshsend_fast(msg, NULL); //forward to mesh
+		dessert_syssend_msg(msg); //forward to sys
 		return DESSERT_MSG_DROP;
 	}
 	return DESSERT_MSG_KEEP;
@@ -523,22 +525,7 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, desse
 /**
  * Forward packets addressed to me to tun pipeline
  */
-int aodv_local_broadcast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
-	if(proc->lflags & DESSERT_LFLAG_DST_BROADCAST) {
-		dessert_syssend_msg(msg);
-		return DESSERT_MSG_DROP;
-	}
-	return DESSERT_MSG_KEEP;
-}
-
-int aodv_local_multicast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
-	if(proc->lflags & DESSERT_LFLAG_DST_MULTICAST) {
-		dessert_syssend_msg(msg);
-		return DESSERT_MSG_DROP;
-	}
-	return DESSERT_MSG_KEEP;
-}
-int aodv_local(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
+int aodv_local_unicast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
 	if(proc->lflags & DESSERT_LFLAG_DST_SELF) {
 		dessert_syssend_msg(msg);
 	}

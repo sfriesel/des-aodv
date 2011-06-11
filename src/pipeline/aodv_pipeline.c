@@ -435,18 +435,15 @@ int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const
 		return DESSERT_MSG_KEEP;
 	if(proc->lflags & DESSERT_LFLAG_DST_SELF_OVERHEARD)
 		return DESSERT_MSG_KEEP;
-	if (proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF)
+	if(proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF)
 		return DESSERT_MSG_KEEP;
 	if(proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF_OVERHEARD)
-		return DESSERT_MSG_KEEP;
-	if(proc->lflags & DESSERT_LFLAG_NEXTHOP_BROADCAST)
 		return DESSERT_MSG_KEEP;
 
 		const dessert_meshif_t* output_iface;
 		struct timeval timestamp;
 		gettimeofday(&timestamp, NULL);
 	u_int8_t next_hop[ETH_ALEN];
-
 
 	struct ether_header* l25h = dessert_msg_getl25ether(msg);
 	if (aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &timestamp)) {

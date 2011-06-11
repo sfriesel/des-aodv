@@ -449,7 +449,8 @@ int aodv_fwd2dest(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, cons
 		} else {
 			u_int32_t rerr_count;
 			aodv_db_getrerrcount(&timestamp, &rerr_count);
-			if (rerr_count < RERR_RATELIMIT) {
+		if (rerr_count >= RERR_RATELIMIT)
+			return DESSERT_MSG_DROP;
 				// route unknown -> send rerr towards source
 				_onlb_element_t *head, *curr_el;
 		
@@ -464,7 +465,6 @@ int aodv_fwd2dest(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, cons
 					aodv_db_putrerr(&timestamp);
 				}
 			}
-		}
 		return DESSERT_MSG_DROP;
 	}
 	return DESSERT_MSG_KEEP;

@@ -438,10 +438,13 @@ int aodv_fwd2dest(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, cons
 		const dessert_meshif_t* output_iface;
 		struct timeval timestamp;
 		gettimeofday(&timestamp, NULL);
+	u_int8_t next_hop[ETH_ALEN];
 
-		if (aodv_db_getroute2dest(l25h->ether_dhost, dhost_next_hop, &output_iface, &timestamp) == TRUE) {
+
+	struct ether_header* l25h = dessert_msg_getl25ether(msg);
+	if (aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &timestamp)) {
 			dessert_debug(MAC " -------> " MAC, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost));
-			memcpy(msg->l2h.ether_dhost, dhost_next_hop, ETH_ALEN);
+		memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
 			dessert_meshsend_fast(msg, output_iface);
 		} else {
 			u_int32_t rerr_count;

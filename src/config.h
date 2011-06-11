@@ -26,7 +26,7 @@ For further information and questions please use the web site
 
 #include <dessert.h>
 
-enum bool {TRUE = 1, FALSE = 0};
+enum aodv_bool {TRUE = 1, FALSE = 0};
 
 #define RREQ_RETRIES				2
 #define RREQ_RATELIMIT				16

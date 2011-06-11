@@ -259,7 +259,11 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 	memcpy(prev_hop, msg->l2h.ether_shost, ETH_ALEN);
 
 	if (memcmp(dessert_l25_defsrc, l25h->ether_dhost, ETH_ALEN) != 0) { // RREQ not for me
-		int cap_result = aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->seq_num_src, &ts);
+		int x = aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->seq_num_src, &ts);
+		if(x == -1) {
+			dessert_crit("aodv_db_capt_rreq returns error");
+			return DESSERT_MSG_DROP;
+		}
 
 		u_int32_t last_rreq_seq;
 		int s = !(rreq_msg->flags & (AODV_FLAGS_RREQ_D | AODV_FLAGS_RREQ_U));
@@ -273,7 +277,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 
 			dessert_meshsend_fast(rrep_msg, iface);
 			dessert_msg_destroy(rrep_msg);
-		} else if (msg->ttl > 0 && cap_result) {
+		} else if (msg->ttl > 0 && a == FALSE) {
 			dessert_debug("route to " MAC " id=%d is unknown for me -> rebroadcast RREQ", EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->seq_num_src);
 			dessert_meshsend_fast(msg, NULL);
 		}
@@ -300,8 +304,8 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 			              rreq_msg->seq_num_src, last_rreq_seq, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost));
 		}
 		/* RREQ gives route to his source. Process RREQ also as RREP */
-		int x = aodv_db_capt_rrep(l25h->ether_shost, prev_hop, iface, rreq_msg->seq_num_src, rreq_msg->hop_count, &ts);
-		if (x == TRUE) {
+		int y = aodv_db_capt_rrep(l25h->ether_shost, prev_hop, iface, rreq_msg->seq_num_src, rreq_msg->hop_count, &ts);
+		if (y == TRUE) {
 			// no need to search for next hop. Next hop is RREQ.prev_hop
 			aodv_send_packets_from_buffer(l25h->ether_shost, prev_hop, iface);
 		} else {
@@ -379,10 +383,16 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 	gettimeofday(&ts, NULL);
 	rrep_msg->hop_count++;
 
+	int x = aodv_db_capt_rrep(l25h->ether_shost, msg->l2h.ether_shost, iface, rrep_msg->seq_num_dest, rrep_msg->hop_count, &ts);
+	if(x == -1) {
+		dessert_crit("aodv_db_capt_rreq returns error");
+		return DESSERT_MSG_DROP;
+	}
+
+	if(x == FALSE) {
 	// capture and re-send only if route is unknown OR
 	// sequence number is greater then that in database OR
 	// if seq_nums are equals and known hop count is greater than that in RREP
-	if (!aodv_db_capt_rrep(l25h->ether_shost, msg->l2h.ether_shost, iface, rrep_msg->seq_num_dest, rrep_msg->hop_count, &ts)) {
 		return DESSERT_MSG_DROP;
 	}
 

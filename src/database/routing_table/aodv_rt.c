@@ -160,6 +160,9 @@ int nht_entry_create (nht_entry_t** entry_out, u_int8_t dhost_next_hop[ETH_ALEN]
 	return TRUE;
 }
 
+//returns TRUE if input entry is used (newer)
+//        FALSE if input entry is unknown
+//        -1 if error
 int aodv_db_rt_capt_rreq (u_int8_t dhost_ether[ETH_ALEN], u_int8_t shost_ether[ETH_ALEN],
 		u_int8_t shost_prev_hop[ETH_ALEN], const dessert_meshif_t* output_iface,
 		u_int32_t shost_seq_num, struct timeval* timestamp) {
@@ -171,7 +174,7 @@ int aodv_db_rt_capt_rreq (u_int8_t dhost_ether[ETH_ALEN], u_int8_t shost_ether[E
 	if (rt_entry == NULL) {
 		// if not found -> create routing entry
 		if (rt_entry_create(&rt_entry, dhost_ether) == FALSE) {
-			return FALSE;
+			return -1;
 		}
 		HASH_ADD_KEYPTR(hh, rt.entrys, rt_entry->dhost_ether, ETH_ALEN, rt_entry);
 	}
@@ -180,8 +183,8 @@ int aodv_db_rt_capt_rreq (u_int8_t dhost_ether[ETH_ALEN], u_int8_t shost_ether[E
 	if (srclist_entry == NULL) {
 		// if not found -> create new source entry of source list
 		if (rt_srclist_entry_create(&srclist_entry, shost_ether, shost_prev_hop,
-				output_iface, shost_seq_num) != TRUE) {
-			return FALSE;
+				output_iface, shost_seq_num) == FALSE) {
+			return -1;
 		}
 		HASH_ADD_KEYPTR(hh, rt_entry->src_list, srclist_entry->shost_ether, ETH_ALEN, srclist_entry);
 		timeslot_addobject(rt.ts, timestamp, rt_entry);
@@ -197,6 +200,9 @@ int aodv_db_rt_capt_rreq (u_int8_t dhost_ether[ETH_ALEN], u_int8_t shost_ether[E
 	return FALSE;
 }
 
+// returns TRUE if rep is newer
+//         FALSE if rep is discarded
+//         -1 error
 int aodv_db_rt_capt_rrep (u_int8_t dhost_ether[ETH_ALEN], u_int8_t dhost_next_hop[ETH_ALEN],
 		const dessert_meshif_t* output_iface, u_int32_t dhost_seq_num, u_int8_t hop_count, struct timeval* timestamp) {
 	aodv_rt_entry_t* rt_entry;
@@ -204,7 +210,7 @@ int aodv_db_rt_capt_rrep (u_int8_t dhost_ether[ETH_ALEN], u_int8_t dhost_next_ho
 	if (rt_entry == NULL) {
 		// if not found -> create routing entry
 		if (rt_entry_create(&rt_entry, dhost_ether) == FALSE) {
-			return FALSE;
+			return -1;
 		}
 		HASH_ADD_KEYPTR(hh, rt.entrys, rt_entry->dhost_ether, ETH_ALEN, rt_entry);
 	}
@@ -293,6 +299,8 @@ int aodv_db_rt_getprevhop(u_int8_t dhost_ether[ETH_ALEN], u_int8_t shost_ether[E
 	return TRUE;
 }
 
+// returns TRUE if dest is known 
+//         FLASE if des is unknown
 int aodv_db_rt_getrouteseqnum(u_int8_t dhost_ether[ETH_ALEN], u_int32_t* dhost_seq_num_out) {
 	aodv_rt_entry_t* rt_entry;
 	HASH_FIND(hh, rt.entrys, dhost_ether, ETH_ALEN, rt_entry);

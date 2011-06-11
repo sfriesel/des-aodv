@@ -515,7 +515,7 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, desse
 			aodv_send_rreq(l25h->ether_dhost, &ts, TTL_START);	 // create and send RREQ
 		}
 	}
-    return DESSERT_MSG_DROP;
+	return DESSERT_MSG_DROP;
 }
 
 // ----------------- common callbacks ---------------------------------------------------
@@ -523,9 +523,23 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, desse
 /**
  * Forward packets addressed to me to tun pipeline
  */
-int rp2sys(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
-	if((proc->lflags & DESSERT_LFLAG_DST_SELF&& !(proc->lflags & DESSERT_LFLAG_DST_SELF_OVERHEARD))
-				|| proc->lflags & DESSERT_LFLAG_DST_BROADCAST || proc->lflags & DESSERT_LFLAG_DST_MULTICAST ) {
+int aodv_local_broadcast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
+	if(proc->lflags & DESSERT_LFLAG_DST_BROADCAST) {
+		dessert_syssend_msg(msg);
+		return DESSERT_MSG_DROP;
+	}
+	return DESSERT_MSG_KEEP;
+}
+
+int aodv_local_multicast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
+	if(proc->lflags & DESSERT_LFLAG_DST_MULTICAST) {
+		dessert_syssend_msg(msg);
+		return DESSERT_MSG_DROP;
+	}
+	return DESSERT_MSG_KEEP;
+}
+int aodv_local(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
+	if(proc->lflags & DESSERT_LFLAG_DST_SELF) {
 		dessert_syssend_msg(msg);
 	}
 	return DESSERT_MSG_DROP;

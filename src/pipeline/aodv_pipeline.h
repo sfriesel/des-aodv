@@ -169,7 +169,13 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc,
 		dessert_sysif_t *sysif, dessert_frameid_t id);
 
 /** forward packets received via AODV to tun interface */
-int rp2sys(dessert_msg_t* msg, size_t len,
+int aodv_local_broadcast(dessert_msg_t* msg, size_t len,
+		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
+
+int aodv_local_multicast(dessert_msg_t* msg, size_t len,
+		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
+
+int aodv_local(dessert_msg_t* msg, size_t len,
 		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
 
 /** drop errors (drop corrupt packets, packets from myself and etc...)*/

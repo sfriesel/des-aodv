@@ -140,10 +140,7 @@ typedef struct _onlb_dest_list_element {
 	struct _onlb_dest_list_element		*prev, *next;
 } _onlb_element_t;
 
-
 // ------------- pipeline -----------------------------------------------------
-
-
 int aodv_handle_hello(dessert_msg_t* msg, size_t len,
 		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
 
@@ -169,7 +166,6 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc,
 /** forward packets received via AODV to tun interface */
 int rp2sys(dessert_msg_t* msg, size_t len,
 		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
-
 
 /** drop errors (drop corrupt packets, packets from myself and etc...)*/
 int aodv_drop_errors(dessert_msg_t* msg, size_t len,

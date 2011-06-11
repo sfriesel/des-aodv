@@ -270,28 +270,29 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 			dessert_meshsend_fast(rrep_msg, iface);
 			dessert_msg_destroy(rrep_msg);
 		} else if (msg->ttl > 0 && cap_result) {
-			// good route to this host is unknown for me -> rebroadcast RREQ
-
-			dessert_debug("rebroadcast RREQ to " MAC, EXPLODE_ARRAY6(l25h->ether_dhost));
+			dessert_debug("route to " MAC " id=%d is unknown for me -> rebroadcast RREQ", EXPLODE_ARRAY6(l25h->ether_dhost), msg->u16);
 			dessert_meshsend_fast(msg, NULL);
 		}
 		return DESSERT_MSG_KEEP;
 	} else { // RREQ for me
 
-		dessert_debug("incoming RREQ from " MAC " seqSRC=%i -> answer with RREP seqDEST=%i", EXPLODE_ARRAY6(l25h->ether_shost), rreq_msg->seq_num_src, seq_num);
+//		dessert_debug("incoming RREQ from " MAC " seq=%i -> answer with RREP seq=%i", EXPLODE_ARRAY6(l25h->ether_shost), msg->u16, seq_num_management);
 
 		u_int32_t last_rreq_seq;
 		int s = !aodv_db_getrouteseqnum(l25h->ether_shost, &last_rreq_seq);
 		s = s || (hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq) > 0);
 		if(s) {
 			// RREQ for me -> answer with RREP
-			dessert_debug("RREQ for me -> answer with RREP to " MAC " over " MAC, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost));
+			dessert_debug("got RREQ for me -> answer with RREP to " MAC " over " MAC, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost));
 			pthread_rwlock_wrlock(&pp_rwlock);
 			u_int32_t seq_num_copy = ++seq_num;
 			pthread_rwlock_unlock(&pp_rwlock);
 			dessert_msg_t* rrep_msg = _create_rrep(dessert_l25_defsrc, l25h->ether_shost, msg->l2h.ether_shost, seq_num_copy, AODV_FLAGS_RREP_A);
 			dessert_meshsend_fast(rrep_msg, iface);
 			dessert_msg_destroy(rrep_msg);
+		} else {
+			dessert_debug("got RREQ for me -> don't answer with RREP route unknown or DUP (msg->u16=%u last_rreq_seq=%u) to " MAC " over " MAC,
+			              msg->u16, last_rreq_seq, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost));
 		}
 		/* RREQ gives route to his source. Process RREQ also as RREP */
 		dessert_debug("RREQ for me -> don't answer with RREP (DUP) to " MAC " over " MAC, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost));

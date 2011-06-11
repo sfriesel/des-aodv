@@ -428,11 +428,19 @@ int aodv_forward_multicast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *p
 	}
 	return DESSERT_MSG_KEEP;
 }
+
 int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
 
-	if (((proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF
-			&& !(proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF_OVERHEARD)) || proc->lflags & DESSERT_LFLAG_NEXTHOP_BROADCAST)
-			&& !(proc->lflags & DESSERT_LFLAG_DST_SELF)){ // Directed message
+	if(proc->lflags & DESSERT_LFLAG_DST_SELF)
+		return DESSERT_MSG_KEEP;
+	if(proc->lflags & DESSERT_LFLAG_DST_SELF_OVERHEARD)
+		return DESSERT_MSG_KEEP;
+	if (proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF)
+		return DESSERT_MSG_KEEP;
+	if(proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF_OVERHEARD)
+		return DESSERT_MSG_KEEP;
+	if(proc->lflags & DESSERT_LFLAG_NEXTHOP_BROADCAST)
+		return DESSERT_MSG_KEEP;
 
 		const dessert_meshif_t* output_iface;
 		struct timeval timestamp;
@@ -466,8 +474,6 @@ int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const
 			}
 		return DESSERT_MSG_DROP;
 	}
-	return DESSERT_MSG_KEEP;
-}
 // --------------------------- TUN ----------------------------------------------------------
 
 int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, dessert_sysif_t *sysif, dessert_frameid_t id) {

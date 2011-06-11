@@ -29,21 +29,21 @@ For further information and questions please use the web site
 enum bool {TRUE = 1, FALSE = 0};
 
 #define RREQ_RETRIES				2
-#define RREQ_RATELIMIT				10
+#define RREQ_RATELIMIT				16
 #define TTL_START					2
 #define TTL_INCREMENT				2
 #define TTL_THRESHOLD				7
 #define SEQNO_MAX					UINT32_MAX
 
 #define ACTIVE_ROUTE_TIMEOUT		6000 	// milliseconds
-#define ALLOWED_HELLO_LOST			7
-#define NODE_TRAVERSAL_TIME			10 		// milliseconds
-#define NET_DIAMETER				20
+#define ALLOWED_HELLO_LOST			5
+#define NODE_TRAVERSAL_TIME			2 		// milliseconds
+#define NET_DIAMETER				8
 #define NET_TRAVERSAL_TIME			2 * NODE_TRAVERSAL_TIME * NET_DIAMETER
 #define BLACKLIST_TIMEOUT			RREQ_RETRIES * NET_TRAVERSAL_TIME
 #define MY_ROUTE_TIMEOUT			2 * ACTIVE_ROUTE_TIMEOUT
 #define PATH_DESCOVERY_TIME			2 * NET_TRAVERSAL_TIME
-#define RERR_RATELIMIT				10
+#define RERR_RATELIMIT				16
 
 #define RREQ_EXT_TYPE				DESSERT_EXT_USER
 #define RREP_EXT_TYPE				DESSERT_EXT_USER + 1
@@ -57,7 +57,7 @@ enum bool {TRUE = 1, FALSE = 0};
 
 #define FIFO_BUFFER_MAX_ENTRY_SIZE	128 	// maximal packet count that can be stored in FIFO for one destination
 #define DB_CLEANUP_INTERVAL			NET_TRAVERSAL_TIME
-#define BUFFER_SENDOUT_DELAY		10
+#define BUFFER_SENDOUT_DELAY		5
 #define SCHEDULE_CHECK_INTERVAL		30 		// milliseconds
 
 /**

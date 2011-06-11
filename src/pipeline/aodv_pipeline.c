@@ -452,10 +452,10 @@ int aodv_fwd2dest(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, cons
 			if (rerr_count < RERR_RATELIMIT) {
 				// route unknown -> send rerr towards source
 				_onlb_element_t *head, *curr_el;
-				head = NULL;
+		
 				curr_el = malloc(sizeof(_onlb_element_t));
 				memcpy(curr_el->dhost_ether, l25h->ether_dhost, ETH_ALEN);
-				curr_el->next = curr_el->prev = NULL;
+		head = NULL;
 				DL_APPEND(head, curr_el);
 				dessert_msg_t* rerr_msg = aodv_create_rerr(&head, 1);
 				if (rerr_msg != NULL) {

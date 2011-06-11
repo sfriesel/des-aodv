@@ -266,10 +266,10 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 		}
 
 		u_int32_t last_rreq_seq;
-		int s = !(rreq_msg->flags & (AODV_FLAGS_RREQ_D | AODV_FLAGS_RREQ_U));
-		s = s && aodv_db_getrouteseqnum(l25h->ether_dhost, &last_rreq_seq);
-		s = s && (hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq) < 0);
-		if(s) {
+		int a = !(rreq_msg->flags & (AODV_FLAGS_RREQ_D | AODV_FLAGS_RREQ_U));
+		int b = aodv_db_getrouteseqnum(l25h->ether_dhost, &last_rreq_seq);
+		int c = (hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq) > 0);
+		if(a && b && c) {
 			// i know route to destination that have seq_num greater then that of source (route is newer)
 			dessert_msg_t* rrep_msg = _create_rrep(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, last_rreq_seq, AODV_FLAGS_RREP_A);
 
@@ -287,10 +287,10 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 //		dessert_debug("incoming RREQ from " MAC " seq=%i -> answer with RREP seq=%i", EXPLODE_ARRAY6(l25h->ether_shost), rreq_msg->seq_num_src, seq_num);
 
 		u_int32_t last_rreq_seq;
-		int s = !aodv_db_getrouteseqnum(l25h->ether_shost, &last_rreq_seq);
-		s = s || (hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq) > 0);
+		int a = aodv_db_getrouteseqnum(l25h->ether_shost, &last_rreq_seq);
+		int b = (hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq) > 0);
 //		dessert_debug("rreq_msg->seq_num_src=%u last_rreq_seq=%u -> hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq)=%d", rreq_msg->seq_num_src, last_rreq_seq, hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq));
-		if(s) {
+		if(a && b) {
 			// RREQ for me -> answer with RREP
 			dessert_debug("got RREQ for me -> answer with RREP to " MAC " over " MAC, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost));
 			pthread_rwlock_wrlock(&pp_rwlock);

@@ -409,13 +409,25 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 	return DESSERT_MSG_DROP;
 }
 
+int aodv_forward_broadcast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
+	if (proc->lflags & DESSERT_LFLAG_DST_BROADCAST) {
+		dessert_meshsend_fast(msg, NULL);
+		return DESSERT_MSG_DROP;
+	}
+	return DESSERT_MSG_KEEP;
+}
+
+int aodv_forward_multicast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
+	if (proc->lflags & DESSERT_LFLAG_DST_MULTICAST) {
+		dessert_meshsend_fast(msg, NULL);
+		return DESSERT_MSG_DROP;
+	}
+	return DESSERT_MSG_KEEP;
+}
 int aodv_fwd2dest(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
 	struct ether_header* l25h = dessert_msg_getl25ether(msg);
 
-	if (proc->lflags & DESSERT_LFLAG_DST_BROADCAST || proc->lflags & DESSERT_LFLAG_DST_MULTICAST) { // BROADCAST
-		dessert_meshsend_fast(msg, NULL);
-		return DESSERT_MSG_KEEP;
-	} else if (((proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF
+	if (((proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF
 			&& !(proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF_OVERHEARD)) || proc->lflags & DESSERT_LFLAG_NEXTHOP_BROADCAST)
 			&& !(proc->lflags & DESSERT_LFLAG_DST_SELF)){ // Directed message
 		u_int8_t dhost_next_hop[ETH_ALEN];

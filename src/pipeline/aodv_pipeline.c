@@ -34,6 +34,7 @@ pthread_rwlock_t pp_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 
 u_int32_t seq_num = 0;
 u_int32_t broadcast_id = 0;
+u_int16_t seq_num_data = 0;
 
 // ---------------------------- help functions ---------------------------------------
 
@@ -160,6 +161,9 @@ void aodv_send_packets_from_buffer(u_int8_t ether_dhost[ETH_ALEN], u_int8_t next
 
 		/*  no need to search for next hop. Next hop is the last_hop that send RREP */
 		memcpy(buffered_msg->l2h.ether_dhost, next_hop, ETH_ALEN);
+		pthread_rwlock_wrlock(&pp_rwlock);
+		buffered_msg->u16 = ++seq_num_data;
+		pthread_rwlock_unlock(&pp_rwlock);
 		dessert_meshsend_fast(buffered_msg, iface);
 		dessert_msg_destroy(buffered_msg);
 	}
@@ -468,6 +472,9 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, desse
 		if (aodv_db_getroute2dest(l25h->ether_dhost, dhost_next_hop, &output_iface, &ts) == TRUE) {
 			// route is known -> send
 			memcpy(msg->l2h.ether_dhost, dhost_next_hop, ETH_ALEN);
+			pthread_rwlock_wrlock(&pp_rwlock);
+			msg->u16 = ++seq_num_data;
+			pthread_rwlock_unlock(&pp_rwlock);
 			dessert_meshsend_fast(msg, output_iface);
 		} else {
 			aodv_db_push_packet(l25h->ether_dhost, msg, &ts);    // route is unknown -> push packet to FIFO and send RREQ

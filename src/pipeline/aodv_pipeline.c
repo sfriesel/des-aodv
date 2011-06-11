@@ -247,6 +247,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 	if (dessert_msg_getext(msg, &rreq_ext, RREQ_EXT_TYPE, 0) == 0) {
 		return DESSERT_MSG_KEEP;
 	}
+
 	struct ether_header* l25h = dessert_msg_getl25ether(msg);
 	msg->ttl--;
 
@@ -259,6 +260,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 	memcpy(prev_hop, msg->l2h.ether_shost, ETH_ALEN);
 
 	if (memcmp(dessert_l25_defsrc, l25h->ether_dhost, ETH_ALEN) != 0) { // RREQ not for me
+
 		int x = aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->seq_num_src, &ts);
 		if(x == -1) {
 			dessert_crit("aodv_db_capt_rreq returns error");
@@ -302,6 +304,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 			dessert_debug("got RREQ for me -> don't answer with RREP route unknown or DUP (rreq_msg->seq_num_src=%u last_rreq_seq=%u) to " MAC " over " MAC,
 			              rreq_msg->seq_num_src, last_rreq_seq, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost));
 		}
+
 		/* RREQ gives route to his source. Process RREQ also as RREP */
 		int y = aodv_db_capt_rrep(l25h->ether_shost, prev_hop, iface, rreq_msg->seq_num_src, rreq_msg->hop_count, &ts);
 		if (y == TRUE) {
@@ -389,9 +392,9 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 	}
 
 	if(x == FALSE) {
-	// capture and re-send only if route is unknown OR
-	// sequence number is greater then that in database OR
-	// if seq_nums are equals and known hop count is greater than that in RREP
+		// capture and re-send only if route is unknown OR
+		// sequence number is greater then that in database OR
+		// if seq_nums are equals and known hop count is greater than that in RREP
 		return DESSERT_MSG_DROP;
 	}
 
@@ -449,37 +452,38 @@ int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const
 	if(proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF_OVERHEARD)
 		return DESSERT_MSG_KEEP;
 
-		const dessert_meshif_t* output_iface;
-		struct timeval timestamp;
-		gettimeofday(&timestamp, NULL);
+	const dessert_meshif_t* output_iface;
+	struct timeval timestamp;
+	gettimeofday(&timestamp, NULL);
 	u_int8_t next_hop[ETH_ALEN];
 
 	struct ether_header* l25h = dessert_msg_getl25ether(msg);
 	if (aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &timestamp)) {
-			dessert_debug(MAC " -------> " MAC, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost));
+		dessert_debug(MAC " -------> " MAC, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost));
 		memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
-			dessert_meshsend_fast(msg, output_iface);
-		} else {
-			u_int32_t rerr_count;
-			aodv_db_getrerrcount(&timestamp, &rerr_count);
+		dessert_meshsend_fast(msg, output_iface);
+	} else {
+		u_int32_t rerr_count;
+		aodv_db_getrerrcount(&timestamp, &rerr_count);
 		if (rerr_count >= RERR_RATELIMIT)
 			return DESSERT_MSG_DROP;
-				// route unknown -> send rerr towards source
-				_onlb_element_t *head, *curr_el;
+		// route unknown -> send rerr towards source
+		_onlb_element_t *head, *curr_el;
 		
-				curr_el = malloc(sizeof(_onlb_element_t));
-				memcpy(curr_el->dhost_ether, l25h->ether_dhost, ETH_ALEN);
+		curr_el = malloc(sizeof(_onlb_element_t));
+		memcpy(curr_el->dhost_ether, l25h->ether_dhost, ETH_ALEN);
 		head = NULL;
-				DL_APPEND(head, curr_el);
-				dessert_msg_t* rerr_msg = aodv_create_rerr(&head, 1);
-				if (rerr_msg != NULL) {
-					dessert_meshsend_fast(rerr_msg, NULL);
-					dessert_msg_destroy(rerr_msg);
-					aodv_db_putrerr(&timestamp);
-				}
-			}
-		return DESSERT_MSG_DROP;
+		DL_APPEND(head, curr_el);
+		dessert_msg_t* rerr_msg = aodv_create_rerr(&head, 1);
+		if (rerr_msg != NULL) {
+			dessert_meshsend_fast(rerr_msg, NULL);
+			dessert_msg_destroy(rerr_msg);
+			aodv_db_putrerr(&timestamp);
+		}
 	}
+	return DESSERT_MSG_DROP;
+}
+
 // --------------------------- TUN ----------------------------------------------------------
 
 int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, dessert_sysif_t *sysif, dessert_frameid_t id) {

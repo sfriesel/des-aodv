@@ -94,7 +94,11 @@ struct aodv_msg_rrep {
 	u_int8_t		prefix_size;
 	/**  Hop Count: The number of hops from the originator to destination */
 	u_int8_t		hop_count;
-	/** Destination sequence number */
+	/**
+	 * Destination Sequence Number;
+	 * The latest sequence number received in the past by the originator for any
+	 * route towards the destination.
+	 */
 	u_int32_t		seq_num_dest;
 	/**
 	 * LifeTime:
@@ -130,27 +134,12 @@ struct aodv_msg_broadcast {
 	u_int32_t		id;
 } __attribute__ ((__packed__));
 
-/**
- * Struct for routing log sequence number
- */
-struct rl_seq {
-	u_int32_t 	seq_num;
-	u_int8_t	hop_count;
-} __attribute__ ((__packed__));
 
 typedef struct _onlb_dest_list_element {
 	u_int8_t 							dhost_ether[ETH_ALEN];
 	struct _onlb_dest_list_element		*prev, *next;
 } _onlb_element_t;
 
-// ------------- helper -------------------------------------------------------
-
-extern pthread_rwlock_t rlflock;
-extern pthread_rwlock_t rlseqlock;
-
-void rlfile_log(const u_int8_t src_addr[ETH_ALEN], const u_int8_t dest_addr[ETH_ALEN],
-		const u_int32_t seq_num, const u_int8_t hop_count, const u_int8_t in_iface[ETH_ALEN],
-		const u_int8_t out_iface[ETH_ALEN], const u_int8_t next_hop_addr[ETH_ALEN]);
 
 // ------------- pipeline -----------------------------------------------------
 

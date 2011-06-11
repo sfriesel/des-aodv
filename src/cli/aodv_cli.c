@@ -86,7 +86,7 @@ int cli_set_rreq_size(struct cli_def *cli, char *command, char *argv[], int argc
 int cli_send_rreq(struct cli_def* cli, char* command, char* argv[], int argc) {
 	u_int8_t dhost_hwaddr[ETHER_ADDR_LEN];
 
-	if (argc < 1 || argc > 2 || sscanf(argv[0], "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+	if (argc < 1 || argc > 2 || sscanf(argv[0], MAC,
 			&dhost_hwaddr[0], &dhost_hwaddr[1], &dhost_hwaddr[2], &dhost_hwaddr[3],
 			&dhost_hwaddr[4], &dhost_hwaddr[5]) != 6) { // args are not correct
 		cli_print(cli, "usage of %s command [hardware address as XX:XX:XX:XX:XX:XX]\n", command);
@@ -123,16 +123,3 @@ int cli_show_rt(struct cli_def* cli, char* command, char* argv[], int argc){
 }
 
 
-// -------------------- common cli functions ----------------------------------------------
-
-int cli_set_routing_log(struct cli_def *cli, char *command, char *argv[], int argc) {
-	routing_log_file = malloc(strlen(argv[0]));
-	strcpy(routing_log_file, argv[0]);
-	FILE* f = fopen(routing_log_file, "a+");
-	time_t lt;
-	lt = time(NULL);
-	fprintf(f, "\n--- %s\n", ctime(&lt));
-	fclose(f);
-	dessert_info("logging routing data at file %s", routing_log_file);
-	return CLI_OK;
-}

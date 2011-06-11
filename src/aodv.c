@@ -38,9 +38,7 @@ int     rreq_size	        = RREQ_SIZE;
 
 dessert_periodic_t* periodic_send_hello;
 
-
 int main(int argc, char** argv) {
-
     /* initialize daemon with correct parameters */
     FILE *cfg = NULL;
     if ((argc == 2) && (strcmp(argv[1], "-nondaemonize") == 0)) {

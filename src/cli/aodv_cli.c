@@ -31,7 +31,6 @@ For further information and questions please use the web site
 #include "../config.h"
 #include "../pipeline/aodv_pipeline.h"
 
-
 // -------------------- Testing ------------------------------------------------------------
 
 int cli_set_hello_size(struct cli_def *cli, char *command, char *argv[], int argc) {
@@ -121,5 +120,3 @@ int cli_show_rt(struct cli_def* cli, char* command, char* argv[], int argc){
 	free(rt_report);
 	return CLI_OK;
 }
-
-

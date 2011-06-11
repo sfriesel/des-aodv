@@ -215,23 +215,26 @@ int aodv_drop_errors(dessert_msg_t* msg, size_t len,
 }
 
 int aodv_handle_hello(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id){
-	dessert_ext_t* hallo_ext;
 
-	if (dessert_msg_getext(msg, &hallo_ext, HELLO_EXT_TYPE, 0) != 0) {
-		msg->ttl--;
-		if (msg->ttl >= 1) { // send hello msg back
-			memcpy(msg->l2h.ether_dhost, msg->l2h.ether_shost, ETH_ALEN);
-			dessert_meshsend(msg, iface);
-		} else {
-			if (memcmp(iface->hwaddr, msg->l2h.ether_dhost, ETH_ALEN) == 0) {
-				struct timeval ts;
-				gettimeofday(&ts, NULL);
-				aodv_db_cap2Dneigh(msg->l2h.ether_shost, iface, &ts);
-			}
-		}
-		return DESSERT_MSG_DROP;
+	dessert_ext_t* hallo_ext;
+	if (dessert_msg_getext(msg, &hallo_ext, HELLO_EXT_TYPE, 0) == 0) {
+		return DESSERT_MSG_KEEP;
 	}
-	return DESSERT_MSG_KEEP;
+
+	msg->ttl--;
+	if (msg->ttl >= 1) {
+		// hello req
+		memcpy(msg->l2h.ether_dhost, msg->l2h.ether_shost, ETH_ALEN);
+		dessert_meshsend(msg, iface);
+	} else {
+		//hello rep
+		if (memcmp(iface->hwaddr, msg->l2h.ether_dhost, ETH_ALEN) == 0) {
+			struct timeval ts;
+			gettimeofday(&ts, NULL);
+			aodv_db_cap2Dneigh(msg->l2h.ether_shost, iface, &ts);
+		}
+	}
+	return DESSERT_MSG_DROP;
 }
 
 int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id){

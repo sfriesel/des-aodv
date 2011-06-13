@@ -25,46 +25,43 @@ For further information and questions please use the web site
 #include <stdlib.h>
 #include <stdio.h>
 #include "data_seq.h"
+#include "../../config.h"
 
 typedef struct data_packet_id {
-	u_int8_t src_dest_addr[ETH_ALEN * 2]; // key
-	u_int32_t seq_num;
+	u_int8_t src_addr[ETH_ALEN]; // key
+	u_int16_t seq_num;
 	UT_hash_handle hh;
 } data_packet_id_t;
 
 data_packet_id_t* entrys = NULL;
 
-u_int32_t data_get_nextseq(u_int8_t src_addr[ETH_ALEN], u_int8_t dest_addr[ETH_ALEN]) {
-	u_int8_t key[ETH_ALEN * 2];
-	memcpy(key, src_addr, ETH_ALEN);
-	memcpy(key + ETH_ALEN, dest_addr, ETH_ALEN);
-	data_packet_id_t* entry;
-	HASH_FIND(hh, entrys, key, ETH_ALEN * 2, entry);
+//returns TRUE if input entry is newer
+//        FALSE if input entry is older
+//        -1 if error
+int aodv_db_data_capt_data_seq(u_int8_t shost_ether[ETH_ALEN], u_int16_t shost_seq_num) {
+
+	data_packet_id_t* entry = NULL;
+	HASH_FIND(hh, entrys, shost_ether, ETH_ALEN, entry);
 	if (entry == NULL) {
+		//never got data from this host
 		entry = malloc(sizeof(data_packet_id_t));
-		if (entry == NULL) return 0;
-		memcpy(entry->src_dest_addr, key, ETH_ALEN * 2);
-		entry->seq_num = 0;
-		HASH_ADD_KEYPTR(hh, entrys, entry->src_dest_addr, ETH_ALEN * 2, entry);
+		if (entry == NULL) {
+			return -1;
+		}
+		memcpy(entry->src_addr, shost_ether, ETH_ALEN);
+		HASH_ADD_KEYPTR(hh, entrys, entry->src_addr, ETH_ALEN, entry);
+		entry->seq_num = shost_seq_num;
+		return TRUE;
 	}
-	entry->seq_num++;
-	return entry->seq_num;
+	
+	//data source is known
+	if ((entry->seq_num - shost_seq_num > (1<<15)) || (entry->seq_num < shost_seq_num)) {
+		//data packet is newer
+		entry->seq_num = shost_seq_num;
+		return TRUE;
+	}
+	
+	//data packet is old
+	return FALSE;
 }
 
-void data_set_seq(u_int8_t src_addr[ETH_ALEN], u_int8_t dest_addr[ETH_ALEN], u_int32_t seq_num) {
-	u_int8_t key[ETH_ALEN * 2];
-	memcpy(key, src_addr, ETH_ALEN);
-	memcpy(key + ETH_ALEN, dest_addr, ETH_ALEN);
-	data_packet_id_t* entry = NULL;
-	HASH_FIND(hh, entrys, key, ETH_ALEN * 2, entry);
-	if (entry == NULL) {
-		entry = malloc(sizeof(data_packet_id_t));
-		if (entry == NULL) return;
-		memcpy(entry->src_dest_addr, key, ETH_ALEN * 2);
-		HASH_ADD_KEYPTR(hh, entrys, entry->src_dest_addr, ETH_ALEN * 2, entry);
-		entry->seq_num = seq_num;
-	}
-	if ((entry->seq_num - seq_num > (1<<30)) || (entry->seq_num < seq_num)) {
-		entry->seq_num = seq_num;
-	}
-}

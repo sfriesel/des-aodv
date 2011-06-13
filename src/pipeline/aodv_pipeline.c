@@ -31,10 +31,11 @@ For further information and questions please use the web site
 #include "../database/data_seq/data_seq.h"
 
 pthread_rwlock_t pp_rwlock = PTHREAD_RWLOCK_INITIALIZER;
+pthread_rwlock_t data_seq_lock = PTHREAD_RWLOCK_INITIALIZER;
 
 u_int32_t seq_num = 0;
 u_int32_t broadcast_id = 0;
-u_int16_t seq_num_data = 0;
+u_int16_t data_seq_num = 0;
 
 // ---------------------------- help functions ---------------------------------------
 
@@ -149,23 +150,30 @@ void aodv_send_rreq(u_int8_t dhost_ether[ETH_ALEN], struct timeval* ts, u_int8_t
 	dessert_debug("rreq send for " MAC " id=%d", EXPLODE_ARRAY6(dhost_ether), seq_num);
 }
 
-void aodv_send_packets_from_buffer(u_int8_t ether_dhost[ETH_ALEN], u_int8_t next_hop[ETH_ALEN],
-		const dessert_meshif_t* iface) {
+void aodv_send_packets_from_buffer(u_int8_t ether_dhost[ETH_ALEN], u_int8_t next_hop[ETH_ALEN], const dessert_meshif_t* iface) {
 	// drop RREQ schedule, since we already know the route to destination
 	aodv_db_dropschedule(ether_dhost, AODV_SC_REPEAT_RREQ);
+
+	dessert_debug("new route to " MAC " over " MAC " found -> send out packet from buffer",
+	              EXPLODE_ARRAY6(ether_dhost),
+	              EXPLODE_ARRAY6(next_hop));
+
 	// send out packets from buffer
 	dessert_msg_t* buffered_msg;
 	while((buffered_msg = aodv_db_pop_packet(ether_dhost)) != NULL) {
-		dessert_debug("new route to " MAC " over " MAC " found -> send out packet from buffer",
-		              EXPLODE_ARRAY6(ether_dhost),
-		              EXPLODE_ARRAY6(next_hop));
+		struct ether_header* l25h = dessert_msg_getl25ether(buffered_msg);
+		u_int16_t seq_num = 0;
+		pthread_rwlock_wrlock(&data_seq_lock);
+		seq_num = ++data_seq_num;
+		pthread_rwlock_unlock(&data_seq_lock);
+		buffered_msg->u16 = seq_num;
 
 		/*  no need to search for next hop. Next hop is the last_hop that send RREP */
 		memcpy(buffered_msg->l2h.ether_dhost, next_hop, ETH_ALEN);
-		pthread_rwlock_wrlock(&pp_rwlock);
-		buffered_msg->u16 = ++seq_num_data;
-		pthread_rwlock_unlock(&pp_rwlock);
 		dessert_meshsend_fast(buffered_msg, iface);
+
+		dessert_trace("data packet - id=%d - to mesh - to " MAC " route is known - send over " MAC, seq_num, EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(next_hop));
+
 		dessert_msg_destroy(buffered_msg);
 	}
 }
@@ -461,8 +469,13 @@ int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const
 	struct timeval timestamp;
 	gettimeofday(&timestamp, NULL);
 	u_int8_t next_hop[ETH_ALEN];
-
 	struct ether_header* l25h = dessert_msg_getl25ether(msg);
+	
+	if(TRUE != aodv_db_data_capt_data_seq(l25h->ether_shost, msg->u16)) {
+		//data packet is known -> DUP
+		return DESSERT_MSG_DROP;
+	}
+		
 	if (aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &timestamp)) {
 		dessert_debug(MAC " -------> " MAC, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost));
 		memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
@@ -509,16 +522,22 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, desse
 		struct timeval ts;
 		gettimeofday(&ts, NULL);
 		if (aodv_db_getroute2dest(l25h->ether_dhost, dhost_next_hop, &output_iface, &ts) == TRUE) {
-			dessert_trace("packet to mesh - to " MAC " route is known - send over " MAC, EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(dhost_next_hop));
+			u_int16_t seq_num = 0;
+			pthread_rwlock_wrlock(&data_seq_lock);
+			seq_num = ++data_seq_num;
+			pthread_rwlock_unlock(&data_seq_lock);
+			msg->u16 = seq_num;
+
 			memcpy(msg->l2h.ether_dhost, dhost_next_hop, ETH_ALEN);
-			pthread_rwlock_wrlock(&pp_rwlock);
-			msg->u16 = ++seq_num_data;
-			pthread_rwlock_unlock(&pp_rwlock);
 			dessert_meshsend_fast(msg, output_iface);
+
+			dessert_trace("data packet - id=%d - to mesh - to " MAC " route is known - send over " MAC, seq_num, EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(dhost_next_hop));
+
+			dessert_msg_destroy(msg);
 		} else {
-			dessert_trace("packet to mesh - to " MAC " but route is unknown -> push packet to FIFO and send RREQ", EXPLODE_ARRAY6(l25h->ether_dhost));
 			aodv_db_push_packet(l25h->ether_dhost, msg, &ts);
 			aodv_send_rreq(l25h->ether_dhost, &ts, TTL_START); // create and send RREQ
+			dessert_trace("data packet to mesh - to " MAC " but route is unknown -> push packet to FIFO and send RREQ", EXPLODE_ARRAY6(l25h->ether_dhost));
 		}
 	}
 	return DESSERT_MSG_DROP;
@@ -531,7 +550,13 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, desse
  */
 int aodv_local_unicast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
 	if(proc->lflags & DESSERT_LFLAG_DST_SELF) {
-		dessert_syssend_msg(msg);
+		struct ether_header* l25h = dessert_msg_getl25ether(msg);
+		if(aodv_db_data_capt_data_seq(l25h->ether_shost, msg->u16)) {
+			//packet is new
+			dessert_syssend_msg(msg);
+		} else {
+			//DUP
+		}
 	}
 	return DESSERT_MSG_DROP;
 }

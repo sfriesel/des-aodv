@@ -26,8 +26,8 @@ For further information and questions please use the web site
 
 #include <linux/if_ether.h>
 
-u_int32_t data_get_nextseq(u_int8_t src_addr[ETH_ALEN], u_int8_t dest_addr[ETH_ALEN]);
+u_int16_t data_get_nextseq(u_int8_t src_addr[ETH_ALEN], u_int8_t dest_addr[ETH_ALEN]);
 
-void data_set_seq(u_int8_t src_addr[ETH_ALEN], u_int8_t dest_addr[ETH_ALEN], u_int32_t seq_num);
+void data_set_seq(u_int8_t src_addr[ETH_ALEN], u_int8_t dest_addr[ETH_ALEN], u_int16_t seq_num);
 
 #endif

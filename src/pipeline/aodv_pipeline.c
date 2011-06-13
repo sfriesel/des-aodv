@@ -28,7 +28,7 @@ For further information and questions please use the web site
 #include "aodv_pipeline.h"
 #include "../config.h"
 #include "../helper.h"
-#include "../database/rl_seq_t/rl_seq.h"
+#include "../database/data_seq/data_seq.h"
 
 pthread_rwlock_t pp_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 

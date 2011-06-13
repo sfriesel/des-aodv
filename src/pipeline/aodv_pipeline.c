@@ -137,7 +137,6 @@ void aodv_send_rreq(u_int8_t dhost_ether[ETH_ALEN], struct timeval* ts, u_int8_t
 		}
 	}
 	aodv_db_putrreq(ts);
-	dessert_trace("RREQ to " MAC " ttl=%i rreq_count=%d", EXPLODE_ARRAY6(dhost_ether), (ttl > TTL_THRESHOLD) ? 255 : ttl, rreq_count);
 
 	void* payload;
 	uint16_t size = max(rreq_size - sizeof(dessert_msg_t) - sizeof(struct ether_header) - 2, 0);
@@ -162,11 +161,11 @@ void aodv_send_packets_from_buffer(u_int8_t ether_dhost[ETH_ALEN], u_int8_t next
 	dessert_msg_t* buffered_msg;
 	while((buffered_msg = aodv_db_pop_packet(ether_dhost)) != NULL) {
 		struct ether_header* l25h = dessert_msg_getl25ether(buffered_msg);
-		u_int16_t seq_num = 0;
+		u_int16_t seq_num_copy = 0;
 		pthread_rwlock_wrlock(&data_seq_lock);
-		seq_num = ++data_seq_num;
+		seq_num_copy = ++data_seq_num;
 		pthread_rwlock_unlock(&data_seq_lock);
-		buffered_msg->u16 = seq_num;
+		buffered_msg->u16 = seq_num_copy;
 
 		/*  no need to search for next hop. Next hop is the last_hop that send RREP */
 		memcpy(buffered_msg->l2h.ether_dhost, next_hop, ETH_ALEN);
@@ -264,25 +263,19 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 	gettimeofday(&ts, NULL);
 	struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) rreq_ext->data;
 
-	dessert_trace("incoming RREQ from " MAC " to " MAC " seq=%i", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->seq_num_src);
-
 	u_int8_t prev_hop[ETH_ALEN];
 	rreq_msg->hop_count++;
 	memcpy(prev_hop, msg->l2h.ether_shost, ETH_ALEN);
 
 	if (memcmp(dessert_l25_defsrc, l25h->ether_dhost, ETH_ALEN) != 0) { // RREQ not for me
 
-		int x = aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->seq_num_src, &ts);
-		if(x == -1) {
-			dessert_crit("aodv_db_capt_rreq returns error");
-			return DESSERT_MSG_DROP;
-		}
+		dessert_trace("incoming RREQ from " MAC " to " MAC " seq=%i", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->seq_num_src);
 
 		u_int32_t last_rreq_seq;
-		int a = !(rreq_msg->flags & (AODV_FLAGS_RREQ_D | AODV_FLAGS_RREQ_U));
-		int b = aodv_db_getrouteseqnum(l25h->ether_dhost, &last_rreq_seq);
-		int c = (hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq) > 0);
-		if(a && b && c) {
+		int f = !(rreq_msg->flags & (AODV_FLAGS_RREQ_D | AODV_FLAGS_RREQ_U));
+		int a = aodv_db_getrouteseqnum(l25h->ether_dhost, &last_rreq_seq);
+		int b = (hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq) > 0);
+		if(a && b && f) {
 			// i know route to destination that have seq_num greater then that of source (route is newer)
 			dessert_msg_t* rrep_msg = _create_rrep(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, last_rreq_seq, AODV_FLAGS_RREP_A);
 
@@ -296,15 +289,15 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 		}
 	} else { // RREQ for me
 
-		dessert_debug("incoming RREQ from " MAC " seq=%i -> answer with RREP seq=%i", EXPLODE_ARRAY6(l25h->ether_shost), rreq_msg->seq_num_src, seq_num);
+		dessert_debug("incoming RREQ from " MAC " for me seq=%i -> answer with RREP seq=%i", EXPLODE_ARRAY6(l25h->ether_shost), rreq_msg->seq_num_src, seq_num);
 
 		u_int32_t last_rreq_seq;
 		int a = aodv_db_getrouteseqnum(l25h->ether_shost, &last_rreq_seq);
 		int b = (hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq) > 0);
 		dessert_trace("rreq_msg->seq_num_src=%u last_rreq_seq=%u -> hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq)=%d", rreq_msg->seq_num_src, last_rreq_seq, hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq));
-		if(a && b) {
+		if(!a || (a && b)) {
 			// RREQ for me -> answer with RREP
-			dessert_debug("got RREQ for me -> answer with RREP to " MAC " over " MAC, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost));
+			dessert_debug("got RREQ for me -> answer with RREP to " MAC " over " MAC " id=%d", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), seq_num);
 			pthread_rwlock_wrlock(&pp_rwlock);
 			u_int32_t seq_num_copy = ++seq_num;
 			pthread_rwlock_unlock(&pp_rwlock);
@@ -324,6 +317,12 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 		} else {
 			// we know a better route already
 		}
+	}
+
+	int x = aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->seq_num_src, &ts);
+	if(x == -1) {
+		dessert_crit("aodv_db_capt_rreq returns error");
+		return DESSERT_MSG_DROP;
 	}
 	return DESSERT_MSG_DROP;
 }
@@ -438,6 +437,8 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 
 int aodv_forward_broadcast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
 	if (proc->lflags & DESSERT_LFLAG_DST_BROADCAST) {
+		struct ether_header* l25h = dessert_msg_getl25ether(msg);
+		dessert_debug("got BROADCAST from " MAC " over " MAC, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost));
 		dessert_meshsend_fast(msg, NULL); //forward to mesh
 		dessert_syssend_msg(msg); //forward to sys
 		return DESSERT_MSG_DROP;
@@ -508,7 +509,7 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, desse
 	struct ether_header* l25h = dessert_msg_getl25ether(msg);
 
 	if (memcmp(l25h->ether_dhost, ether_broadcast, ETH_ALEN) == 0) {
-		dessert_trace("broadcast message -> add broadcast extension to avoid broadcast loops");
+		dessert_trace("send broadcast message -> add broadcast extension to avoid broadcast loops");
 		dessert_ext_t* ext;
 		dessert_msg_addext(msg, &ext, BROADCAST_EXT_TYPE, sizeof(struct aodv_msg_broadcast));
 		struct aodv_msg_broadcast* brc_str = (struct aodv_msg_broadcast*) ext->data;
@@ -522,22 +523,20 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, desse
 		struct timeval ts;
 		gettimeofday(&ts, NULL);
 		if (aodv_db_getroute2dest(l25h->ether_dhost, dhost_next_hop, &output_iface, &ts) == TRUE) {
-			u_int16_t seq_num = 0;
+			u_int16_t seq_num_copy = 0;
 			pthread_rwlock_wrlock(&data_seq_lock);
-			seq_num = ++data_seq_num;
+			seq_num_copy = ++data_seq_num;
 			pthread_rwlock_unlock(&data_seq_lock);
-			msg->u16 = seq_num;
+			msg->u16 = seq_num_copy;
 
 			memcpy(msg->l2h.ether_dhost, dhost_next_hop, ETH_ALEN);
 			dessert_meshsend_fast(msg, output_iface);
 
-			dessert_trace("data packet - id=%d - to mesh - to " MAC " route is known - send over " MAC, seq_num, EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(dhost_next_hop));
-
-			dessert_msg_destroy(msg);
+			dessert_trace("send data packet to mesh - to " MAC " over " MAC " id=%d route is known", EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(dhost_next_hop), seq_num);
 		} else {
 			aodv_db_push_packet(l25h->ether_dhost, msg, &ts);
 			aodv_send_rreq(l25h->ether_dhost, &ts, TTL_START); // create and send RREQ
-			dessert_trace("data packet to mesh - to " MAC " but route is unknown -> push packet to FIFO and send RREQ", EXPLODE_ARRAY6(l25h->ether_dhost));
+			dessert_trace("send data packet to mesh - to " MAC " id=%d but route is unknown -> push packet to FIFO and send RREQ", EXPLODE_ARRAY6(l25h->ether_dhost), seq_num);
 		}
 	}
 	return DESSERT_MSG_DROP;
@@ -551,11 +550,11 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, desse
 int aodv_local_unicast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
 	if(proc->lflags & DESSERT_LFLAG_DST_SELF) {
 		struct ether_header* l25h = dessert_msg_getl25ether(msg);
-		if(aodv_db_data_capt_data_seq(l25h->ether_shost, msg->u16)) {
-			//packet is new
+		if(TRUE == aodv_db_data_capt_data_seq(l25h->ether_shost, msg->u16)) {
+			dessert_trace("data packet from mesh - from " MAC " over " MAC " id=%d", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), msg->u16);
 			dessert_syssend_msg(msg);
 		} else {
-			//DUP
+			dessert_trace("data packet from mesh - from " MAC " over " MAC " id=%d -> DUP", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), msg->u16);
 		}
 	}
 	return DESSERT_MSG_DROP;

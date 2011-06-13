@@ -161,7 +161,7 @@ int nht_entry_create (nht_entry_t** entry_out, u_int8_t dhost_next_hop[ETH_ALEN]
 }
 
 //returns TRUE if input entry is used (newer)
-//        FALSE if input entry is unknown
+//        FALSE if input entry is unused
 //        -1 if error
 int aodv_db_rt_capt_rreq (u_int8_t dhost_ether[ETH_ALEN], u_int8_t shost_ether[ETH_ALEN],
 		u_int8_t shost_prev_hop[ETH_ALEN], const dessert_meshif_t* output_iface,
@@ -304,8 +304,10 @@ int aodv_db_rt_getprevhop(u_int8_t dhost_ether[ETH_ALEN], u_int8_t shost_ether[E
 int aodv_db_rt_getrouteseqnum(u_int8_t dhost_ether[ETH_ALEN], u_int32_t* dhost_seq_num_out) {
 	aodv_rt_entry_t* rt_entry;
 	HASH_FIND(hh, rt.entrys, dhost_ether, ETH_ALEN, rt_entry);
-	if (rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN)
+	if (rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN) {
+		*dhost_seq_num_out = 0;
 		return FALSE;
+	}
 	*dhost_seq_num_out = rt_entry->dhost_seq_num;
 	return TRUE;
 }

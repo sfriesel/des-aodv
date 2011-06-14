@@ -30,6 +30,7 @@ For further information and questions please use the web site
 
 #include <linux/if_ether.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 /**
  * Compares two integers
@@ -37,7 +38,7 @@ For further information and questions please use the web site
  * return 1 if i > j (cirlce diff < (MAX_INT / 2))
  * return -1 if i < j (circle diff > (MAX_INT / 2))
  */
-int hf_seq_comp_i_j(u_int32_t i, u_int32_t j);
+int hf_seq_comp_i_j(uint32_t i, uint32_t j);
 
 /**
  * Compares two timevals.

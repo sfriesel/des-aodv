@@ -28,8 +28,8 @@ For further information and questions please use the web site
 #include "../../config.h"
 
 typedef struct data_packet_id {
-	u_int8_t src_addr[ETH_ALEN]; // key
-	u_int16_t seq_num;
+	uint8_t src_addr[ETH_ALEN]; // key
+	uint16_t seq_num;
 	UT_hash_handle hh;
 } data_packet_id_t;
 
@@ -38,7 +38,7 @@ data_packet_id_t* entrys = NULL;
 //returns TRUE if input entry is newer
 //        FALSE if input entry is older
 //        -1 if error
-int aodv_db_data_capt_data_seq(u_int8_t shost_ether[ETH_ALEN], u_int16_t shost_seq_num) {
+int aodv_db_data_capt_data_seq(uint8_t shost_ether[ETH_ALEN], uint16_t shost_seq_num) {
 
 	data_packet_id_t* entry = NULL;
 	HASH_FIND(hh, entrys, shost_ether, ETH_ALEN, entry);

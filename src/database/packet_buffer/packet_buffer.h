@@ -32,11 +32,11 @@ For further information and questions please use the web site
 
 int pb_init();
 
-void pb_push_packet(u_int8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct timeval* timestamp);
+void pb_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct timeval* timestamp);
 
-dessert_msg_t* pb_pop_packet(u_int8_t dhost_ether[ETH_ALEN]);
+dessert_msg_t* pb_pop_packet(uint8_t dhost_ether[ETH_ALEN]);
 
-void pb_drop_packets(u_int8_t dhost_ether[ETH_ALEN]);
+void pb_drop_packets(uint8_t dhost_ether[ETH_ALEN]);
 
 int pb_cleanup(struct timeval* timestamp);
 

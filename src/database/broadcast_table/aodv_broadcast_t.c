@@ -28,8 +28,8 @@ For further information and questions please use the web site
 #include "../timeslot.h"
 
 typedef struct aodv_brcid_entry {
-	u_int8_t 		shost_ether[ETH_ALEN];
-	u_int32_t		brc_id;
+	uint8_t 		shost_ether[ETH_ALEN];
+	uint32_t		brc_id;
 	UT_hash_handle	hh;
 } aodv_brcid_entry_t;
 
@@ -56,7 +56,7 @@ int aodv_db_brct_init() {
 }
 
 
-int aodv_db_brct_addid(u_int8_t shost_ether[ETH_ALEN], u_int32_t rreq_id, struct timeval* timestamp) {
+int aodv_db_brct_addid(uint8_t shost_ether[ETH_ALEN], uint32_t rreq_id, struct timeval* timestamp) {
 	aodv_brcid_entry_t* entry;
 	timeslot_purgeobjects(brcid_table.ts, timestamp);
 	HASH_FIND(hh, brcid_table.entrys, shost_ether, ETH_ALEN, entry);

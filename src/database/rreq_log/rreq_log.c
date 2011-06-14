@@ -25,7 +25,7 @@ For further information and questions please use the web site
 #include "../timeslot.h"
 
 timeslot_t* rreq_log_ts 	= NULL;
-u_int32_t rreq_count 		= 0;
+uint32_t rreq_count 		= 0;
 void* rreq_pseudo_pointer 	= 0;
 
 void rreq_decrement_counter(struct timeval* timestamp, void* src_object, void* object) {
@@ -43,7 +43,7 @@ void aodv_db_rl_putrreq(struct timeval* timestamp) {
 	if (timeslot_addobject(rreq_log_ts, timestamp, rreq_pseudo_pointer++) == TRUE) rreq_count++;
 }
 
-void aodv_db_rl_getrreqcount(struct timeval* timestamp, u_int32_t* count_out) {
+void aodv_db_rl_getrreqcount(struct timeval* timestamp, uint32_t* count_out) {
 	timeslot_purgeobjects(rreq_log_ts, timestamp);
 	*count_out = rreq_count;
 }

@@ -33,13 +33,13 @@ For further information and questions please use the web site
 pthread_rwlock_t pp_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 pthread_rwlock_t data_seq_lock = PTHREAD_RWLOCK_INITIALIZER;
 
-u_int32_t seq_num = 0;
-u_int32_t broadcast_id = 0;
-u_int16_t data_seq_num = 0;
+uint32_t seq_num = 0;
+uint32_t broadcast_id = 0;
+uint16_t data_seq_num = 0;
 
 // ---------------------------- help functions ---------------------------------------
 
-dessert_msg_t* _create_rreq(u_int8_t dhost_ether[ETH_ALEN], u_int8_t ttl) {
+dessert_msg_t* _create_rreq(uint8_t dhost_ether[ETH_ALEN], uint8_t ttl) {
 	dessert_msg_t* msg;
 	dessert_ext_t* ext;
 	dessert_msg_new(&msg);
@@ -60,7 +60,7 @@ dessert_msg_t* _create_rreq(u_int8_t dhost_ether[ETH_ALEN], u_int8_t ttl) {
 	pthread_rwlock_wrlock(&pp_rwlock);
 	rreq_msg->seq_num_src = ++seq_num;
 	pthread_rwlock_unlock(&pp_rwlock);
-	u_int32_t dhost_seq_num;
+	uint32_t dhost_seq_num;
 	if (aodv_db_getrouteseqnum(dhost_ether, &dhost_seq_num) == TRUE) {
 		rreq_msg->seq_num_dest = dhost_seq_num;
 	} else {
@@ -78,8 +78,8 @@ dessert_msg_t* _create_rreq(u_int8_t dhost_ether[ETH_ALEN], u_int8_t ttl) {
 }
 
 
-dessert_msg_t* _create_rrep(u_int8_t route_dest[ETH_ALEN], u_int8_t route_source[ETH_ALEN],
-		u_int8_t rrep_next_hop[ETH_ALEN], u_int32_t route_seq_num, u_int8_t flags) {
+dessert_msg_t* _create_rrep(uint8_t route_dest[ETH_ALEN], uint8_t route_source[ETH_ALEN],
+		uint8_t rrep_next_hop[ETH_ALEN], uint32_t route_seq_num, uint8_t flags) {
 	dessert_msg_t* msg;
 	dessert_ext_t* ext;
 	dessert_msg_new(&msg);
@@ -105,9 +105,9 @@ dessert_msg_t* _create_rrep(u_int8_t route_dest[ETH_ALEN], u_int8_t route_source
 	return msg;
 }
 
-void aodv_send_rreq(u_int8_t dhost_ether[ETH_ALEN], struct timeval* ts, u_int8_t ttl) {
+void aodv_send_rreq(uint8_t dhost_ether[ETH_ALEN], struct timeval* ts, uint8_t ttl) {
 	// fist check if we have sent more then RREQ_LIMITH RREQ messages at last 1 sek.
-	u_int32_t rreq_count;
+	uint32_t rreq_count;
 	aodv_db_getrreqcount(ts, &rreq_count);
 	if (rreq_count >= RREQ_RATELIMIT) { // we have reached RREQ_RATELIMIT -> send this RREQ later(try in 100ms)!
 		struct timeval retry_time;
@@ -121,7 +121,7 @@ void aodv_send_rreq(u_int8_t dhost_ether[ETH_ALEN], struct timeval* ts, u_int8_t
 	dessert_msg_t* rreq_msg = _create_rreq(dhost_ether, (ttl <= TTL_THRESHOLD)? ttl : 255); // create RREQ
 
 	// add task to repeat RREQ after
-	u_int32_t rep_time = (ttl > TTL_THRESHOLD)? NET_TRAVERSAL_TIME : (2 * NODE_TRAVERSAL_TIME * ttl);
+	uint32_t rep_time = (ttl > TTL_THRESHOLD)? NET_TRAVERSAL_TIME : (2 * NODE_TRAVERSAL_TIME * ttl);
 	struct timeval rreq_repeat_time;
 	rreq_repeat_time.tv_sec = rep_time / 1000;
 	rreq_repeat_time.tv_usec = (rep_time % 1000) * 1000;
@@ -131,7 +131,7 @@ void aodv_send_rreq(u_int8_t dhost_ether[ETH_ALEN], struct timeval* ts, u_int8_t
 		aodv_db_addschedule(&rreq_repeat_time, dhost_ether, AODV_SC_REPEAT_RREQ,
 				(ttl + TTL_INCREMENT > TTL_THRESHOLD)? TTL_THRESHOLD + 1 : ttl + TTL_INCREMENT);
 	} else {
-		u_int8_t try_num = ttl - TTL_THRESHOLD;
+		uint8_t try_num = ttl - TTL_THRESHOLD;
 		if (try_num < RREQ_RETRIES) {
 			aodv_db_addschedule(&rreq_repeat_time, dhost_ether, AODV_SC_REPEAT_RREQ, ttl + 1);
 		}
@@ -149,7 +149,7 @@ void aodv_send_rreq(u_int8_t dhost_ether[ETH_ALEN], struct timeval* ts, u_int8_t
 	dessert_debug("rreq send for " MAC " id=%d", EXPLODE_ARRAY6(dhost_ether), seq_num);
 }
 
-void aodv_send_packets_from_buffer(u_int8_t ether_dhost[ETH_ALEN], u_int8_t next_hop[ETH_ALEN], const dessert_meshif_t* iface) {
+void aodv_send_packets_from_buffer(uint8_t ether_dhost[ETH_ALEN], uint8_t next_hop[ETH_ALEN], const dessert_meshif_t* iface) {
 	// drop RREQ schedule, since we already know the route to destination
 	aodv_db_dropschedule(ether_dhost, AODV_SC_REPEAT_RREQ);
 
@@ -161,7 +161,7 @@ void aodv_send_packets_from_buffer(u_int8_t ether_dhost[ETH_ALEN], u_int8_t next
 	dessert_msg_t* buffered_msg;
 	while((buffered_msg = aodv_db_pop_packet(ether_dhost)) != NULL) {
 		struct ether_header* l25h = dessert_msg_getl25ether(buffered_msg);
-		u_int16_t seq_num_copy = 0;
+		uint16_t seq_num_copy = 0;
 		pthread_rwlock_wrlock(&data_seq_lock);
 		seq_num_copy = ++data_seq_num;
 		pthread_rwlock_unlock(&data_seq_lock);
@@ -263,7 +263,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 	gettimeofday(&ts, NULL);
 	struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) rreq_ext->data;
 
-	u_int8_t prev_hop[ETH_ALEN];
+	uint8_t prev_hop[ETH_ALEN];
 	rreq_msg->hop_count++;
 	memcpy(prev_hop, msg->l2h.ether_shost, ETH_ALEN);
 
@@ -271,7 +271,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 
 		dessert_trace("incoming RREQ from " MAC " to " MAC " seq=%i", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->seq_num_src);
 
-		u_int32_t last_rreq_seq;
+		uint32_t last_rreq_seq;
 		int f = !(rreq_msg->flags & (AODV_FLAGS_RREQ_D | AODV_FLAGS_RREQ_U));
 		int a = aodv_db_getrouteseqnum(l25h->ether_dhost, &last_rreq_seq);
 		int b = (hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq) > 0);
@@ -291,7 +291,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 
 		dessert_debug("incoming RREQ from " MAC " for me seq=%i -> answer with RREP seq=%i", EXPLODE_ARRAY6(l25h->ether_shost), rreq_msg->seq_num_src, seq_num);
 
-		u_int32_t last_rreq_seq;
+		uint32_t last_rreq_seq;
 		int a = aodv_db_getrouteseqnum(l25h->ether_shost, &last_rreq_seq);
 		int b = (hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq) > 0);
 		dessert_trace("rreq_msg->seq_num_src=%u last_rreq_seq=%u -> hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq)=%d", rreq_msg->seq_num_src, last_rreq_seq, hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq));
@@ -299,7 +299,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 			// RREQ for me -> answer with RREP
 			dessert_debug("got RREQ for me -> answer with RREP to " MAC " over " MAC " id=%d", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), seq_num);
 			pthread_rwlock_wrlock(&pp_rwlock);
-			u_int32_t seq_num_copy = ++seq_num;
+			uint32_t seq_num_copy = ++seq_num;
 			pthread_rwlock_unlock(&pp_rwlock);
 			dessert_msg_t* rrep_msg = _create_rrep(dessert_l25_defsrc, l25h->ether_shost, msg->l2h.ether_shost, seq_num_copy, AODV_FLAGS_RREP_A);
 			dessert_meshsend_fast(rrep_msg, iface);
@@ -335,9 +335,9 @@ int aodv_handle_rerr(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 	}
 	struct aodv_msg_rerr* rerr_msg = (struct aodv_msg_rerr*) rerr_ext->data;
 	int rerrdl_num = 0;
-	u_int8_t dhost_ether[ETH_ALEN];
-	u_int8_t dhost_next_hop[ETH_ALEN];
-	u_int8_t rebroadcast_rerr = FALSE;
+	uint8_t dhost_ether[ETH_ALEN];
+	uint8_t dhost_next_hop[ETH_ALEN];
+	uint8_t rebroadcast_rerr = FALSE;
 	dessert_ext_t* rerrdl_ext;
 
 	while (dessert_msg_getext(msg, &rerrdl_ext, RERRDL_EXT_TYPE, rerrdl_num++) > 0) {
@@ -415,7 +415,7 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 
 	if (memcmp(dessert_l25_defsrc, l25h->ether_dhost, ETH_ALEN) != 0) {
 		// send RREP to RREQ originator if RREP is not for me
-		u_int8_t next_hop[ETH_ALEN];
+		uint8_t next_hop[ETH_ALEN];
 		const dessert_meshif_t* output_iface;
 		
 		if (aodv_db_getprevhop(l25h->ether_shost, l25h->ether_dhost, next_hop, &output_iface) == TRUE) {
@@ -469,7 +469,7 @@ int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const
 	const dessert_meshif_t* output_iface;
 	struct timeval timestamp;
 	gettimeofday(&timestamp, NULL);
-	u_int8_t next_hop[ETH_ALEN];
+	uint8_t next_hop[ETH_ALEN];
 	struct ether_header* l25h = dessert_msg_getl25ether(msg);
 	
 	if(TRUE != aodv_db_data_capt_data_seq(l25h->ether_shost, msg->u16)) {
@@ -482,7 +482,7 @@ int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const
 		memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
 		dessert_meshsend_fast(msg, output_iface);
 	} else {
-		u_int32_t rerr_count;
+		uint32_t rerr_count;
 		aodv_db_getrerrcount(&timestamp, &rerr_count);
 		if (rerr_count >= RERR_RATELIMIT)
 			return DESSERT_MSG_DROP;
@@ -518,12 +518,12 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, desse
 		pthread_rwlock_unlock(&pp_rwlock);
 		dessert_meshsend_fast(msg, NULL);
 	} else {
-		u_int8_t dhost_next_hop[ETH_ALEN];
+		uint8_t dhost_next_hop[ETH_ALEN];
 		const dessert_meshif_t* output_iface;
 		struct timeval ts;
 		gettimeofday(&ts, NULL);
 		if (aodv_db_getroute2dest(l25h->ether_dhost, dhost_next_hop, &output_iface, &ts) == TRUE) {
-			u_int16_t seq_num_copy = 0;
+			uint16_t seq_num_copy = 0;
 			pthread_rwlock_wrlock(&data_seq_lock);
 			seq_num_copy = ++data_seq_num;
 			pthread_rwlock_unlock(&data_seq_lock);

@@ -27,10 +27,10 @@ For further information and questions please use the web site
 #include <time.h>
 #include <linux/if_ether.h>
 
-int aodv_db_sc_addschedule(struct timeval* execute_ts, u_int8_t ether_addr[ETH_ALEN], u_int8_t type, u_int64_t param);
+int aodv_db_sc_addschedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, uint64_t param);
 
-int aodv_db_sc_popschedule(struct timeval* timestamp, u_int8_t ether_addr_out[ETH_ALEN], u_int8_t* type, u_int64_t* param);
+int aodv_db_sc_popschedule(struct timeval* timestamp, uint8_t ether_addr_out[ETH_ALEN], uint8_t* type, uint64_t* param);
 
-void aodv_db_sc_dropschedule(u_int8_t ether_addr[ETH_ALEN], u_int8_t type);
+void aodv_db_sc_dropschedule(uint8_t ether_addr[ETH_ALEN], uint8_t type);
 
 #endif

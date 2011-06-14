@@ -56,7 +56,7 @@ int aodv_periodic_cleanup_database(void *data, struct timeval *scheduled, struct
         else return 1;
 }
 
-dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, u_int16_t count) {
+dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, uint16_t count) {
         if (*head == NULL) return NULL;
         dessert_msg_t* msg;
         dessert_ext_t* ext;
@@ -79,7 +79,7 @@ dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, u_int16_t count) {
         // write addresses of all my mesh interfaces
         dessert_meshif_t* iface = dessert_meshiflist_get();
         void* ifaceaddr_pointer = rerr_msg->ifaces;
-        u_int8_t ifaces_count = 0;
+        uint8_t ifaces_count = 0;
         while (iface != NULL && ifaces_count < MAX_MESH_IFACES_COUNT) {
                 memcpy(ifaceaddr_pointer, iface->hwaddr, ETH_ALEN);
                 ifaceaddr_pointer += ETH_ALEN;
@@ -90,11 +90,11 @@ dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, u_int16_t count) {
         rerr_msg->iface_addr_count = ifaces_count;
 
         // write addresses of affected destinations in RERRDL_EXT
-        u_int8_t rerrdl_count = 0;
-        u_int8_t ext_el_num = 0;
+        uint8_t rerrdl_count = 0;
+        uint8_t ext_el_num = 0;
         void* dl = NULL;
-        u_int8_t max_dl_len = DESSERT_MAXEXTDATALEN / ETH_ALEN;
-        u_int8_t MAX_RERRDL_COUNT = (dessert_maxlen -
+        uint8_t max_dl_len = DESSERT_MAXEXTDATALEN / ETH_ALEN;
+        uint8_t MAX_RERRDL_COUNT = (dessert_maxlen -
                         sizeof(dessert_msg_t) - sizeof(struct ether_header) -
                         sizeof(struct aodv_msg_rerr) - sizeof(struct aodv_msg_broadcast)) / DESSERT_MAXEXTDATALEN;
 
@@ -130,9 +130,9 @@ dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, u_int16_t count) {
 }
 
 int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeval *interval) {
-        u_int8_t schedule_type;
-        u_int64_t schedule_param;
-        u_int8_t ether_addr[ETH_ALEN];
+        uint8_t schedule_type;
+        uint64_t schedule_param;
+        uint8_t ether_addr[ETH_ALEN];
         struct timeval timestamp;
         gettimeofday(&timestamp, NULL);
 
@@ -145,11 +145,11 @@ int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeva
         }
         else if (schedule_type == AODV_SC_REPEAT_RREQ) aodv_send_rreq(ether_addr, &timestamp, schedule_param);	// send out rreq
         else if (schedule_type == AODV_SC_SEND_OUT_RERR) {
-                u_int32_t rerr_count;
+                uint32_t rerr_count;
                 aodv_db_getrerrcount(&timestamp, &rerr_count);
                 if (rerr_count < RERR_RATELIMIT) {
-                        u_int16_t dest_count = 0;
-                        u_int8_t dhost_ether[ETH_ALEN];
+                        uint16_t dest_count = 0;
+                        uint8_t dhost_ether[ETH_ALEN];
                         _onlb_element_t* curr_el = NULL;
                         _onlb_element_t* head = NULL;
 

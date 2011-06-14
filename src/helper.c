@@ -24,9 +24,9 @@ For further information and questions please use the web site
 #include "helper.h"
 #include "config.h"
 
-int hf_seq_comp_i_j(u_int32_t i, u_int32_t j) {
+int hf_seq_comp_i_j(uint32_t i, uint32_t j) {
 	if (i == j) return 0;
-	u_int32_t diff = i - j;
+	uint32_t diff = i - j;
 	if (diff < (SEQNO_MAX >> 1))
 		return 1;
 	return -1;

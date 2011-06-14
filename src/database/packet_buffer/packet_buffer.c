@@ -33,14 +33,14 @@ typedef struct fifo_list_el {
 typedef struct fifo_list {
 	fifo_list_el_t* head;
 	fifo_list_el_t* tail;
-	u_int8_t		size;
+	uint8_t		size;
 } fifo_list_t;
 
 /**
  * Packet buffer element
  */
 typedef struct pb_el {
-	u_int8_t		dhost_ether[ETH_ALEN];
+	uint8_t		dhost_ether[ETH_ALEN];
 	fifo_list_t		fl;
 	UT_hash_handle	hh;
 } pb_el_t;
@@ -118,7 +118,7 @@ dessert_msg_t* fl_pop_packet(fifo_list_t* fl) {
 	return msg;
 }
 
-void pb_push_packet(u_int8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct timeval* timestamp) {
+void pb_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct timeval* timestamp) {
 	pb_cleanup(timestamp);
 	pb_el_t* pb_el;
 	HASH_FIND(hh, pbt.entrys, dhost_ether, ETH_ALEN, pb_el);
@@ -137,7 +137,7 @@ void pb_push_packet(u_int8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct t
 	timeslot_addobject(pbt.ts, timestamp, pb_el);
 }
 
-dessert_msg_t* pb_pop_packet(u_int8_t dhost_ether[ETH_ALEN]) {
+dessert_msg_t* pb_pop_packet(uint8_t dhost_ether[ETH_ALEN]) {
 	pb_el_t* pb_el;
 	HASH_FIND(hh, pbt.entrys, dhost_ether, ETH_ALEN, pb_el);
 	if (pb_el == NULL) return NULL;

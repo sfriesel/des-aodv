@@ -30,7 +30,7 @@ int aodv_db_rerrl_init();
 
 void aodv_db_rl_putrerr(struct timeval* timestamp);
 
-void aodv_db_rl_getrerrcount(struct timeval* timestamp, u_int32_t* count_out);
+void aodv_db_rl_getrerrcount(struct timeval* timestamp, uint32_t* count_out);
 
 #endif
 

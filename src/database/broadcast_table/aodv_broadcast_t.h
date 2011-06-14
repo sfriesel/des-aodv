@@ -36,6 +36,6 @@ int aodv_db_brct_init();
 /**
  * Returns TRUE if broadcast id is newer then that of entry in database
  */
-int aodv_db_brct_addid(u_int8_t shost_ether[ETH_ALEN], u_int32_t rreq_id, struct timeval* timestamp);
+int aodv_db_brct_addid(uint8_t shost_ether[ETH_ALEN], uint32_t rreq_id, struct timeval* timestamp);
 
 #endif

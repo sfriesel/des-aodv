@@ -27,7 +27,7 @@ For further information and questions please use the web site
 
 timeslot_t* rerr_log_ts = NULL;
 
-u_int32_t rerr_count = 0;
+uint32_t rerr_count = 0;
 void* rerr_pseudo_pointer = 0;
 
 void rerr_decrement_counter(struct timeval* timestamp, void* src_object, void* object) {
@@ -47,7 +47,7 @@ void aodv_db_rl_putrerr(struct timeval* timestamp) {
 		rerr_count++;
 }
 
-void aodv_db_rl_getrerrcount(struct timeval* timestamp, u_int32_t* count_out) {
+void aodv_db_rl_getrerrcount(struct timeval* timestamp, uint32_t* count_out) {
 	timeslot_purgeobjects(rerr_log_ts, timestamp);
 	*count_out = rerr_count;
 }

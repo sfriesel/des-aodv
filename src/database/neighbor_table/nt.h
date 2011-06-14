@@ -38,12 +38,12 @@ int db_nt_init();
  * Take a record that the given neighbor seems to be
  * 1 hop bidirectional neighbor
  */
-int db_nt_cap2Dneigh(u_int8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif_t* iface, struct timeval* timestamp);
+int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif_t* iface, struct timeval* timestamp);
 
 /**
  * Check whether given neighbor is 1 hop bidirectional neighbor
  */
-int db_nt_check2Dneigh(u_int8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif_t* iface, struct timeval* timestamp);
+int db_nt_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif_t* iface, struct timeval* timestamp);
 
 int db_nt_cleanup(struct timeval* timestamp);
 

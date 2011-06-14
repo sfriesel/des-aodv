@@ -28,7 +28,7 @@ For further information and questions please use the web site
 
 typedef struct neighbor_entry {
 	struct __attribute__ ((__packed__)) { // key
-		u_int8_t 				ether_neighbor[ETH_ALEN];
+		uint8_t 				ether_neighbor[ETH_ALEN];
 		const dessert_meshif_t*	iface;
 	};
 	UT_hash_handle				hh;
@@ -41,7 +41,7 @@ typedef struct neighbor_table {
 
 neighbor_table_t nt;
 
-neighbor_entry_t* db_neighbor_entry_create(u_int8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif_t* iface) {
+neighbor_entry_t* db_neighbor_entry_create(uint8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif_t* iface) {
 	neighbor_entry_t* new_entry;
 	new_entry = malloc(sizeof(neighbor_entry_t));
 	if (new_entry == NULL) return NULL;
@@ -65,7 +65,7 @@ void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void*
 int db_nt_init() {
 	timeslot_t* new_ts;
 	struct timeval timeout;
-	u_int32_t hello_int_msek = hello_interval * (ALLOWED_HELLO_LOST + 1);
+	uint32_t hello_int_msek = hello_interval * (ALLOWED_HELLO_LOST + 1);
 	timeout.tv_sec = hello_int_msek / 1000;
 	timeout.tv_usec = (hello_int_msek % 1000) * 1000;
 	if (timeslot_create(&new_ts, &timeout, NULL, db_nt_on_neigbor_timeout) != TRUE) return FALSE;
@@ -74,9 +74,9 @@ int db_nt_init() {
 	return TRUE;
 }
 
-int db_nt_cap2Dneigh(u_int8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif_t* iface, struct timeval* timestamp) {
+int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif_t* iface, struct timeval* timestamp) {
 	neighbor_entry_t* curr_entry = NULL;
-	u_int8_t addr_sum[ETH_ALEN + sizeof(void*)];
+	uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
 	memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
 	memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
 	HASH_FIND(hh, nt.entrys, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
@@ -90,10 +90,10 @@ int db_nt_cap2Dneigh(u_int8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshi
 	return TRUE;
 }
 
-int db_nt_check2Dneigh(u_int8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif_t* iface, struct timeval* timestamp) {
+int db_nt_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif_t* iface, struct timeval* timestamp) {
 	timeslot_purgeobjects(nt.ts, timestamp);
 	neighbor_entry_t* curr_entry;
-	u_int8_t addr_sum[ETH_ALEN + sizeof(void*)];
+	uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
 	memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
 	memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
 	HASH_FIND(hh, nt.entrys, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);

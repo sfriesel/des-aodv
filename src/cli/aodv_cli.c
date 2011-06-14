@@ -83,7 +83,7 @@ int cli_set_rreq_size(struct cli_def *cli, char *command, char *argv[], int argc
 }
 
 int cli_send_rreq(struct cli_def* cli, char* command, char* argv[], int argc) {
-	u_int8_t dhost_hwaddr[ETHER_ADDR_LEN];
+	uint8_t dhost_hwaddr[ETHER_ADDR_LEN];
 
 	if (argc < 1 || argc > 2 || sscanf(argv[0], MAC,
 			&dhost_hwaddr[0], &dhost_hwaddr[1], &dhost_hwaddr[2], &dhost_hwaddr[3],

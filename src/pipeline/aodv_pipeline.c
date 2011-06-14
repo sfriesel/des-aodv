@@ -182,10 +182,10 @@ void aodv_send_packets_from_buffer(u_int8_t ether_dhost[ETH_ALEN], u_int8_t next
 int aodv_drop_errors(dessert_msg_t* msg, size_t len,
 		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id){
 	// drop packets sent by myself.
-	if (proc->lflags & DESSERT_LFLAG_PREVHOP_SELF) {
+	if (proc->lflags & DESSERT_RX_FLAG_L2_SRC) {
 		return DESSERT_MSG_DROP;
 	}
-	if (proc->lflags & DESSERT_LFLAG_SRC_SELF) {
+	if (proc->lflags & DESSERT_RX_FLAG_L25_SRC) {
 		return DESSERT_MSG_DROP;
 	}
 	/**
@@ -436,7 +436,7 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 }
 
 int aodv_forward_broadcast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
-	if (proc->lflags & DESSERT_LFLAG_DST_BROADCAST) {
+	if (proc->lflags & DESSERT_RX_FLAG_L25_BROADCAST) {
 		struct ether_header* l25h = dessert_msg_getl25ether(msg);
 		dessert_debug("got BROADCAST from " MAC " over " MAC, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost));
 		dessert_meshsend_fast(msg, NULL); //forward to mesh
@@ -447,7 +447,7 @@ int aodv_forward_broadcast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *p
 }
 
 int aodv_forward_multicast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
-	if (proc->lflags & DESSERT_LFLAG_DST_MULTICAST) {
+	if (proc->lflags & DESSERT_RX_FLAG_L25_MULTICAST) {
 		dessert_meshsend_fast(msg, NULL); //forward to mesh
 		dessert_syssend_msg(msg); //forward to sys
 		return DESSERT_MSG_DROP;
@@ -457,13 +457,13 @@ int aodv_forward_multicast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *p
 
 int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
 
-	if(proc->lflags & DESSERT_LFLAG_DST_SELF)
+	if(proc->lflags & DESSERT_RX_FLAG_L25_DST)
 		return DESSERT_MSG_KEEP;
-	if(proc->lflags & DESSERT_LFLAG_DST_SELF_OVERHEARD)
+	if(proc->lflags & DESSERT_RX_FLAG_L25_OVERHEARD)
 		return DESSERT_MSG_KEEP;
-	if(proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF)
+	if(proc->lflags & DESSERT_RX_FLAG_L2_DST)
 		return DESSERT_MSG_KEEP;
-	if(proc->lflags & DESSERT_LFLAG_NEXTHOP_SELF_OVERHEARD)
+	if(proc->lflags & DESSERT_RX_FLAG_L2_OVERHEARD)
 		return DESSERT_MSG_KEEP;
 
 	const dessert_meshif_t* output_iface;
@@ -548,7 +548,7 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, desse
  * Forward packets addressed to me to tun pipeline
  */
 int aodv_local_unicast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
-	if(proc->lflags & DESSERT_LFLAG_DST_SELF) {
+	if(proc->lflags & DESSERT_RX_FLAG_L25_DST) {
 		struct ether_header* l25h = dessert_msg_getl25ether(msg);
 		if(TRUE == aodv_db_data_capt_data_seq(l25h->ether_shost, msg->u16)) {
 			dessert_trace("data packet from mesh - from " MAC " over " MAC " id=%d", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), msg->u16);

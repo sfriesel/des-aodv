@@ -81,8 +81,8 @@ int main(int argc, char** argv) {
     /* registering callbacks */
     dessert_meshrxcb_add(dessert_msg_check_cb, 10);
     dessert_meshrxcb_add(dessert_msg_ifaceflags_cb, 20);
-//    dessert_meshrxcb_add(dessert_mesh_ping, 21);
-//    dessert_meshrxcb_add(dessert_mesh_trace, 22);
+    dessert_meshrxcb_add(dessert_mesh_ping, 21);
+    dessert_meshrxcb_add(dessert_mesh_trace, 22);
     dessert_meshrxcb_add(aodv_drop_errors, 30);
     dessert_meshrxcb_add(aodv_handle_hello, 40);
     dessert_meshrxcb_add(aodv_handle_rreq, 50);

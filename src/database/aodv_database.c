@@ -35,7 +35,6 @@ For further information and questions please use the web site
 #include "rerr_log/rerr_log.h"
 
 pthread_rwlock_t db_rwlock = PTHREAD_RWLOCK_INITIALIZER;
-uint8_t wlocked = FALSE;
 
 void aodv_db_rlock() {
 	pthread_rwlock_rdlock(&db_rwlock);

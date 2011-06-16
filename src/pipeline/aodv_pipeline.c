@@ -450,8 +450,8 @@ int aodv_forward_broadcast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *p
 
 int aodv_forward_multicast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
 	if (proc->lflags & DESSERT_RX_FLAG_L25_MULTICAST) {
-		dessert_meshsend_fast(msg, NULL); //forward to mesh
-		dessert_syssend_msg(msg); //forward to sys
+//		dessert_meshsend_fast(msg, NULL); //forward to mesh
+//		dessert_syssend_msg(msg); //forward to sys
 		return DESSERT_MSG_DROP;
 	}
 	return DESSERT_MSG_KEEP;

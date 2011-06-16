@@ -361,7 +361,8 @@ int aodv_handle_rerr(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 		}
 	}
 
-	if (rebroadcast_rerr) { // write addresses of all my mesh interfaces
+	if (rebroadcast_rerr) {
+		// write addresses of all my mesh interfaces
 		dessert_meshif_t* iface = dessert_meshiflist_get();
 		rerr_msg->iface_addr_count = 0;
 		void* iface_addr_pointer = rerr_msg->ifaces;
@@ -421,6 +422,8 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 			dessert_debug("re-send RREP to " MAC, EXPLODE_ARRAY6(l25h->ether_dhost));
 			memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
 			dessert_meshsend_fast(msg, output_iface);
+		} else {
+			dessert_debug("drop RREP to " MAC, EXPLODE_ARRAY6(l25h->ether_dhost));
 		}
 	} else {
 		// this RREP is for me! -> pop all packets from FIFO buffer and send to destination
@@ -473,9 +476,13 @@ int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const
 	}
 		
 	if (aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &timestamp)) {
-		dessert_debug(MAC " -------> " MAC, EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost));
 		memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
 		dessert_meshsend_fast(msg, output_iface);
+		dessert_debug(MAC " over " MAC " ----ME----> " MAC " to " MAC,
+		              EXPLODE_ARRAY6(l25h->ether_shost),
+		              EXPLODE_ARRAY6(msg->l2h.ether_shost),
+		              EXPLODE_ARRAY6(msg->l2h.ether_dhost),
+		              EXPLODE_ARRAY6(l25h->ether_dhost));
 	} else {
 		uint32_t rerr_count;
 		aodv_db_getrerrcount(&timestamp, &rerr_count);

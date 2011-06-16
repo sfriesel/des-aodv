@@ -268,6 +268,11 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 	memcpy(prev_hop, msg->l2h.ether_shost, ETH_ALEN);
 
 	if (memcmp(dessert_l25_defsrc, l25h->ether_dhost, ETH_ALEN) != 0) { // RREQ not for me
+		int x = aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->seq_num_src, &ts);
+		if(x == -1) {
+			dessert_crit("aodv_db_capt_rreq returns error");
+			return DESSERT_MSG_DROP;
+		}
 
 		dessert_trace("incoming RREQ from " MAC " to " MAC " seq=%i", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->seq_num_src);
 
@@ -283,7 +288,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 
 			dessert_meshsend_fast(rrep_msg, iface);
 			dessert_msg_destroy(rrep_msg);
-		} else if (msg->ttl > 0 && a == FALSE) {
+		} else if (msg->ttl > 0 && x) {
 			dessert_debug("route to " MAC " id=%d is unknown for me -> rebroadcast RREQ", EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->seq_num_src);
 			dessert_meshsend_fast(msg, NULL);
 		}
@@ -295,7 +300,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 		int a = aodv_db_getrouteseqnum(l25h->ether_shost, &last_rreq_seq);
 		int b = (hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq) > 0);
 		dessert_trace("rreq_msg->seq_num_src=%u last_rreq_seq=%u -> hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq)=%d", rreq_msg->seq_num_src, last_rreq_seq, hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq));
-		if(!a || (a && b)) {
+		if(a == FALSE || b == TRUE) {
 			// RREQ for me -> answer with RREP
 			dessert_debug("got RREQ for me -> answer with RREP to " MAC " over " MAC " id=%d", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), seq_num);
 			pthread_rwlock_wrlock(&pp_rwlock);
@@ -317,12 +322,6 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, c
 		} else {
 			// we know a better route already
 		}
-	}
-
-	int x = aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->seq_num_src, &ts);
-	if(x == -1) {
-		dessert_crit("aodv_db_capt_rreq returns error");
-		return DESSERT_MSG_DROP;
 	}
 	return DESSERT_MSG_DROP;
 }
@@ -457,15 +456,11 @@ int aodv_forward_multicast(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *p
 
 int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id) {
 
-	if(proc->lflags & DESSERT_RX_FLAG_L25_DST)
+	int a = (proc->lflags & DESSERT_RX_FLAG_L2_DST);
+	int b = (proc->lflags & DESSERT_RX_FLAG_L25_DST);
+	if(!a || b) {
 		return DESSERT_MSG_KEEP;
-	if(proc->lflags & DESSERT_RX_FLAG_L25_OVERHEARD)
-		return DESSERT_MSG_KEEP;
-	if(proc->lflags & DESSERT_RX_FLAG_L2_DST)
-		return DESSERT_MSG_KEEP;
-	if(proc->lflags & DESSERT_RX_FLAG_L2_OVERHEARD)
-		return DESSERT_MSG_KEEP;
-
+	}
 	const dessert_meshif_t* output_iface;
 	struct timeval timestamp;
 	gettimeofday(&timestamp, NULL);

@@ -51,10 +51,13 @@ int aodv_periodic_send_hello(void *data, struct timeval *scheduled, struct timev
 }
 
 int aodv_periodic_cleanup_database(void *data, struct timeval *scheduled, struct timeval *interval) {
-        struct timeval timestamp;
-        gettimeofday(&timestamp, NULL);
-        if (aodv_db_cleanup(&timestamp)) return 0;
-        else return 1;
+	struct timeval timestamp;
+	gettimeofday(&timestamp, NULL);
+	if (aodv_db_cleanup(&timestamp)) {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
 dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, uint16_t count) {

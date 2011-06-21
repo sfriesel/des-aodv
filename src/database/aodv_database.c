@@ -161,7 +161,7 @@ int aodv_db_getlastrreqseq(uint8_t dhost_ether[ETH_ALEN],
 	return result;
 }
 
-int aodv_db_markrouteinv (uint8_t dhost_ether[ETH_ALEN]) {
+int aodv_db_markrouteinv(uint8_t dhost_ether[ETH_ALEN]) {
 	aodv_db_wlock();
 	int result =  aodv_db_rt_markrouteinv(dhost_ether);
 	aodv_db_unlock();
@@ -245,9 +245,6 @@ void aodv_db_getrerrcount(struct timeval* timestamp, uint32_t* count_out) {
 	aodv_db_rl_getrerrcount(timestamp, count_out);
 	aodv_db_unlock();
 }
-
-
-
 
 // --------------------------------------- reporting ---------------------------------------------------------------
 

@@ -141,25 +141,25 @@ typedef struct _onlb_dest_list_element {
 
 // ------------- pipeline -----------------------------------------------------
 int aodv_handle_hello(dessert_msg_t* msg, size_t len,
-		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
+		dessert_msg_proc_t *proc, dessert_meshif_t *iface, dessert_frameid_t id);
 
 int aodv_handle_rreq(dessert_msg_t* msg, size_t len,
-		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
+		dessert_msg_proc_t *proc, dessert_meshif_t *iface, dessert_frameid_t id);
 
 int aodv_handle_rerr(dessert_msg_t* msg, size_t len,
-		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
+		dessert_msg_proc_t *proc, dessert_meshif_t *iface, dessert_frameid_t id);
 
 int aodv_handle_rrep(dessert_msg_t* msg, size_t len,
-		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
+		dessert_msg_proc_t *proc, dessert_meshif_t *iface, dessert_frameid_t id);
 
 int aodv_forward_broadcast(dessert_msg_t* msg, size_t len,
-		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
+		dessert_msg_proc_t *proc, dessert_meshif_t *iface, dessert_frameid_t id);
 
 int aodv_forward_multicast(dessert_msg_t* msg, size_t len,
-		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
+		dessert_msg_proc_t *proc, dessert_meshif_t *iface, dessert_frameid_t id);
 
 int aodv_forward(dessert_msg_t* msg, size_t len,
-		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
+		dessert_msg_proc_t *proc, dessert_meshif_t *iface, dessert_frameid_t id);
 
 /**
  * Encapsulate packets as dessert_msg,
@@ -170,11 +170,11 @@ int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc,
 
 /** forward packets received via AODV to tun interface */
 int aodv_local_unicast(dessert_msg_t* msg, size_t len,
-		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
+		dessert_msg_proc_t *proc, dessert_meshif_t *iface, dessert_frameid_t id);
 
 /** drop errors (drop corrupt packets, packets from myself and etc...)*/
 int aodv_drop_errors(dessert_msg_t* msg, size_t len,
-		dessert_msg_proc_t *proc, const dessert_meshif_t *iface, dessert_frameid_t id);
+		dessert_msg_proc_t *proc, dessert_meshif_t *iface, dessert_frameid_t id);
 
 // ------------------------------ periodic ----------------------------------------------------
 

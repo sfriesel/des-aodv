@@ -53,11 +53,11 @@ int aodv_db_add_brcid(uint8_t shost_ether[ETH_ALEN], uint32_t rreq_id, struct ti
  * over shost_prev_hop (nodes output interface: output_iface).
  */
 int aodv_db_capt_rreq (uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN],
-		uint8_t shost_prev_hop[ETH_ALEN], const dessert_meshif_t* output_iface,
+		uint8_t shost_prev_hop[ETH_ALEN], dessert_meshif_t* output_iface,
 		uint32_t shost_seq_num, struct timeval* timestamp);
 
 int aodv_db_capt_rrep (uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop[ETH_ALEN],
-		const dessert_meshif_t* output_iface, uint32_t dhost_seq_num,
+		dessert_meshif_t* output_iface, uint32_t dhost_seq_num,
 		uint8_t hop_count, struct timeval* timestamp);
 
 /**
@@ -65,12 +65,12 @@ int aodv_db_capt_rrep (uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop[ETH
  * that has produces an RREQ to destination with dhost_ether address
  */
 int aodv_db_getroute2dest(uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop_out[ETH_ALEN],
-		const dessert_meshif_t** output_iface_out, struct timeval* timestamp);
+		dessert_meshif_t** output_iface_out, struct timeval* timestamp);
 
 int aodv_db_getnexthop(uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop_out[ETH_ALEN]);
 
 int aodv_db_getprevhop(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN],
-		uint8_t shost_next_hop_out[ETH_ALEN], const dessert_meshif_t** output_iface_out);
+		uint8_t shost_next_hop_out[ETH_ALEN], dessert_meshif_t** output_iface_out);
 
 int aodv_db_getrouteseqnum(uint8_t dhost_ether[ETH_ALEN], uint32_t* dhost_seq_num_out);
 
@@ -85,12 +85,12 @@ int aodv_db_invroute(uint8_t dhost_next_hop[ETH_ALEN], uint8_t dhost_ether_out[E
  * Take a record that the given neighbor seems to be
  * the 1 hop bidirectional neighbor
  */
-int aodv_db_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif_t* iface, struct timeval* timestamp);
+int aodv_db_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
 
 /**
  * Check whether given neighbor is 1 hop bidirectional neighbor
  */
-int aodv_db_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif_t* iface, struct timeval* timestamp);
+int aodv_db_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
 
 int aodv_db_addschedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, uint64_t param);
 

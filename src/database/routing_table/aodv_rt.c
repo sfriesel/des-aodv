@@ -31,7 +31,7 @@ For further information and questions please use the web site
 typedef struct aodv_rt_srclist_entry {
 	uint8_t					shost_ether[ETH_ALEN]; // ID
 	uint8_t					shost_prev_hop[ETH_ALEN];
-	const dessert_meshif_t*		output_iface;
+	dessert_meshif_t*		output_iface;
 	uint32_t					shost_seq_num;
 	UT_hash_handle				hh;
 } aodv_rt_srclist_entry_t;
@@ -39,7 +39,7 @@ typedef struct aodv_rt_srclist_entry {
 typedef struct aodv_rt_entry {
 	uint8_t					dhost_ether[ETH_ALEN]; // ID
 	uint8_t					dhost_next_hop[ETH_ALEN];
-	const dessert_meshif_t*		output_iface;
+	dessert_meshif_t*		output_iface;
 	uint32_t					dhost_seq_num;
 	uint8_t					hop_count;
 	/**
@@ -119,7 +119,7 @@ int aodv_db_rt_init() {
 }
 
 int rt_srclist_entry_create(aodv_rt_srclist_entry_t** srclist_entry_out, uint8_t shost_ether[ETH_ALEN],
-		uint8_t shost_prev_hop[ETH_ALEN], const dessert_meshif_t* output_iface, uint32_t source_seq_num) {
+		uint8_t shost_prev_hop[ETH_ALEN], dessert_meshif_t* output_iface, uint32_t source_seq_num) {
 	aodv_rt_srclist_entry_t* srclist_entry = malloc(sizeof(aodv_rt_srclist_entry_t));
 	if (srclist_entry == NULL) return FALSE;
 	memcpy(srclist_entry->shost_ether, shost_ether, ETH_ALEN);
@@ -164,7 +164,7 @@ int nht_entry_create (nht_entry_t** entry_out, uint8_t dhost_next_hop[ETH_ALEN])
 //        FALSE if input entry is unused
 //        -1 if error
 int aodv_db_rt_capt_rreq (uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN],
-		uint8_t shost_prev_hop[ETH_ALEN], const dessert_meshif_t* output_iface,
+		uint8_t shost_prev_hop[ETH_ALEN], dessert_meshif_t* output_iface,
 		uint32_t shost_seq_num, struct timeval* timestamp) {
 	aodv_rt_entry_t* rt_entry;
 	aodv_rt_srclist_entry_t* srclist_entry;
@@ -204,7 +204,7 @@ int aodv_db_rt_capt_rreq (uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH
 //         FALSE if rep is discarded
 //         -1 error
 int aodv_db_rt_capt_rrep (uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop[ETH_ALEN],
-		const dessert_meshif_t* output_iface, uint32_t dhost_seq_num, uint8_t hop_count, struct timeval* timestamp) {
+		dessert_meshif_t* output_iface, uint32_t dhost_seq_num, uint8_t hop_count, struct timeval* timestamp) {
 	aodv_rt_entry_t* rt_entry;
 	HASH_FIND(hh, rt.entrys, dhost_ether, ETH_ALEN, rt_entry);
 	if (rt_entry == NULL) {
@@ -265,7 +265,7 @@ int aodv_db_rt_capt_rrep (uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop[
 }
 
 int aodv_db_rt_getroute2dest(uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop_out[ETH_ALEN],
-		const dessert_meshif_t** output_iface_out, struct timeval* timestamp) {
+		dessert_meshif_t** output_iface_out, struct timeval* timestamp) {
 	aodv_rt_entry_t* rt_entry;
 	HASH_FIND(hh, rt.entrys, dhost_ether, ETH_ALEN, rt_entry);
 	if (rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN || rt_entry->flags & AODV_FLAGS_ROUTE_INVALID) {
@@ -287,7 +287,7 @@ int aodv_db_rt_getnexthop(uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop_
 }
 
 int aodv_db_rt_getprevhop(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN],
-		uint8_t shost_next_hop_out[ETH_ALEN], const dessert_meshif_t** output_iface_out) {
+		uint8_t shost_next_hop_out[ETH_ALEN], dessert_meshif_t** output_iface_out) {
 	aodv_rt_entry_t* rt_entry;
 	aodv_rt_srclist_entry_t* srclist_entry;
 	HASH_FIND(hh, rt.entrys, dhost_ether, ETH_ALEN, rt_entry);

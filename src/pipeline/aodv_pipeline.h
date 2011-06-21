@@ -37,21 +37,21 @@ extern uint32_t broadcast_id;
 /**
  * Unknown sequence number
  */
-#define AODV_FLAGS_RREQ_U 			1 << 11
+#define AODV_FLAGS_RREQ_U 			(1 << 11)
 
 /**
  * Destination only flag
  */
-#define AODV_FLAGS_RREQ_D			1 << 12
+#define AODV_FLAGS_RREQ_D			(1 << 12)
 /**
  * Aknowledgement required
  */
-#define AODV_FLAGS_RREP_A			1 << 6
+#define AODV_FLAGS_RREP_A			(1 << 6)
 
 /**
  * Not delete flag of RERR
  */
-#define AODV_FLAGS_RERR_N			1 << 7
+#define AODV_FLAGS_RERR_N			(1 << 7)
 
 /** RREQ - Route Request Message */
 struct aodv_msg_rreq {

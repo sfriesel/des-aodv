@@ -92,6 +92,8 @@ int main(int argc, char** argv) {
     dessert_meshrxcb_add(aodv_forward, 90);
     dessert_meshrxcb_add(aodv_local_unicast, 100);
 
+    dessert_sysrxcb_add(dessert_sys_drop_ipv6, 1);
+    dessert_sysrxcb_add(aodv_sys_drop_multicast, 3);
     dessert_sysrxcb_add(aodv_sys2rp, 10);
 
     /* registering periodic tasks */

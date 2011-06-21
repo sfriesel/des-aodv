@@ -512,6 +512,25 @@ int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, desse
 }
 
 // --------------------------- TUN ----------------------------------------------------------
+int aodv_sys_drop_multicast(dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, dessert_sysif_t *sysif, dessert_frameid_t id) {
+
+	/* check if we have an processing header */
+	if (proc == NULL) {
+		return DESSERT_MSG_NEEDMSGPROC;
+	}
+
+	struct ether_header *l25h = dessert_msg_getl25ether(msg);
+	if (memcmp(l25h->ether_dhost, ether_broadcast, ETHER_ADDR_LEN) == 0) {
+		proc->lflags |= DESSERT_LFLAG_DST_BROADCAST;
+	} else if (l25h->ether_dhost[0] & 0x01) { /* broadcast also has this bit set */
+		proc->lflags |= DESSERT_LFLAG_DST_MULTICAST;
+	}
+
+	if (proc->lflags & DESSERT_RX_FLAG_L25_MULTICAST) {
+		return DESSERT_MSG_DROP;
+	}
+	return DESSERT_MSG_KEEP;
+}
 
 int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc, dessert_sysif_t *sysif, dessert_frameid_t id) {
 	struct ether_header* l25h = dessert_msg_getl25ether(msg);

@@ -168,6 +168,8 @@ int aodv_forward(dessert_msg_t* msg, size_t len,
 int aodv_sys2rp (dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc,
 		dessert_sysif_t *sysif, dessert_frameid_t id);
 
+int aodv_sys_drop_multicast(dessert_msg_t *msg, size_t len, dessert_msg_proc_t *proc,
+		dessert_sysif_t *sysif, dessert_frameid_t id);
 /** forward packets received via AODV to tun interface */
 int aodv_local_unicast(dessert_msg_t* msg, size_t len,
 		dessert_msg_proc_t *proc, dessert_meshif_t *iface, dessert_frameid_t id);

@@ -81,6 +81,7 @@ int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], const dessert_meshif
 	memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
 	HASH_FIND(hh, nt.entrys, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
 	if (curr_entry == NULL) {
+		//this neigbor is new, so create an entry
 		curr_entry = db_neighbor_entry_create(ether_neighbor_addr, iface);
 		if (curr_entry == NULL) return FALSE;
 		HASH_ADD_KEYPTR(hh, nt.entrys, curr_entry->ether_neighbor, ETH_ALEN + sizeof(void*), curr_entry);

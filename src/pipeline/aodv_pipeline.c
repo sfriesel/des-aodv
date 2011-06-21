@@ -394,28 +394,25 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, d
 	if (memcmp(msg->l2h.ether_dhost, iface->hwaddr, ETH_ALEN) != 0) {
 		return DESSERT_MSG_DROP;
 	}
-	msg->ttl--;
+
 	struct ether_header* l25h = dessert_msg_getl25ether(msg);
+
+	msg->ttl--;
+	if(msg->ttl <= 0) {
+		dessert_debug("got RREP from " MAC " but TTL ist <= 0", EXPLODE_ARRAY6(l25h->ether_dhost));
+		return DESSERT_MSG_DROP;
+	}
+
 	struct aodv_msg_rrep* rrep_msg = (struct aodv_msg_rrep*) rrep_ext->data;
 	struct timeval ts;
 	gettimeofday(&ts, NULL);
 	rrep_msg->hop_count++;
 
 	int x = aodv_db_capt_rrep(l25h->ether_shost, msg->l2h.ether_shost, iface, rrep_msg->seq_num_dest, rrep_msg->hop_count, &ts);
-	if(x == -1) {
-		dessert_crit("aodv_db_capt_rreq returns error");
-		return DESSERT_MSG_DROP;
-	}
-
-	if(x == FALSE) {
+	if(x != TRUE) {
 		// capture and re-send only if route is unknown OR
 		// sequence number is greater then that in database OR
 		// if seq_nums are equals and known hop count is greater than that in RREP
-		return DESSERT_MSG_DROP;
-	}
-
-	if(msg->ttl <= 0) {
-		dessert_debug("got RREP from " MAC " but TTL ist <= 0", EXPLODE_ARRAY6(l25h->ether_dhost));
 		return DESSERT_MSG_DROP;
 	}
 
@@ -423,8 +420,9 @@ int aodv_handle_rrep(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, d
 		// send RREP to RREQ originator if RREP is not for me
 		uint8_t next_hop[ETH_ALEN];
 		dessert_meshif_t* output_iface;
-		
-		if (aodv_db_getprevhop(l25h->ether_shost, l25h->ether_dhost, next_hop, &output_iface) == TRUE) {
+
+		int a = aodv_db_getprevhop(l25h->ether_shost, l25h->ether_dhost, next_hop, &output_iface);
+		if(a == TRUE) {
 			dessert_debug("re-send RREP to " MAC, EXPLODE_ARRAY6(l25h->ether_dhost));
 			memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
 			dessert_meshsend_fast(msg, output_iface);

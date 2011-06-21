@@ -21,13 +21,6 @@ For further information and questions please use the web site
        http://www.des-testbed.net
 *******************************************************************************/
 
-#ifndef DATA_SEQ
-#define DATA_SEQ
-
 #include <linux/if_ether.h>
 
-uint16_t data_get_nextseq(uint8_t src_addr[ETH_ALEN], uint8_t dest_addr[ETH_ALEN]);
-
-void data_set_seq(uint8_t src_addr[ETH_ALEN], uint8_t dest_addr[ETH_ALEN], uint16_t seq_num);
-
-#endif
+int aodv_db_data_capt_data_seq(uint8_t shost_ether[ETH_ALEN], uint16_t shost_seq_num);

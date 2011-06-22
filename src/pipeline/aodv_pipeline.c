@@ -281,7 +281,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, d
 
 		int d = (rreq_msg->flags & AODV_FLAGS_RREQ_D);
 		int u = (rreq_msg->flags & AODV_FLAGS_RREQ_U);
-		u_int32_t dhost_seq_num;
+		uint32_t dhost_seq_num;
 		int s = aodv_db_getrouteseqnum(l25h->ether_dhost, &dhost_seq_num);
 		int h = hf_seq_comp_i_j(rreq_msg->seq_num_dest, dhost_seq_num);
 
@@ -301,12 +301,12 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, d
 		dessert_debug("incoming RREQ from " MAC " over " MAC " for me seq=%i -> answer with RREP seq=%i", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), rreq_msg->seq_num_src, seq_num);
 
 		// RREQ for me -> answer with RREP
-		u_int32_t last_rreq_seq;
+		uint32_t last_rreq_seq;
 		int s = aodv_db_getrouteseqnum(l25h->ether_shost, &last_rreq_seq);
 		int h = hf_seq_comp_i_j(rreq_msg->seq_num_src, last_rreq_seq);
 		if (s == FALSE || h > 0) {
 			pthread_rwlock_wrlock(&pp_rwlock);
-			u_int32_t seq_num_copy = ++seq_num;
+			uint32_t seq_num_copy = ++seq_num;
 			pthread_rwlock_unlock(&pp_rwlock);
 
 			dessert_msg_t* rrep_msg = _create_rrep(dessert_l25_defsrc, l25h->ether_shost, msg->l2h.ether_shost, seq_num_copy, AODV_FLAGS_RREP_A);
@@ -516,9 +516,9 @@ int aodv_sys_drop_multicast(dessert_msg_t *msg, size_t len, dessert_msg_proc_t *
 
 	struct ether_header *l25h = dessert_msg_getl25ether(msg);
 	if (memcmp(l25h->ether_dhost, ether_broadcast, ETHER_ADDR_LEN) == 0) {
-		proc->lflags |= DESSERT_LFLAG_DST_BROADCAST;
+		proc->lflags |= DESSERT_RX_FLAG_L25_BROADCAST;
 	} else if (l25h->ether_dhost[0] & 0x01) { /* broadcast also has this bit set */
-		proc->lflags |= DESSERT_LFLAG_DST_MULTICAST;
+		proc->lflags |= DESSERT_RX_FLAG_L25_MULTICAST;
 	}
 
 	if (proc->lflags & DESSERT_RX_FLAG_L25_MULTICAST) {

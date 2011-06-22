@@ -89,7 +89,7 @@ dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, uint16_t count) {
 
 	// write addresses of all my mesh interfaces
 	void* ifaceaddr_pointer = rerr_msg->ifaces;
-	u_int8_t ifaces_count = 0;
+	uint8_t ifaces_count = 0;
 	dessert_meshif_t *iface;
 	MESHIFLIST_ITERATOR_START(iface)
 		if(ifaces_count >= MAX_MESH_IFACES_COUNT)
@@ -100,14 +100,14 @@ dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, uint16_t count) {
 	MESHIFLIST_ITERATOR_STOP;
 
 	rerr_msg->iface_addr_count = ifaces_count;
-	u_int8_t max_dl_len = DESSERT_MAXEXTDATALEN / ETH_ALEN;
+	uint8_t max_dl_len = DESSERT_MAXEXTDATALEN / ETH_ALEN;
 
 	while(count) {
 		int dl_len = (count >= max_dl_len) ? max_dl_len : count;
 		if(dessert_msg_addext(msg, &ext, RERRDL_EXT_TYPE, dl_len * ETH_ALEN) != DESSERT_OK)
 			break;
-		u_int8_t *iter;
-		u_int8_t *end = ext->data + dl_len * ETH_ALEN;
+		uint8_t *iter;
+		uint8_t *end = ext->data + dl_len * ETH_ALEN;
 		for(iter = ext->data; iter < end; iter += ETH_ALEN) {
 			_onlb_element_t* el = *head;
 			memcpy(iter, el->dhost_ether, ETH_ALEN);

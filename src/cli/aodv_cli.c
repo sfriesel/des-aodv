@@ -33,6 +33,23 @@ For further information and questions please use the web site
 
 // -------------------- Testing ------------------------------------------------------------
 
+int cli_set_shortcut(struct cli_def* cli, char* command, char* argv[], int argc) {
+	u_int32_t mode;
+	if (argc != 1 || sscanf(argv[0], "%u", &mode) != 1|| (mode != 0 && mode != 1)) {
+		cli_print(cli, "usage of %s command [0, 1]\n", command);
+		return CLI_ERROR_ARG;
+	}
+	if (mode == 1) {
+		dessert_info("use shortcuts = TRUE");
+		shortcut = TRUE;
+	} else {
+		dessert_info("use shortcuts = FALSE");
+		shortcut = FALSE;
+	}
+	return CLI_OK;
+}
+
+
 int cli_set_hello_size(struct cli_def *cli, char *command, char *argv[], int argc) {
     uint16_t min_size = sizeof(dessert_msg_t) + sizeof(struct ether_header) + 2;
 
@@ -79,6 +96,21 @@ int cli_set_rreq_size(struct cli_def *cli, char *command, char *argv[], int argc
     if(psize < min_size || psize > 1500) goto label_out_usage;
     rreq_size = psize;
     dessert_notice("setting RREQ size to %d", rreq_size);
+    return CLI_OK;
+}
+
+int cli_set_gossipp(struct cli_def *cli, char *command, char *argv[], int argc) {
+
+    if(argc != 1) {
+        label_out_usage:
+        cli_print(cli, "usage %s [0.0..1.0]\n", command);
+        return CLI_ERROR;
+    }
+
+    double psize = strtod(argv[0], NULL);
+    if(psize < 0 || psize > 1) goto label_out_usage;
+    gossipp = psize;
+    dessert_notice("setting p for gossip to %lf", gossipp);
     return CLI_OK;
 }
 

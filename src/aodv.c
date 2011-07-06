@@ -35,6 +35,8 @@ For further information and questions please use the web site
 int     hello_size	        = HELLO_SIZE;
 int     hello_interval      = HELLO_INTERVAL;
 int     rreq_size	        = RREQ_SIZE;
+double  gossipp             = GOSSIPP;
+int     shortcut            = SHORTCUT;
 
 dessert_periodic_t* periodic_send_hello;
 
@@ -70,6 +72,8 @@ int main(int argc, char** argv) {
     cli_register_command(dessert_cli, cli_cfg_set, "hello_size", cli_set_hello_size, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set HELLO packet size");
     cli_register_command(dessert_cli, cli_cfg_set, "hello_interval", cli_set_hello_interval, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set HELLO packet interval");
     cli_register_command(dessert_cli, cli_cfg_set, "rreq_size", cli_set_rreq_size, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set RREQ packet size");
+    cli_register_command(dessert_cli, cli_cfg_set, "gossip_p", cli_set_gossipp, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set p for gossip  p in [0.0,...,1.0]");
+    cli_register_command(dessert_cli, cli_cfg_set, "shortcut", cli_set_shortcut, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set shortcut mode");
 
     cli_register_command(dessert_cli, dessert_cli_show, "hello_size", cli_show_hello_size, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show HELLO packet size");
     cli_register_command(dessert_cli, dessert_cli_show, "hello_interval", cli_show_hello_interval, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show HELLO packet interval");

@@ -67,6 +67,10 @@ dessert_msg_t* _create_rreq(uint8_t dhost_ether[ETH_ALEN], uint8_t ttl) {
 		rreq_msg->flags |= AODV_FLAGS_RREQ_D | AODV_FLAGS_RREQ_U;
 	}
 
+	if (!shortcut) {
+		rreq_msg->flags |= AODV_FLAGS_RREQ_D;
+	}
+
 	// add broadcast id ext since RREQ is an broadcast message
 	dessert_msg_addext(msg, &ext, BROADCAST_EXT_TYPE, sizeof(struct aodv_msg_broadcast));
 	struct aodv_msg_broadcast* brc_str = (struct aodv_msg_broadcast*) ext->data;
@@ -108,6 +112,7 @@ dessert_msg_t* _create_rrep(uint8_t route_dest[ETH_ALEN], uint8_t route_source[E
 void aodv_send_rreq(uint8_t dhost_ether[ETH_ALEN], struct timeval* ts, uint8_t ttl) {
 	// fist check if we have sent more then RREQ_LIMITH RREQ messages at last 1 sek.
 	uint32_t rreq_count;
+
 	aodv_db_getrreqcount(ts, &rreq_count);
 	if (rreq_count >= RREQ_RATELIMIT) { // we have reached RREQ_RATELIMIT -> send this RREQ later(try in 100ms)!
 		struct timeval retry_time;
@@ -289,12 +294,16 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, d
 			// i know route to destination that have seq_num greater then that of source (route is newer)
 			dessert_msg_t* rrep_msg = _create_rrep(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, dhost_seq_num, AODV_FLAGS_RREP_A);
 			dessert_debug("repair link to " MAC " id=%d", EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->seq_num_src);
-
 			dessert_meshsend_fast(rrep_msg, iface);
 			dessert_msg_destroy(rrep_msg);
 		} else {
-			dessert_debug("route to " MAC " id=%d is unknown for me -> rebroadcast RREQ", EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->seq_num_src);
-			dessert_meshsend_fast(msg, NULL);
+			if(random() < (((long double) gossipp)*((long double) RAND_MAX))) {
+				// gossip 0
+				dessert_debug("route to " MAC " id=%d is unknown for me -> rebroadcast RREQ", EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->seq_num_src);
+				dessert_meshsend_fast(msg, NULL);
+			} else {
+				dessert_debug("stop RREQ to " MAC " id=%d", EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->seq_num_src);
+			}
 		}
 	} else { // RREQ for me
 

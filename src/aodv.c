@@ -36,7 +36,7 @@ int     hello_size	        = HELLO_SIZE;
 int     hello_interval      = HELLO_INTERVAL;
 int     rreq_size	        = RREQ_SIZE;
 double  gossipp             = GOSSIPP;
-int     shortcut            = SHORTCUT;
+int     dest_only           = DESTONLY;
 
 dessert_periodic_t* periodic_send_hello;
 

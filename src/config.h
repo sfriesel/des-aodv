@@ -76,7 +76,7 @@ enum aodv_bool {TRUE = 1, FALSE = 0};
 #define HELLO_INTERVAL				2000 	// milliseconds
 #define RREQ_SIZE					128
 #define GOSSIPP					 	1		// flooding
-#define SHORTCUT					TRUE
+#define DESTONLY					FALSE
 
 // --- Database Flags
 #define AODV_FLAGS_ROUTE_INVALID 	1
@@ -92,6 +92,6 @@ extern int 							hello_size;
 extern int 							hello_interval;
 extern int 							rreq_size;
 extern double 						gossipp;
-extern int 							shortcut;
+extern int 							dest_only;
 
 #endif

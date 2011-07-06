@@ -40,11 +40,11 @@ int cli_set_shortcut(struct cli_def* cli, char* command, char* argv[], int argc)
 		return CLI_ERROR_ARG;
 	}
 	if (mode == 1) {
-		dessert_info("use shortcuts = TRUE");
-		shortcut = TRUE;
+		dessert_info("use dest_only = TRUE");
+		dest_only = TRUE;
 	} else {
-		dessert_info("use shortcuts = FALSE");
-		shortcut = FALSE;
+		dessert_info("use dest_only = FALSE");
+		dest_only = FALSE;
 	}
 	return CLI_OK;
 }

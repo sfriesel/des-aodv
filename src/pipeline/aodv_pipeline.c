@@ -67,7 +67,7 @@ dessert_msg_t* _create_rreq(uint8_t dhost_ether[ETH_ALEN], uint8_t ttl) {
 		rreq_msg->flags |= AODV_FLAGS_RREQ_D | AODV_FLAGS_RREQ_U;
 	}
 
-	if (!shortcut) {
+	if (dest_only) {
 		rreq_msg->flags |= AODV_FLAGS_RREQ_D;
 	}
 

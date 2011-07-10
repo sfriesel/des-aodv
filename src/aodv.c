@@ -25,7 +25,6 @@ For further information and questions please use the web site
 #ifndef ANDROID
 #include <printf.h>
 #endif
-#include <dessert-extra.h>
 
 #include "config.h"
 #include "cli/aodv_cli.h"

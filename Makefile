@@ -47,7 +47,7 @@ build: $(addsuffix .o,$(MODULES))
 
 android: CC=android-gcc
 android: CFLAGS=-I$(DESSERT_LIB)/include
-android: LDFLAGS=-L$(DESSERT_LIB)/lib -Wl,-rpath-link=$(DESSERT_LIB)/lib -ldessert -ldessert-extra
+android: LDFLAGS=-L$(DESSERT_LIB)/lib -Wl,-rpath-link=$(DESSERT_LIB)/lib -ldessert 
 android: build package
 
 package:

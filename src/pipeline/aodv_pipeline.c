@@ -142,10 +142,7 @@ void aodv_send_rreq(uint8_t dhost_ether[ETH_ALEN], struct timeval* ts, uint8_t t
 	aodv_db_putrreq(ts);
 
 	dessert_msg_t* rreq_msg = _create_rreq(dhost_ether, (ttl <= TTL_THRESHOLD)? ttl : 255); // create RREQ
-	void* payload;
-	uint16_t size = max(rreq_size - sizeof(dessert_msg_t) - sizeof(struct ether_header) - 2, 0);
-	dessert_msg_addpayload(rreq_msg, &payload, size);
-	memset(payload, 0xA, size);
+    dessert_msg_dummy_payload(rreq_msg, rreq_size);
 
 	// send out and destroy
 	dessert_meshsend_fast(rreq_msg, NULL);
@@ -479,12 +476,12 @@ int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, desse
 	gettimeofday(&timestamp, NULL);
 	uint8_t next_hop[ETH_ALEN];
 	struct ether_header* l25h = dessert_msg_getl25ether(msg);
-	
+
 	if(TRUE != aodv_db_data_capt_data_seq(l25h->ether_shost, msg->u16)) {
 		//data packet is known -> DUP
 		return DESSERT_MSG_DROP;
 	}
-		
+
 	if (aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &timestamp)) {
 		memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
 		dessert_meshsend_fast(msg, output_iface);
@@ -500,7 +497,7 @@ int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t *proc, desse
 			return DESSERT_MSG_DROP;
 		// route unknown -> send rerr towards source
 		_onlb_element_t *head, *curr_el;
-		
+
 		curr_el = malloc(sizeof(_onlb_element_t));
 		memcpy(curr_el->dhost_ether, l25h->ether_dhost, ETH_ALEN);
 		head = NULL;

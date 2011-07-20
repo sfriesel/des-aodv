@@ -39,6 +39,12 @@ int     dest_only           = DESTONLY;
 
 dessert_periodic_t* periodic_send_hello;
 
+static void register_names() {
+    dessert_register_ptr_name(aodv_periodic_send_hello, "aodv_periodic_send_hello");
+    dessert_register_ptr_name(aodv_periodic_cleanup_database, "aodv_periodic_cleanup_database");
+    dessert_register_ptr_name(aodv_periodic_scexecute, "aodv_periodic_scexecute");
+}
+
 int main(int argc, char** argv) {
     /* initialize daemon with correct parameters */
     FILE *cfg = NULL;
@@ -56,6 +62,8 @@ int main(int argc, char** argv) {
             cfg = dessert_cli_get_cfg(argc, argv);
             dessert_init("AODV", 0x03, DESSERT_OPT_DAEMONIZE);
     }
+
+    register_names();
 
     /* routing table initialization */
     aodv_db_init();

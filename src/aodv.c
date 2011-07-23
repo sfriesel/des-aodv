@@ -31,9 +31,9 @@ For further information and questions please use the web site
 #include "pipeline/aodv_pipeline.h"
 #include "database/aodv_database.h"
 
-int hello_size = HELLO_SIZE;
-int hello_interval = HELLO_INTERVAL;
-int rreq_size = RREQ_SIZE;
+uint16_t hello_size = HELLO_SIZE;
+uint16_t hello_interval = HELLO_INTERVAL;
+uint16_t rreq_size = RREQ_SIZE;
 double gossipp = GOSSIPP;
 int dest_only = DESTONLY;
 

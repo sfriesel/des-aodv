@@ -450,7 +450,7 @@ int aodv_db_rt_report(char** str_out) {
     char entry_str[REPORT_RT_STR_LEN  + 1];
 
     // compute str length
-    uint len = 0;
+    uint32_t len = 0;
 
     while(current_entry != NULL) {
         len += REPORT_RT_STR_LEN * 2;

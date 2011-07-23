@@ -90,9 +90,9 @@ enum aodv_bool {TRUE = 1, FALSE = 0};
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 
 extern dessert_periodic_t* 			periodic_send_hello;
-extern int 							hello_size;
-extern int 							hello_interval;
-extern int 							rreq_size;
+extern uint16_t 					hello_size;
+extern uint16_t 							hello_interval;
+extern uint16_t 							rreq_size;
 extern double 						gossipp;
 extern int 							dest_only;
 

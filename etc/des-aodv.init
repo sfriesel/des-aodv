@@ -47,7 +47,7 @@ build_conf()
         echo "interface mesh $i" >> /tmp/$NAME.cli
     done
     IFS=$OIFS
-    echo "port $CLI_PORT" >> /tmp/$NAME.cli
+    echo "set port $CLI_PORT" >> /tmp/$NAME.cli
     return 0
 }
 

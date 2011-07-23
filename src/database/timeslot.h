@@ -30,26 +30,26 @@ For further information and questions please use the web site
 typedef void object_purger_t(struct timeval* purge_time, void* src_object, void* object);
 
 typedef struct timeslot_element {
-	struct timeslot_element*	prev;
-	struct timeslot_element*	next;
-	struct timeval			 	purge_time;
-	void*						object; // key
-	UT_hash_handle 				hh;
+    struct timeslot_element*	prev;
+    struct timeslot_element*	next;
+    struct timeval			 	purge_time;
+    void*						object; // key
+    UT_hash_handle 				hh;
 } timeslot_element_t;
 
 typedef struct timeslot {
-	struct timeslot_element*	head;
-	struct timeslot_element*	tail;
-	uint32_t					size;
-	object_purger_t*			object_purger;
-	struct timeval				purge_timeout;
-	void*						src_object;
-	struct timeslot_element*	elements_hash;
+    struct timeslot_element*	head;
+    struct timeslot_element*	tail;
+    uint32_t					size;
+    object_purger_t*			object_purger;
+    struct timeval				purge_timeout;
+    void*						src_object;
+    struct timeslot_element*	elements_hash;
 } timeslot_t;
 
 /** Create time-slot */
 int timeslot_create(timeslot_t** ts_out, struct timeval* purge_timeout,
-		void* src_object, object_purger_t* object_purger);
+                    void* src_object, object_purger_t* object_purger);
 
 /** Remove all time-slot elements and destroy time-slot */
 int timeslot_destroy(timeslot_t* ts);
@@ -62,6 +62,6 @@ int timeslot_addobject(timeslot_t* ts, struct timeval* timestamp, void* object);
 int timeslot_deleteobject(timeslot_t* ts, void* object);
 
 /**Pudges all objects older with curr_time > purge_time from time-slot*/
-int timeslot_purgeobjects (timeslot_t* sw, struct timeval* curr_time);
+int timeslot_purgeobjects(timeslot_t* sw, struct timeval* curr_time);
 
 #endif

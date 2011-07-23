@@ -25,43 +25,66 @@ For further information and questions please use the web site
 #include "config.h"
 
 int hf_comp_u32(uint32_t i, uint32_t j) {
-	if (i == j) return 0;
-	uint32_t diff = i - j;
-	if (diff < (UINT32_MAX >> 1))
-		return 1;
-	return -1;
+    if(i == j) {
+        return 0;
+    }
+
+    uint32_t diff = i - j;
+
+    if(diff < (UINT32_MAX >> 1)) {
+        return 1;
+    }
+
+    return -1;
 }
 
 int hf_compare_tv(struct timeval* tv1, struct timeval* tv2) {
-	if ((tv1->tv_sec == tv2->tv_sec) && (tv1->tv_usec == tv2->tv_usec))
-		return 0;
-	if (tv1->tv_sec > tv2->tv_sec)
-		return 1;
-	if (tv2->tv_sec > tv1->tv_sec)
-		return -1;
-	if (tv1->tv_usec > tv2->tv_usec)
-		return 1;
-	else
-		return -1;
+    if((tv1->tv_sec == tv2->tv_sec) && (tv1->tv_usec == tv2->tv_usec)) {
+        return 0;
+    }
+
+    if(tv1->tv_sec > tv2->tv_sec) {
+        return 1;
+    }
+
+    if(tv2->tv_sec > tv1->tv_sec) {
+        return -1;
+    }
+
+    if(tv1->tv_usec > tv2->tv_usec) {
+        return 1;
+    }
+    else {
+        return -1;
+    }
 }
 
 int hf_add_tv(struct timeval* tv1, struct timeval* tv2, struct timeval* sum) {
-	sum->tv_sec = tv1->tv_sec + tv2->tv_sec;
-	__suseconds_t usec_sum = tv1->tv_usec + tv2->tv_usec;
-	if (usec_sum >= 1000000) {
-		sum->tv_sec += 1;
-		sum->tv_usec = usec_sum - 1000000;
-	} else {
-		sum->tv_usec = usec_sum;
-	}
-	return TRUE;
+    sum->tv_sec = tv1->tv_sec + tv2->tv_sec;
+    __suseconds_t usec_sum = tv1->tv_usec + tv2->tv_usec;
+
+    if(usec_sum >= 1000000) {
+        sum->tv_sec += 1;
+        sum->tv_usec = usec_sum - 1000000;
+    }
+    else {
+        sum->tv_usec = usec_sum;
+    }
+
+    return TRUE;
 }
 
 int hf_comp_u8(uint8_t i, uint8_t j) {
-	if (i == j) return 0;
-	uint32_t diff = i - j;
-	if (diff < (UINT8_MAX >> 1))
-		return 1;
-	return -1;
+    if(i == j) {
+        return 0;
+    }
+
+    uint32_t diff = i - j;
+
+    if(diff < (UINT8_MAX >> 1)) {
+        return 1;
+    }
+
+    return -1;
 
 }

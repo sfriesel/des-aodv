@@ -28,17 +28,15 @@ For further information and questions please use the web site
 #include "aodv_st.h"
 
 typedef struct schedule {
-	struct timeval 		execute_ts;
-	struct __attribute__((__packed__)) {
-		uint8_t 			ether_addr[ETH_ALEN];
-		uint8_t 			schedule_id;
-	};
-	void*			schedule_param;
-
-	struct schedule* 	next;
-	struct schedule* 	prev;
-
-	UT_hash_handle		hh;
+    struct timeval      execute_ts;
+    struct __attribute__((__packed__)) {
+        uint8_t         ether_addr[ETH_ALEN];
+        uint8_t         schedule_id;
+    };
+    void*               schedule_param;
+    struct schedule*    next;
+    struct schedule*    prev;
+    UT_hash_handle      hh;
 } schedule_t;
 
 schedule_t* first_schedule = NULL;
@@ -46,103 +44,128 @@ schedule_t* first_schedule = NULL;
 schedule_t* hash_table = NULL;
 
 schedule_t* create_schedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, void* param) {
-	schedule_t* s = malloc(sizeof(schedule_t));
-	if (s == NULL) return NULL;
+    schedule_t* s = malloc(sizeof(schedule_t));
 
-	s->execute_ts.tv_sec = execute_ts->tv_sec;
-	s->execute_ts.tv_usec = execute_ts->tv_usec;
-	memcpy(s->ether_addr, ether_addr, ETH_ALEN);
-	s->schedule_id = type;
-	s->schedule_param = param;
-	s->next = s->prev = NULL;
-	return s;
+    if(s == NULL) {
+        return NULL;
+    }
+
+    s->execute_ts.tv_sec = execute_ts->tv_sec;
+    s->execute_ts.tv_usec = execute_ts->tv_usec;
+    memcpy(s->ether_addr, ether_addr, ETH_ALEN);
+    s->schedule_id = type;
+    s->schedule_param = param;
+    s->next = s->prev = NULL;
+    return s;
 }
 
 int aodv_db_sc_addschedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, void* param) {
-	aodv_db_sc_dropschedule(ether_addr, type);
+    aodv_db_sc_dropschedule(ether_addr, type);
 
-	schedule_t* next_el = first_schedule;
-	schedule_t* el = create_schedule(execute_ts, ether_addr, type, param);
-	if (el == NULL) return FALSE;
+    schedule_t* next_el = first_schedule;
+    schedule_t* el = create_schedule(execute_ts, ether_addr, type, param);
 
-	HASH_ADD_KEYPTR(hh, hash_table, el->ether_addr, ETH_ALEN + sizeof(uint8_t), el);
+    if(el == NULL) {
+        return FALSE;
+    }
 
-	// search for appropriate place to insert new element
-	while (next_el != NULL && next_el->next != NULL && hf_compare_tv(execute_ts, &next_el->execute_ts) > 0) {
-		if (next_el->next != NULL) next_el = next_el->next;
-	}
-	if (next_el == NULL) {
-		first_schedule = el;
-	} else {
-		if (hf_compare_tv(&next_el->execute_ts, execute_ts) > 0) {
-			if (next_el->prev != NULL) {
-				next_el->prev->next = el;
-				el->prev = next_el->prev;
-			} else {
-				first_schedule = el;
-			}
-			next_el->prev = el;
-			el->next = next_el;
-		} else {
-			if (next_el->next != NULL) {
-				next_el->next->prev = el;
-				el->next = next_el->next;
-			}
-			next_el->next = el;
-			el->prev = next_el;
-		}
-	}
-	return TRUE;
+    HASH_ADD_KEYPTR(hh, hash_table, el->ether_addr, ETH_ALEN + sizeof(uint8_t), el);
+
+    // search for appropriate place to insert new element
+    while(next_el != NULL && next_el->next != NULL && hf_compare_tv(execute_ts, &next_el->execute_ts) > 0) {
+        if(next_el->next != NULL) {
+            next_el = next_el->next;
+        }
+    }
+
+    if(next_el == NULL) {
+        first_schedule = el;
+    }
+    else {
+        if(hf_compare_tv(&next_el->execute_ts, execute_ts) > 0) {
+            if(next_el->prev != NULL) {
+                next_el->prev->next = el;
+                el->prev = next_el->prev;
+            }
+            else {
+                first_schedule = el;
+            }
+
+            next_el->prev = el;
+            el->next = next_el;
+        }
+        else {
+            if(next_el->next != NULL) {
+                next_el->next->prev = el;
+                el->next = next_el->next;
+            }
+
+            next_el->next = el;
+            el->prev = next_el;
+        }
+    }
+
+    return TRUE;
 }
 
 int aodv_db_sc_popschedule(struct timeval* timestamp, uint8_t ether_addr_out[ETH_ALEN], uint8_t* type, void** param) {
-	if (first_schedule != NULL && hf_compare_tv(&first_schedule->execute_ts, timestamp) <= 0) {
-		schedule_t* sc = first_schedule;
-		first_schedule = first_schedule->next;
-		if (first_schedule != NULL) first_schedule->prev = NULL;
-		memcpy(ether_addr_out, sc->ether_addr, ETH_ALEN);
-		*type = sc->schedule_id;
-		*param = sc->schedule_param;
-		HASH_DEL(hash_table, sc);
-		free(sc);
-		return TRUE;
-	}
-	return FALSE;
+    if(first_schedule != NULL && hf_compare_tv(&first_schedule->execute_ts, timestamp) <= 0) {
+        schedule_t* sc = first_schedule;
+        first_schedule = first_schedule->next;
+
+        if(first_schedule != NULL) {
+            first_schedule->prev = NULL;
+        }
+
+        memcpy(ether_addr_out, sc->ether_addr, ETH_ALEN);
+        *type = sc->schedule_id;
+        *param = sc->schedule_param;
+        HASH_DEL(hash_table, sc);
+        free(sc);
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 int aodv_db_sc_schedule_exists(uint8_t ether_addr[ETH_ALEN], uint8_t type) {
-	schedule_t* schedule;
-	uint8_t key[ETH_ALEN + sizeof(uint8_t)];
-	memcpy(key, ether_addr, ETH_ALEN);
-	memcpy(key + ETH_ALEN, &type, sizeof(uint8_t));
-	HASH_FIND(hh, hash_table, key, ETH_ALEN + sizeof(uint8_t), schedule);
+    schedule_t* schedule;
+    uint8_t key[ETH_ALEN + sizeof(uint8_t)];
+    memcpy(key, ether_addr, ETH_ALEN);
+    memcpy(key + ETH_ALEN, &type, sizeof(uint8_t));
+    HASH_FIND(hh, hash_table, key, ETH_ALEN + sizeof(uint8_t), schedule);
 
-	if (schedule == NULL) {
-		return FALSE;
-	} else {
-		return TRUE;
-	}
+    if(schedule == NULL) {
+        return FALSE;
+    }
+    else {
+        return TRUE;
+    }
 }
 
 int aodv_db_sc_dropschedule(uint8_t ether_addr[ETH_ALEN], uint8_t type) {
-	schedule_t* schedule;
-	uint8_t key[ETH_ALEN + sizeof(uint8_t)];
-	memcpy(key, ether_addr, ETH_ALEN);
-	memcpy(key + ETH_ALEN, &type, sizeof(uint8_t));
-	HASH_FIND(hh, hash_table, key, ETH_ALEN + sizeof(uint8_t), schedule);
+    schedule_t* schedule;
+    uint8_t key[ETH_ALEN + sizeof(uint8_t)];
+    memcpy(key, ether_addr, ETH_ALEN);
+    memcpy(key + ETH_ALEN, &type, sizeof(uint8_t));
+    HASH_FIND(hh, hash_table, key, ETH_ALEN + sizeof(uint8_t), schedule);
 
-	if (schedule == NULL) return FALSE;
+    if(schedule == NULL) {
+        return FALSE;
+    }
 
-	if (schedule->prev != NULL) {
-		schedule->prev->next = schedule->next;
-	} else {
-		first_schedule = schedule->next;
-	}
+    if(schedule->prev != NULL) {
+        schedule->prev->next = schedule->next;
+    }
+    else {
+        first_schedule = schedule->next;
+    }
 
-	if (schedule->next != NULL) {
-		schedule->next->prev = schedule->prev;
-	}
-	HASH_DEL(hash_table, schedule);
-	free(schedule);
-	return TRUE;
+    if(schedule->next != NULL) {
+        schedule->next->prev = schedule->prev;
+    }
+
+    HASH_DEL(hash_table, schedule);
+    free(schedule);
+    return TRUE;
 }

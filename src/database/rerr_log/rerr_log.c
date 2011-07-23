@@ -29,27 +29,28 @@ uint32_t rerr_count = 0;
 void* rerr_pseudo_pointer = 0;
 
 void rerr_decrement_counter(struct timeval* timestamp, void* src_object, void* object) {
-	rerr_count--;
+    rerr_count--;
 }
 
 int aodv_db_rerrl_init() {
-	// 1 sec timeout since we are interested for number of sent RERR in last 1 sec
-	struct timeval timeout;
-	timeout.tv_sec = 1;
-	timeout.tv_usec = 0;
-	return timeslot_create(&rerr_log_ts, &timeout, NULL, rerr_decrement_counter);
+    // 1 sec timeout since we are interested for number of sent RERR in last 1 sec
+    struct timeval timeout;
+    timeout.tv_sec = 1;
+    timeout.tv_usec = 0;
+    return timeslot_create(&rerr_log_ts, &timeout, NULL, rerr_decrement_counter);
 }
 
 int aodv_db_rerrl_cleanup(struct timeval* timestamp) {
-	return timeslot_purgeobjects(rerr_log_ts, timestamp);
+    return timeslot_purgeobjects(rerr_log_ts, timestamp);
 }
 
 void aodv_db_rl_putrerr(struct timeval* timestamp) {
-	if (timeslot_addobject(rerr_log_ts, timestamp, rerr_pseudo_pointer++) == TRUE)
-		rerr_count++;
+    if(timeslot_addobject(rerr_log_ts, timestamp, rerr_pseudo_pointer++) == TRUE) {
+        rerr_count++;
+    }
 }
 
 void aodv_db_rl_getrerrcount(struct timeval* timestamp, uint32_t* count_out) {
-	aodv_db_rerrl_cleanup(timestamp);
-	*count_out = rerr_count;
+    aodv_db_rerrl_cleanup(timestamp);
+    *count_out = rerr_count;
 }

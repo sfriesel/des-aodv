@@ -38,7 +38,7 @@ typedef struct aodv_brcid {
     timeslot_t*         ts;
 } aodv_brcid_t;
 
-aodv_brcid_t	brcid_table;
+aodv_brcid_t brcid_table;
 
 void purge_brcid_entry(struct timeval* timestamp, void* src_object, void* object) {
     aodv_brcid_entry_t* entry = object;

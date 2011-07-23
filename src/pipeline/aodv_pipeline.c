@@ -161,9 +161,7 @@ void aodv_send_packets_from_buffer(uint8_t ether_dhost[ETH_ALEN], uint8_t next_h
     // drop RREQ schedule, since we already know the route to destination
     aodv_db_dropschedule(ether_dhost, AODV_SC_REPEAT_RREQ);
 
-    dessert_debug("new route to " MAC " over " MAC " found -> send out packet from buffer",
-                  EXPLODE_ARRAY6(ether_dhost),
-                  EXPLODE_ARRAY6(next_hop));
+    dessert_debug("new route to " MAC " over " MAC " found -> send out packet from buffer", EXPLODE_ARRAY6(ether_dhost), EXPLODE_ARRAY6(next_hop));
 
     // send out packets from buffer
     dessert_msg_t* buffered_msg;

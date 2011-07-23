@@ -28,9 +28,9 @@ For further information and questions please use the web site
 #include "../../config.h"
 
 typedef struct data_packet_id {
-    uint8_t src_addr[ETH_ALEN]; // key
-    uint16_t seq_num;
-    UT_hash_handle hh;
+    uint8_t         src_addr[ETH_ALEN]; // key
+    uint16_t        seq_num;
+    UT_hash_handle  hh;
 } data_packet_id_t;
 
 data_packet_id_t* entrys = NULL;

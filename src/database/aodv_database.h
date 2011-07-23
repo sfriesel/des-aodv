@@ -41,25 +41,24 @@ void aodv_db_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, stru
 dessert_msg_t* aodv_db_pop_packet(uint8_t dhost_ether[ETH_ALEN]);
 
 /**
- * Returns TRUE if no broadcast messages for this source
- * for the last PATH_DESCOVERY_TIME were captured.
- * Also captures rreq_id.
- */
-int aodv_db_add_brcid(uint8_t shost_ether[ETH_ALEN], uint32_t rreq_id, struct timeval* timestamp);
-
-/**
  * Captures seq_num of the source. Also add to source list for
  * this destination. All messages to source (example: RREP) must be send
  * over shost_prev_hop (nodes output interface: output_iface).
  */
-int aodv_db_capt_rreq (uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN],
-		uint8_t shost_prev_hop[ETH_ALEN], dessert_meshif_t* output_iface,
-		uint32_t shost_seq_num, struct timeval* timestamp);
+int aodv_db_capt_rreq(uint8_t destination_host[ETH_ALEN],
+                         uint8_t originator_host[ETH_ALEN],
+                         uint8_t originator_host_prev_hop[ETH_ALEN],
+                         dessert_meshif_t* output_iface,
+                         uint32_t originator_sequence_number,
+                         uint8_t hop_count,
+                         struct timeval* timestamp);
 
-int aodv_db_capt_rrep (uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop[ETH_ALEN],
-		dessert_meshif_t* output_iface, uint32_t dhost_seq_num,
-		uint8_t hop_count, struct timeval* timestamp);
-
+int aodv_db_capt_rrep(uint8_t destination_host[ETH_ALEN],
+                         uint8_t destination_host_next_hop[ETH_ALEN],
+                         dessert_meshif_t* output_iface,
+                         uint32_t destination_sequence_number,
+                         uint8_t hop_count,
+                         struct timeval* timestamp);
 /**
  * gets prev_hop adress and output_iface towards source with shost_ether address
  * that has produces an RREQ to destination with dhost_ether address
@@ -72,10 +71,11 @@ int aodv_db_getnexthop(uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop_out
 int aodv_db_getprevhop(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN],
 		uint8_t shost_next_hop_out[ETH_ALEN], dessert_meshif_t** output_iface_out);
 
-int aodv_db_getrouteseqnum(uint8_t dhost_ether[ETH_ALEN], uint32_t* dhost_seq_num_out);
+int aodv_db_get_destination_sequence_number(uint8_t dhost_ether[ETH_ALEN], uint32_t* destination_sequence_number_out);
 
-int aodv_db_getlastrreqseq(uint8_t dhost_ether[ETH_ALEN],
-		uint8_t shost_ether[ETH_ALEN], uint32_t* shost_seq_num_out);
+int aodv_db_get_originator_sequence_number(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN], uint32_t* originator_sequence_number_out);
+
+int aodv_db_get_hop_count(uint8_t dhost_ether[ETH_ALEN], uint8_t* hop_count_out);
 
 int aodv_db_markrouteinv (uint8_t dhost_ether[ETH_ALEN]);
 
@@ -92,11 +92,13 @@ int aodv_db_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* 
  */
 int aodv_db_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
 
-int aodv_db_addschedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, uint64_t param);
+int aodv_db_addschedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, void* param);
 
-int aodv_db_popschedule(struct timeval* timestamp, uint8_t ether_addr_out[ETH_ALEN], uint8_t* type, uint64_t* param);
+int aodv_db_popschedule(struct timeval* timestamp, uint8_t ether_addr_out[ETH_ALEN], uint8_t* type, void* param);
 
-void aodv_db_dropschedule(uint8_t ether_addr[ETH_ALEN], uint8_t type);
+int aodv_db_schedule_exists(uint8_t ether_addr[ETH_ALEN], uint8_t type);
+
+int aodv_db_dropschedule(uint8_t ether_addr[ETH_ALEN], uint8_t type);
 
 void aodv_db_putrreq(struct timeval* timestamp);
 
@@ -106,7 +108,7 @@ void aodv_db_putrerr(struct timeval* timestamp);
 
 void aodv_db_getrerrcount(struct timeval* timestamp, uint32_t* count_out);
 
-
+int aodv_db_data_capt_data_seq(uint8_t shost_ether[ETH_ALEN], uint16_t shost_seq_num);
 
 // ----------------------------------- reporiting -------------------------------------------------------------------------
 

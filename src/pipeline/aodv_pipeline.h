@@ -32,7 +32,6 @@ For further information and questions please use the web site
 #include "../config.h"
 
 extern pthread_rwlock_t pp_rwlock;
-extern uint32_t broadcast_id;
 
 /**
  * Unknown sequence number
@@ -67,18 +66,10 @@ struct aodv_msg_rreq {
 	uint16_t		flags;
 	/** The number of hops from the originator to the node habdling the request */
 	uint8_t		hop_count;
-	/**
-	 * Destination Sequence Number;
-	 * The latest sequence number received in the past by the originator for any
-	 * route towards the destination.
-	 */
-	uint32_t		seq_num_dest;
-	/**
-	 * Originator Sequence Number;
-	 * The current sequence number to be used in the route entry pointing towards
-	 * the originator of the route request.
-	 */
-	uint32_t		seq_num_src;
+
+	uint32_t		destination_sequence_number;
+
+	uint32_t		originator_sequence_number;
 } __attribute__ ((__packed__));
 
 /** RREP - Route Reply Message */
@@ -89,16 +80,11 @@ struct aodv_msg_rrep {
 	 * A - acknowledgement required;
 	 */
 	uint8_t		flags;
-	/** not used */
-	uint8_t		prefix_size;
+
 	/**  Hop Count: The number of hops from the originator to destination */
 	uint8_t		hop_count;
-	/**
-	 * Destination Sequence Number;
-	 * The latest sequence number received in the past by the originator for any
-	 * route towards the destination.
-	 */
-	uint32_t		seq_num_dest;
+
+	uint32_t		destination_sequence_number;
 	/**
 	 * LifeTime:
 	 * The time in millisecond for which nodes receiving the RREP consider the
@@ -123,16 +109,6 @@ struct aodv_msg_rerr {
 /** HELLO - Hello Message */
 struct aodv_msg_hello {
 } __attribute__ ((__packed__));
-
-struct aodv_msg_broadcast {
-	/**
-	 * Broadcast ID;
-	 * A sequence number uniqiely identifying the broadcast packet (RREQ or simple packet)
-	 * in combination with ether_shost
-	 */
-	uint32_t		id;
-} __attribute__ ((__packed__));
-
 
 typedef struct _onlb_dest_list_element {
 	uint8_t 							dhost_ether[ETH_ALEN];
@@ -180,17 +156,17 @@ int aodv_drop_errors(dessert_msg_t* msg, size_t len,
 
 // ------------------------------ periodic ----------------------------------------------------
 
-int aodv_periodic_send_hello(void *data, struct timeval *scheduled, struct timeval *interval);
+dessert_per_result_t aodv_periodic_send_hello(void *data, struct timeval *scheduled, struct timeval *interval);
 
 /** clean up database from old entrys */
-int aodv_periodic_cleanup_database(void *data, struct timeval *scheduled, struct timeval *interval);
+dessert_per_result_t aodv_periodic_cleanup_database(void *data, struct timeval *scheduled, struct timeval *interval);
 
 dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, uint16_t count);
 
-int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeval *interval);
+dessert_per_result_t aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeval *interval);
 
 // ------------------------------ helper ------------------------------------------------------
 
-void aodv_send_rreq(uint8_t dhost_ether[ETH_ALEN], struct timeval* ts, uint8_t ttl);
+void aodv_send_rreq(uint8_t dhost_ether[ETH_ALEN], struct timeval* ts, dessert_msg_t* rreq_msg, uint8_t initial_hop_count);
 
 #endif

@@ -38,7 +38,7 @@ data_packet_id_t* entrys = NULL;
 //returns TRUE if input entry is newer
 //        FALSE if input entry is older
 //        -1 if error
-int aodv_db_data_capt_data_seq(uint8_t shost_ether[ETH_ALEN], uint16_t shost_seq_num) {
+int aodv_db_ds_data_capt_data_seq(uint8_t shost_ether[ETH_ALEN], uint16_t shost_seq_num) {
 
 	data_packet_id_t* entry = NULL;
 	HASH_FIND(hh, entrys, shost_ether, ETH_ALEN, entry);

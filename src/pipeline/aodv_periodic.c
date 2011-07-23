@@ -25,11 +25,10 @@ For further information and questions please use the web site
 #include "aodv_pipeline.h"
 #include "../config.h"
 #include <string.h>
-#include "../database/data_seq/data_seq.h"
 #include <pthread.h>
 #include <utlist.h>
 
-int aodv_periodic_send_hello(void *data, struct timeval *scheduled, struct timeval *interval) {
+dessert_per_result_t aodv_periodic_send_hello(void *data, struct timeval *scheduled, struct timeval *interval) {
 
 	// create new HELLO message with hello_ext.
 	dessert_msg_t* hello_msg;
@@ -39,21 +38,20 @@ int aodv_periodic_send_hello(void *data, struct timeval *scheduled, struct timev
 	dessert_ext_t* ext;
 	dessert_msg_addext(hello_msg, &ext, HELLO_EXT_TYPE, sizeof(struct aodv_msg_hello));
 
-    dessert_msg_dummy_payload(hello_msg, hello_size);
+	dessert_msg_dummy_payload(hello_msg, hello_size);
 
-	dessert_meshsend_fast(hello_msg, NULL);
+	dessert_meshsend(hello_msg, NULL);
 	dessert_msg_destroy(hello_msg);
-	return 0;
+	return DESSERT_PER_KEEP;
 }
 
-int aodv_periodic_cleanup_database(void *data, struct timeval *scheduled, struct timeval *interval) {
+dessert_per_result_t aodv_periodic_cleanup_database(void *data, struct timeval *scheduled, struct timeval *interval) {
 	struct timeval timestamp;
 	gettimeofday(&timestamp, NULL);
-	if (aodv_db_cleanup(&timestamp)) {
-		return 0;
-	} else {
-		return 1;
-	}
+	if(aodv_db_cleanup(&timestamp))
+		return DESSERT_PER_KEEP;
+	else
+		return DESSERT_PER_UNREGISTER;
 }
 
 dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, uint16_t count) {
@@ -63,14 +61,7 @@ dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, uint16_t count) {
 	dessert_msg_new(&msg);
 
 	// set ttl
-	msg->ttl = 255;
-
-	// add broadcast id ext since RERR is an broadcast message
-	dessert_msg_addext(msg, &ext, BROADCAST_EXT_TYPE, sizeof(struct aodv_msg_broadcast));
-	struct aodv_msg_broadcast* brc_str = (struct aodv_msg_broadcast*) ext->data;
-	pthread_rwlock_wrlock(&pp_rwlock);
-	brc_str->id = ++broadcast_id;
-	pthread_rwlock_unlock(&pp_rwlock);
+	msg->ttl =TTL_MAX;
 
 	// add l25h header
 	dessert_msg_addext(msg, &ext, DESSERT_EXT_ETH, ETHER_HDR_LEN);
@@ -118,21 +109,21 @@ dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, uint16_t count) {
 	return msg;
 }
 
-int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeval *interval) {
+dessert_per_result_t aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeval *interval) {
 	uint8_t schedule_type;
-	uint64_t schedule_param;
+	void* schedule_param = NULL;
 	uint8_t ether_addr[ETH_ALEN];
 	struct timeval timestamp;
 	gettimeofday(&timestamp, NULL);
 
 	if (aodv_db_popschedule(&timestamp, ether_addr, &schedule_type, &schedule_param) == FALSE) {
-		return 0;
+		return DESSERT_PER_KEEP;
 	}
 
 	if (schedule_type == AODV_SC_SEND_OUT_PACKET) {
 		//do nothing
 	} else if (schedule_type == AODV_SC_REPEAT_RREQ) {
-		aodv_send_rreq(ether_addr, &timestamp, schedule_param);
+		aodv_send_rreq(ether_addr, &timestamp, (dessert_msg_t*) (schedule_param), 0/*send rreq without initial hop_count*/);
 	} else if (schedule_type == AODV_SC_SEND_OUT_RERR) {
 		uint32_t rerr_count;
 		aodv_db_getrerrcount(&timestamp, &rerr_count);
@@ -156,13 +147,15 @@ int aodv_periodic_scexecute(void *data, struct timeval *scheduled, struct timeva
 					dessert_msg_t* rerr_msg = aodv_create_rerr(&head, dest_count);
 					if (rerr_msg != NULL) {
 						dessert_debug("link to " MAC " break -> send RERR", EXPLODE_ARRAY6(dhost_ether));
-						dessert_meshsend_fast(rerr_msg, NULL);
+						dessert_meshsend(rerr_msg, NULL);
 						dessert_msg_destroy(rerr_msg);
 						aodv_db_putrerr(&timestamp);
 					}
 				}
 			}
 		}
+	} else {
+		dessert_crit("unknown schedule type=%u", schedule_type);
 	}
-	return 0;
+	return DESSERT_PER_KEEP;
 }

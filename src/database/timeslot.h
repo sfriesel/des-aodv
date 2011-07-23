@@ -56,7 +56,7 @@ int timeslot_destroy(timeslot_t* ts);
 
 /** Add object with timestamp number time-slot.
  * Pudges all objects older than timestamp - pudge_timeout from time-slot */
-int timeslot_addobject(timeslot_t* ts, struct timeval* purge_time, void* object);
+int timeslot_addobject(timeslot_t* ts, struct timeval* timestamp, void* object);
 
 /** delete an object from timeslot */
 int timeslot_deleteobject(timeslot_t* ts, void* object);

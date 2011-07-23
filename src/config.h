@@ -28,22 +28,22 @@ For further information and questions please use the web site
 
 enum aodv_bool {TRUE = 1, FALSE = 0};
 
-#define RREQ_RETRIES				4
-#define RREQ_RATELIMIT				16
-#define TTL_START					2
-#define TTL_INCREMENT				2
-#define TTL_THRESHOLD				7
-#define SEQNO_MAX					UINT32_MAX
+#define RREQ_RETRIES				5 /* ferhat=5 rfc=2 */
+#define RREQ_RATELIMIT				10 /* rfc=10 */
+#define TTL_START				4 /* rfc=1 */
+#define TTL_INCREMENT				2 /* rfc=2 */
+#define TTL_THRESHOLD				10 /* rfc=7 */
+#define TTL_MAX					UINT8_MAX
 
-#define ACTIVE_ROUTE_TIMEOUT		6000 	// milliseconds
-#define ALLOWED_HELLO_LOST			7
-#define NODE_TRAVERSAL_TIME			4 		// milliseconds
-#define NET_DIAMETER				8
-#define NET_TRAVERSAL_TIME			(2 * NODE_TRAVERSAL_TIME * NET_DIAMETER)
-#define BLACKLIST_TIMEOUT			(RREQ_RETRIES * NET_TRAVERSAL_TIME)
-#define MY_ROUTE_TIMEOUT			(2 * ACTIVE_ROUTE_TIMEOUT)
-#define PATH_DESCOVERY_TIME			(2 * NET_TRAVERSAL_TIME)
-#define RERR_RATELIMIT				10
+#define ACTIVE_ROUTE_TIMEOUT			3000 /* ms rfc=3000 */
+#define ALLOWED_HELLO_LOST			4 /* christian=4 rfc=2 */
+#define NODE_TRAVERSAL_TIME			2 /* ms christian=2 rfc=40 */
+#define NET_DIAMETER				10 /* christian=8 rfc=35 */
+#define NET_TRAVERSAL_TIME			(2 * NODE_TRAVERSAL_TIME * NET_DIAMETER) /* rfc */
+#define BLACKLIST_TIMEOUT			(RREQ_RETRIES * NET_TRAVERSAL_TIME) /* rfc */
+#define MY_ROUTE_TIMEOUT			(2 * ACTIVE_ROUTE_TIMEOUT) /* rfc */
+#define PATH_DESCOVERY_TIME			(2 * NET_TRAVERSAL_TIME) /* rfc */
+#define RERR_RATELIMIT				10 /* rfc=10 */
 
 #define RREQ_EXT_TYPE				DESSERT_EXT_USER
 #define RREP_EXT_TYPE				(DESSERT_EXT_USER + 1)
@@ -52,42 +52,44 @@ enum aodv_bool {TRUE = 1, FALSE = 0};
 #define HELLO_EXT_TYPE				(DESSERT_EXT_USER + 4)
 #define BROADCAST_EXT_TYPE			(DESSERT_EXT_USER + 5)
 
-#define FIFO_BUFFER_MAX_ENTRY_SIZE	128 	// maximal packet count that can be stored in FIFO for one destination
-#define DB_CLEANUP_INTERVAL			NET_TRAVERSAL_TIME
-#define BUFFER_SENDOUT_DELAY		10
-#define SCHEDULE_CHECK_INTERVAL		30 		// milliseconds
+#define FIFO_BUFFER_MAX_ENTRY_SIZE		128 /* maximal packet count that can be stored in FIFO for one destination */
+#define DB_CLEANUP_INTERVAL			NET_TRAVERSAL_TIME /* not in rfc */
+#define SCHEDULE_CHECK_INTERVAL			20 /* ms not in rfc */
+
+#define HELLO_INTERVAL				1000 /* ms rfc=1000 */
+
+#define HELLO_SIZE				128 /* bytes */
+#define RREQ_SIZE				128 /* bytes */
+
+#define GOSSIPP					 	1		// flooding
+#define DESTONLY					FALSE
 
 /**
  * Schedule type = send out packets from FIFO puffer for
  * destination with ether_addr
  */
-#define AODV_SC_SEND_OUT_PACKET		1
+#define AODV_SC_SEND_OUT_PACKET			1
 
 /**
- * Schedule type = repeat RREQ with ttl *=2
+ * Schedule type = repeat RREQ
  */
 #define AODV_SC_REPEAT_RREQ			2
 
 /**
  * Schedule type = send out route error for given next hop
  */
-#define AODV_SC_SEND_OUT_RERR		3
-#define HELLO_SIZE					128
-#define HELLO_INTERVAL				2000 	// milliseconds
-#define RREQ_SIZE					128
-#define GOSSIPP					 	1		// flooding
-#define DESTONLY					FALSE
+#define AODV_SC_SEND_OUT_RERR			3
 
 // --- Database Flags
-#define AODV_FLAGS_ROUTE_INVALID 	1
-#define AODV_FLAGS_NEXT_HOP_UNKNOWN	(1 << 1)
-#define MAX_MESH_IFACES_COUNT		8
+#define AODV_FLAGS_ROUTE_INVALID 		1
+#define AODV_FLAGS_NEXT_HOP_UNKNOWN		(1 << 1)
+
+#define MAX_MESH_IFACES_COUNT			8
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 
 extern dessert_periodic_t *			periodic_send_hello;
-extern char*						routing_log_file;
 extern int 							hello_size;
 extern int 							hello_interval;
 extern int 							rreq_size;

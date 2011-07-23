@@ -27,7 +27,7 @@ For further information and questions please use the web site
 #include "aodv_database.h"
 #include "../config.h"
 #include "routing_table/aodv_rt.h"
-#include "broadcast_table/aodv_broadcast_t.h"
+#include "data_seq/data_seq.h"
 #include "neighbor_table/nt.h"
 #include "packet_buffer/packet_buffer.h"
 #include "schedule_table/aodv_st.h"
@@ -51,12 +51,11 @@ void aodv_db_unlock() {
 int aodv_db_init() {
 	int success = TRUE;
 	aodv_db_wlock();
-	success &= aodv_db_rl_init();
 	success &= db_nt_init();
-	success &= aodv_db_brct_init();
 	success &= aodv_db_rt_init();
 	success &= pb_init();
 	success &= aodv_db_rerrl_init();
+	success &= aodv_db_rl_init();
 	aodv_db_unlock();
 	return success;
 }
@@ -64,8 +63,8 @@ int aodv_db_init() {
 int aodv_db_cleanup(struct timeval* timestamp) {
 	int success = TRUE;
 	aodv_db_wlock();
-	success &= aodv_db_rt_cleanup(timestamp);
 	success &= db_nt_cleanup(timestamp);
+	success &= aodv_db_rt_cleanup(timestamp);
 	success &= pb_cleanup(timestamp);
 	aodv_db_unlock();
 	return success;
@@ -85,35 +84,31 @@ dessert_msg_t* aodv_db_pop_packet(uint8_t dhost_ether[ETH_ALEN]) {
 }
 
 /**
- * Returns TRUE if no broadcast messages for this source
- * for the last PATH_DESCOVERY_TIME were captured.
- * Also captures rreq_id.
- */
-int aodv_db_add_brcid(uint8_t shost_ether[ETH_ALEN], uint32_t brc_id, struct timeval* timestamp) {
-	aodv_db_wlock();
-	int result = aodv_db_brct_addid(shost_ether, brc_id, timestamp);
-	aodv_db_unlock();
-	return result;
-}
-
-/**
  * Captures seq_num of the source. Also add to source list for
  * this destination. All messages to source (example: RREP) must be send
  * over shost_prev_hop (nodes output interface: output_iface).
  */
-int aodv_db_capt_rreq (uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN],
-		uint8_t shost_prev_hop[ETH_ALEN], dessert_meshif_t* output_iface,
-		uint32_t shost_seq_num, struct timeval* timestamp){
+int aodv_db_capt_rreq(uint8_t destination_host[ETH_ALEN],
+                         uint8_t originator_host[ETH_ALEN],
+                         uint8_t originator_host_prev_hop[ETH_ALEN],
+                         dessert_meshif_t* output_iface,
+                         uint32_t originator_sequence_number,
+                         uint8_t hop_count,
+                         struct timeval* timestamp) {
 	aodv_db_wlock();
-	int result = aodv_db_rt_capt_rreq(dhost_ether, shost_ether, shost_prev_hop, output_iface, shost_seq_num, timestamp);
+	int result = aodv_db_rt_capt_rreq(destination_host, originator_host, originator_host_prev_hop, output_iface, originator_sequence_number, hop_count, timestamp);
 	aodv_db_unlock();
 	return result;
 }
 
-int aodv_db_capt_rrep (uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop[ETH_ALEN],
-		dessert_meshif_t* output_iface, uint32_t dhost_seq_num, uint8_t hop_count, struct timeval* timestamp) {
+int aodv_db_capt_rrep(uint8_t destination_host[ETH_ALEN],
+                         uint8_t destination_host_next_hop[ETH_ALEN],
+                         dessert_meshif_t* output_iface,
+                         uint32_t destination_sequence_number,
+                         uint8_t hop_count,
+                         struct timeval* timestamp) {
 	aodv_db_wlock();
-	int result =  aodv_db_rt_capt_rrep(dhost_ether, dhost_next_hop, output_iface, dhost_seq_num, hop_count, timestamp);
+	int result =  aodv_db_rt_capt_rrep(destination_host, destination_host_next_hop, output_iface, destination_sequence_number, hop_count, timestamp);
 	aodv_db_unlock();
 	return result;
 }
@@ -146,17 +141,23 @@ int aodv_db_getprevhop(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_AL
 	return result;
 }
 
-int aodv_db_getrouteseqnum(uint8_t dhost_ether[ETH_ALEN], uint32_t* dhost_seq_num_out) {
+int aodv_db_get_destination_sequence_number(uint8_t dhost_ether[ETH_ALEN], uint32_t* destination_sequence_number_out) {
 	aodv_db_rlock();
-	int result =  aodv_db_rt_getrouteseqnum(dhost_ether, dhost_seq_num_out);
+	int result = aodv_db_rt_get_destination_sequence_number(dhost_ether, destination_sequence_number_out);
 	aodv_db_unlock();
 	return result;
 }
 
-int aodv_db_getlastrreqseq(uint8_t dhost_ether[ETH_ALEN],
-		uint8_t shost_ether[ETH_ALEN], uint32_t* shost_seq_num_out) {
+int aodv_db_get_originator_sequence_number(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN], uint32_t* originator_sequence_number_out) {
 	aodv_db_rlock();
-	int result = aodv_db_rt_getlastrreqseq(dhost_ether, shost_ether, shost_seq_num_out);
+	int result = aodv_db_rt_get_originator_sequence_number(dhost_ether, shost_ether, originator_sequence_number_out);
+	aodv_db_unlock();
+	return result;
+}
+
+int aodv_db_get_hop_count(uint8_t dhost_ether[ETH_ALEN], uint8_t* hop_count_out) {
+	aodv_db_rlock();
+	int result = aodv_db_rt_get_hop_count(dhost_ether, hop_count_out);
 	aodv_db_unlock();
 	return result;
 }
@@ -187,7 +188,7 @@ int aodv_db_invroute(uint8_t dhost_next_hop[ETH_ALEN], uint8_t dhost_ether_out[E
  */
 int aodv_db_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {
 	aodv_db_wlock();
-	int result =  db_nt_cap2Dneigh(ether_neighbor_addr, iface, timestamp);
+	int result = db_nt_cap2Dneigh(ether_neighbor_addr, iface, timestamp);
 	aodv_db_unlock();
 	return result;
 }
@@ -202,24 +203,32 @@ int aodv_db_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t
 	return result;
 }
 
-int aodv_db_addschedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, uint64_t param) {
+int aodv_db_addschedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, void* param) {
 	aodv_db_wlock();
 	int result =  aodv_db_sc_addschedule(execute_ts, ether_addr, type, param);
 	aodv_db_unlock();
 	return result;
 }
 
-int aodv_db_popschedule(struct timeval* timestamp, uint8_t ether_addr_out[ETH_ALEN], uint8_t* type, uint64_t* param) {
+int aodv_db_popschedule(struct timeval* timestamp, uint8_t ether_addr_out[ETH_ALEN], uint8_t* type, void* param) {
 	aodv_db_wlock();
 	int result =  aodv_db_sc_popschedule(timestamp, ether_addr_out, type, param);
 	aodv_db_unlock();
 	return result;
 }
 
-void aodv_db_dropschedule(uint8_t ether_addr[ETH_ALEN], uint8_t type) {
+int aodv_db_schedule_exists(uint8_t ether_addr[ETH_ALEN], uint8_t type) {
 	aodv_db_wlock();
-	aodv_db_sc_dropschedule(ether_addr, type);
+	int result =  aodv_db_sc_schedule_exists(ether_addr, type);
 	aodv_db_unlock();
+	return result;
+}
+
+int aodv_db_dropschedule(uint8_t ether_addr[ETH_ALEN], uint8_t type) {
+	aodv_db_wlock();
+	int result =  aodv_db_sc_dropschedule(ether_addr, type);
+	aodv_db_unlock();
+	return result;
 }
 
 void aodv_db_putrreq(struct timeval* timestamp) {
@@ -246,6 +255,12 @@ void aodv_db_getrerrcount(struct timeval* timestamp, uint32_t* count_out) {
 	aodv_db_unlock();
 }
 
+int aodv_db_data_capt_data_seq(uint8_t shost_ether[ETH_ALEN], uint16_t shost_seq_num) {
+	aodv_db_wlock();
+	int result =  aodv_db_ds_data_capt_data_seq(shost_ether, shost_seq_num);
+	aodv_db_unlock();
+	return result;
+}
 // --------------------------------------- reporting ---------------------------------------------------------------
 
 int aodv_db_view_routing_table(char** str_out) {

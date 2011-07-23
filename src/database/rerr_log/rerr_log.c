@@ -23,10 +23,8 @@ For further information and questions please use the web site
 
 #include "../../config.h"
 #include "../timeslot.h"
-#include "rerr_log.h"
 
 timeslot_t* rerr_log_ts = NULL;
-
 uint32_t rerr_count = 0;
 void* rerr_pseudo_pointer = 0;
 
@@ -42,12 +40,16 @@ int aodv_db_rerrl_init() {
 	return timeslot_create(&rerr_log_ts, &timeout, NULL, rerr_decrement_counter);
 }
 
+int aodv_db_rerrl_cleanup(struct timeval* timestamp) {
+	return timeslot_purgeobjects(rerr_log_ts, timestamp);
+}
+
 void aodv_db_rl_putrerr(struct timeval* timestamp) {
 	if (timeslot_addobject(rerr_log_ts, timestamp, rerr_pseudo_pointer++) == TRUE)
 		rerr_count++;
 }
 
 void aodv_db_rl_getrerrcount(struct timeval* timestamp, uint32_t* count_out) {
-	timeslot_purgeobjects(rerr_log_ts, timestamp);
+	aodv_db_rerrl_cleanup(timestamp);
 	*count_out = rerr_count;
 }

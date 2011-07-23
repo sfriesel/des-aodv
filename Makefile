@@ -9,7 +9,7 @@ DIR_ETC = $(DESTDIR)/etc
 DIR_DEFAULT = $(DIR_ETC)/default
 DIR_INIT = $(DIR_ETC)/init.d
 
-MODULES = src/aodv src/helper src/cli/aodv_cli src/database/aodv_database src/database/timeslot src/database/broadcast_table/aodv_broadcast_t src/database/neighbor_table/nt \
+MODULES = src/aodv src/helper src/cli/aodv_cli src/database/aodv_database src/database/timeslot src/database/neighbor_table/nt \
 	src/database/packet_buffer/packet_buffer src/database/rerr_log/rerr_log src/database/data_seq/data_seq src/database/routing_table/aodv_rt src/database/rreq_log/rreq_log \
 	src/database/schedule_table/aodv_st src/pipeline/aodv_periodic src/pipeline/aodv_pipeline
 
@@ -20,7 +20,7 @@ FILE_DEFAULT = etc/$(DAEMONNAME).default
 FILE_ETC = etc/$(DAEMONNAME).conf
 FILE_INIT = etc/$(DAEMONNAME).init
 
-LIBS = dessert  pthread cli
+LIBS = dessert pthread cli
 CFLAGS += -ggdb -Wall -DTARGET_$(UNAME) -D_GNU_SOURCE -I/usr/include
 LDFLAGS += $(addprefix -l,$(LIBS))
 
@@ -47,7 +47,7 @@ build: $(addsuffix .o,$(MODULES))
 
 android: CC=android-gcc
 android: CFLAGS=-I$(DESSERT_LIB)/include
-android: LDFLAGS=-L$(DESSERT_LIB)/lib -Wl,-rpath-link=$(DESSERT_LIB)/lib -ldessert 
+android: LDFLAGS=-L$(DESSERT_LIB)/lib -Wl,-rpath-link=$(DESSERT_LIB)/lib -ldessert
 android: build package
 
 package:

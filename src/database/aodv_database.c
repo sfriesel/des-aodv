@@ -142,7 +142,7 @@ int aodv_db_get_originator_sequence_number(uint8_t dhost_ether[ETH_ALEN], uint8_
     return result;
 }
 
-int aodv_db_get_orginator_hop_count(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN], uint8_t *last_hop_count_orginator_out) {
+int aodv_db_get_orginator_hop_count(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN], uint8_t* last_hop_count_orginator_out) {
     aodv_db_rlock();
     int result = aodv_db_rt_get_orginator_hop_count(dhost_ether, shost_ether, last_hop_count_orginator_out);
     aodv_db_unlock();

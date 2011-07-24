@@ -504,10 +504,10 @@ int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t* proc, desse
         memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
         dessert_meshsend(msg, output_iface);
         dessert_debug(MAC " over " MAC " ----ME----> " MAC " to " MAC,
-            EXPLODE_ARRAY6(l25h->ether_shost),
-            EXPLODE_ARRAY6(msg->l2h.ether_shost),
-            EXPLODE_ARRAY6(msg->l2h.ether_dhost),
-            EXPLODE_ARRAY6(l25h->ether_dhost));
+                      EXPLODE_ARRAY6(l25h->ether_shost),
+                      EXPLODE_ARRAY6(msg->l2h.ether_shost),
+                      EXPLODE_ARRAY6(msg->l2h.ether_dhost),
+                      EXPLODE_ARRAY6(l25h->ether_dhost));
     }
     else {
         uint32_t rerr_count;
@@ -533,10 +533,10 @@ int aodv_forward(dessert_msg_t* msg, size_t len, dessert_msg_proc_t* proc, desse
         }
 
         dessert_debug(MAC " over " MAC " ----XXX----> " MAC " to " MAC,
-            EXPLODE_ARRAY6(l25h->ether_shost),
-            EXPLODE_ARRAY6(msg->l2h.ether_shost),
-            EXPLODE_ARRAY6(msg->l2h.ether_dhost),
-            EXPLODE_ARRAY6(l25h->ether_dhost));
+                      EXPLODE_ARRAY6(l25h->ether_shost),
+                      EXPLODE_ARRAY6(msg->l2h.ether_shost),
+                      EXPLODE_ARRAY6(msg->l2h.ether_dhost),
+                      EXPLODE_ARRAY6(l25h->ether_dhost));
     }
 
     return DESSERT_MSG_DROP;

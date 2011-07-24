@@ -229,7 +229,7 @@ int aodv_db_rt_capt_rrep(uint8_t destination_host[ETH_ALEN],
         }
 
         dessert_debug("create route to " MAC ": destination_sequence_number=%u",
-              EXPLODE_ARRAY6(destination_host), destination_sequence_number);
+                      EXPLODE_ARRAY6(destination_host), destination_sequence_number);
 
         HASH_ADD_KEYPTR(hh, rt.entrys, rt_entry->destination_host, ETH_ALEN, rt_entry);
     }
@@ -388,7 +388,7 @@ int aodv_db_rt_get_originator_sequence_number(uint8_t dhost_ether[ETH_ALEN], uin
     return true;
 }
 
-int aodv_db_rt_get_orginator_hop_count(uint8_t destination_host[ETH_ALEN], uint8_t originator_host[ETH_ALEN], uint8_t *last_hop_count_orginator_out) {
+int aodv_db_rt_get_orginator_hop_count(uint8_t destination_host[ETH_ALEN], uint8_t originator_host[ETH_ALEN], uint8_t* last_hop_count_orginator_out) {
     aodv_rt_entry_t* rt_entry;
     HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
 

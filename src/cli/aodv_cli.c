@@ -139,6 +139,7 @@ int cli_send_rreq(struct cli_def* cli, char* command, char* argv[], int argc) {
 
     mac_addr host;
     int ok = dessert_parse_mac(argv[0], &host);
+
     if(ok != 0) {
         cli_print(cli, "usage of %s command [hardware address as XX:XX:XX:XX:XX:XX] [initial_hop_count]\n", command);
         return CLI_ERROR_ARG;

@@ -304,7 +304,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, size_t len, dessert_msg_proc_t* proc, d
                 dessert_meshsend(msg, NULL);
             }
             else {
-                dessert_debug("stop RREQ to " MAC " id=%d", EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->originator_sequence_number);
+                dessert_debug("stop RREQ to " MAC " id=%u", EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->originator_sequence_number);
             }
         }
     }

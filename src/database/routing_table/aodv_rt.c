@@ -163,7 +163,7 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
 
     if(rt_entry == NULL) {
         // if not found -> create routing entry
-        if(rt_entry_create(&rt_entry, destination_host) != true) {
+        if(!rt_entry_create(&rt_entry, destination_host)) {
             return false;
         }
 
@@ -175,7 +175,7 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
 
     if(srclist_entry == NULL) {
         // if not found -> create new source entry of source list
-        if(rt_srclist_entry_create(&srclist_entry, originator_host, originator_host_prev_hop, output_iface) != true) {
+        if(!rt_srclist_entry_create(&srclist_entry, originator_host, originator_host_prev_hop, output_iface)) {
             return false;
         }
 
@@ -224,7 +224,7 @@ int aodv_db_rt_capt_rrep(uint8_t destination_host[ETH_ALEN],
 
     if(rt_entry == NULL) {
         // if not found -> create routing entry
-        if(rt_entry_create(&rt_entry, destination_host) == false) {
+        if(!rt_entry_create(&rt_entry, destination_host)) {
             return false;
         }
 

@@ -35,8 +35,8 @@ typedef struct data_packet_id {
 
 data_packet_id_t* entrys = NULL;
 
-//returns TRUE if input entry is newer
-//        FALSE if input entry is older
+//returns true if input entry is newer
+//        false if input entry is older
 //        -1 if error
 int aodv_db_ds_data_capt_data_seq(uint8_t shost_ether[ETH_ALEN], uint16_t shost_seq_num) {
 
@@ -54,17 +54,17 @@ int aodv_db_ds_data_capt_data_seq(uint8_t shost_ether[ETH_ALEN], uint16_t shost_
         memcpy(entry->src_addr, shost_ether, ETH_ALEN);
         HASH_ADD_KEYPTR(hh, entrys, entry->src_addr, ETH_ALEN, entry);
         entry->seq_num = shost_seq_num;
-        return TRUE;
+        return true;
     }
 
     //data source is known
     if((entry->seq_num - shost_seq_num > (1 << 15)) || (entry->seq_num < shost_seq_num)) {
         //data packet is newer
         entry->seq_num = shost_seq_num;
-        return TRUE;
+        return true;
     }
 
     //data packet is old
-    return FALSE;
+    return false;
 }
 

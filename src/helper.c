@@ -71,7 +71,7 @@ int hf_add_tv(struct timeval* tv1, struct timeval* tv2, struct timeval* sum) {
         sum->tv_usec = usec_sum;
     }
 
-    return TRUE;
+    return true;
 }
 
 int hf_comp_u8(uint8_t i, uint8_t j) {

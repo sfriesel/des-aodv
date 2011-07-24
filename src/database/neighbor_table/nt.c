@@ -73,13 +73,13 @@ int db_nt_init() {
     timeout.tv_sec = hello_int_msek / 1000;
     timeout.tv_usec = (hello_int_msek % 1000) * 1000;
 
-    if(timeslot_create(&new_ts, &timeout, NULL, db_nt_on_neigbor_timeout) != TRUE) {
-        return FALSE;
+    if(timeslot_create(&new_ts, &timeout, NULL, db_nt_on_neigbor_timeout) != true) {
+        return false;
     }
 
     nt.entrys = NULL;
     nt.ts = new_ts;
-    return TRUE;
+    return true;
 }
 
 int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {
@@ -94,7 +94,7 @@ int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* if
         curr_entry = db_neighbor_entry_create(ether_neighbor_addr, iface);
 
         if(curr_entry == NULL) {
-            return FALSE;
+            return false;
         }
 
         HASH_ADD_KEYPTR(hh, nt.entrys, curr_entry->ether_neighbor, ETH_ALEN + sizeof(void*), curr_entry);
@@ -102,7 +102,7 @@ int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* if
     }
 
     timeslot_addobject(nt.ts, timestamp, curr_entry);
-    return TRUE;
+    return true;
 }
 
 int db_nt_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {
@@ -114,10 +114,10 @@ int db_nt_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* 
     HASH_FIND(hh, nt.entrys, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
 
     if(curr_entry == NULL) {
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 int db_nt_cleanup(struct timeval* timestamp) {

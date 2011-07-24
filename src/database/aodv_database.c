@@ -49,7 +49,7 @@ void aodv_db_unlock() {
 }
 
 int aodv_db_init() {
-    int success = TRUE;
+    int success = true;
     aodv_db_wlock();
     success &= db_nt_init();
     success &= aodv_db_rt_init();
@@ -61,7 +61,7 @@ int aodv_db_init() {
 }
 
 int aodv_db_cleanup(struct timeval* timestamp) {
-    int success = TRUE;
+    int success = true;
     aodv_db_wlock();
     success &= db_nt_cleanup(timestamp);
     success &= aodv_db_rt_cleanup(timestamp);
@@ -158,8 +158,8 @@ int aodv_db_markrouteinv(uint8_t dhost_ether[ETH_ALEN]) {
 
 /**
  * Marks only one route from database with next_hop = dhost_next_hop as invalid.
- * @return TRUE if route was invalidated. In that case contains dhost_ether
- * the destination address of this route. Returns FALSE if no route to invalidate
+ * @return true if route was invalidated. In that case contains dhost_ether
+ * the destination address of this route. Returns false if no route to invalidate
  * (i.e. no route that uses dhost_next_hop)
  */
 int aodv_db_invroute(uint8_t dhost_next_hop[ETH_ALEN], uint8_t dhost_ether_out[ETH_ALEN]) {

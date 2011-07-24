@@ -26,8 +26,6 @@ For further information and questions please use the web site
 
 #include <dessert.h>
 
-enum aodv_bool {TRUE = 1, FALSE = 0};
-
 #define RREQ_RETRIES				5 /* ferhat=5 rfc=2 */
 #define RREQ_RATELIMIT				10 /* rfc=10 */
 #define TTL_START				4 /* rfc=1 */
@@ -62,7 +60,7 @@ enum aodv_bool {TRUE = 1, FALSE = 0};
 #define RREQ_SIZE				128 /* bytes */
 
 #define GOSSIPP					 	1		// flooding
-#define DESTONLY					FALSE
+#define DESTONLY					false
 
 /**
  * Schedule type = send out packets from FIFO puffer for

@@ -45,7 +45,7 @@ int aodv_db_rerrl_cleanup(struct timeval* timestamp) {
 }
 
 void aodv_db_rl_putrerr(struct timeval* timestamp) {
-    if(timeslot_addobject(rerr_log_ts, timestamp, rerr_pseudo_pointer++) == TRUE) {
+    if(timeslot_addobject(rerr_log_ts, timestamp, rerr_pseudo_pointer++) == true) {
         rerr_count++;
     }
 }

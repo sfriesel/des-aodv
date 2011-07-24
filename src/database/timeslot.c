@@ -33,7 +33,7 @@ int create_new_ts_element(timeslot_element_t** ts_el_out, struct timeval* timest
     new_el = malloc(sizeof(timeslot_element_t));
 
     if(new_el == NULL) {
-        return FALSE;
+        return false;
     }
 
     new_el->next = NULL;
@@ -42,7 +42,7 @@ int create_new_ts_element(timeslot_element_t** ts_el_out, struct timeval* timest
     new_el->purge_time.tv_usec = timestamp->tv_usec;
     new_el->object = object;
     *ts_el_out = new_el;
-    return TRUE;
+    return true;
 }
 
 int timeslot_create(timeslot_t** ts_out, struct timeval* purge_timeout, void* src_object, object_purger_t* object_purger) {
@@ -50,7 +50,7 @@ int timeslot_create(timeslot_t** ts_out, struct timeval* purge_timeout, void* sr
     ts = malloc(sizeof(timeslot_t));
 
     if(ts == NULL) {
-        return FALSE;
+        return false;
     }
 
     ts->head = NULL;
@@ -62,7 +62,7 @@ int timeslot_create(timeslot_t** ts_out, struct timeval* purge_timeout, void* sr
     ts->src_object = src_object;
     ts->elements_hash = NULL;
     *ts_out = ts;
-    return TRUE;
+    return true;
 }
 
 int timeslot_destroy(timeslot_t* ts) {
@@ -75,7 +75,7 @@ int timeslot_destroy(timeslot_t* ts) {
     }
 
     free(ts);
-    return TRUE;
+    return true;
 };
 
 int timeslot_purgeobjects(timeslot_t* ts, struct timeval* curr_time) {
@@ -106,7 +106,7 @@ int timeslot_purgeobjects(timeslot_t* ts, struct timeval* curr_time) {
         search_el = new_tail;
     }
 
-    return TRUE;
+    return true;
 }
 
 int timeslot_addobject(timeslot_t* ts, struct timeval* timestamp, void* object) {
@@ -114,8 +114,8 @@ int timeslot_addobject(timeslot_t* ts, struct timeval* timestamp, void* object) 
     struct timeval purge_time;
     hf_add_tv(&ts->purge_timeout, timestamp, &purge_time);
 
-    if(create_new_ts_element(&new_el, &purge_time, object) == FALSE) {
-        return FALSE;
+    if(create_new_ts_element(&new_el, &purge_time, object) == false) {
+        return false;
     }
 
     // first find element with *object pointer and delete this element
@@ -127,7 +127,7 @@ int timeslot_addobject(timeslot_t* ts, struct timeval* timestamp, void* object) 
     if(ts->size == 0) {
         ts->head = ts->tail = new_el;
         ts->size = 1;
-        return TRUE;
+        return true;
     }
 
     // insert new element into appropriate place
@@ -172,7 +172,7 @@ int timeslot_addobject(timeslot_t* ts, struct timeval* timestamp, void* object) 
     struct timeval curr_time;
     gettimeofday(&curr_time, NULL);
     timeslot_purgeobjects(ts, &curr_time);
-    return TRUE;
+    return true;
 }
 
 int timeslot_deleteobject(timeslot_t* ts, void* object) {
@@ -201,10 +201,10 @@ int timeslot_deleteobject(timeslot_t* ts, void* object) {
         HASH_DEL(ts->elements_hash, old_el);
         free(old_el);
         ts->size--;
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 void timeslot_report(timeslot_t* ts) {

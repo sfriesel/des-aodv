@@ -45,7 +45,7 @@ int aodv_db_rl_cleanup(struct timeval* timestamp) {
 }
 
 void aodv_db_rl_putrreq(struct timeval* timestamp) {
-    if(timeslot_addobject(rreq_log_ts, timestamp, rreq_pseudo_pointer++) == TRUE) {
+    if(timeslot_addobject(rreq_log_ts, timestamp, rreq_pseudo_pointer++) == true) {
         rreq_count++;
     }
 }

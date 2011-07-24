@@ -34,7 +34,7 @@ For further information and questions please use the web site
 // -------------------- Testing ------------------------------------------------------------
 
 int cli_set_shortcut(struct cli_def* cli, char* command, char* argv[], int argc) {
-    u_int32_t mode;
+    uint32_t mode;
 
     if(argc != 1 || sscanf(argv[0], "%u", &mode) != 1 || (mode != 0 && mode != 1)) {
         cli_print(cli, "usage of %s command [0, 1]\n", command);
@@ -42,12 +42,12 @@ int cli_set_shortcut(struct cli_def* cli, char* command, char* argv[], int argc)
     }
 
     if(mode == 1) {
-        dessert_info("use dest_only = TRUE");
-        dest_only = TRUE;
+        dessert_info("use dest_only = true");
+        dest_only = true;
     }
     else {
-        dessert_info("use dest_only = FALSE");
-        dest_only = FALSE;
+        dessert_info("use dest_only = false");
+        dest_only = false;
     }
 
     return CLI_OK;

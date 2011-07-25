@@ -28,15 +28,15 @@ For further information and questions please use the web site
 
 #define RREQ_RETRIES				5 /* ferhat=5 rfc=2 */
 #define RREQ_RATELIMIT				10 /* rfc=10 */
-#define TTL_START				4 /* rfc=1 */
+#define TTL_START					1 /* rfc=1 */
 #define TTL_INCREMENT				2 /* rfc=2 */
-#define TTL_THRESHOLD				10 /* rfc=7 */
-#define TTL_MAX					UINT8_MAX
+#define TTL_THRESHOLD				7 /* rfc=7 */
+#define TTL_MAX						UINT8_MAX
 
-#define ACTIVE_ROUTE_TIMEOUT			3000 /* ms rfc=3000 */
+#define ACTIVE_ROUTE_TIMEOUT		3000 /* ms rfc=3000 */
 #define ALLOWED_HELLO_LOST			4 /* christian=4 rfc=2 */
 #define NODE_TRAVERSAL_TIME			2 /* ms christian=2 rfc=40 */
-#define NET_DIAMETER				10 /* christian=8 rfc=35 */
+#define NET_DIAMETER				16 /* christian=8 rfc=35 */
 #define NET_TRAVERSAL_TIME			(2 * NODE_TRAVERSAL_TIME * NET_DIAMETER) /* rfc */
 #define BLACKLIST_TIMEOUT			(RREQ_RETRIES * NET_TRAVERSAL_TIME) /* rfc */
 #define MY_ROUTE_TIMEOUT			(2 * ACTIVE_ROUTE_TIMEOUT) /* rfc */
@@ -50,23 +50,23 @@ For further information and questions please use the web site
 #define HELLO_EXT_TYPE				(DESSERT_EXT_USER + 4)
 #define BROADCAST_EXT_TYPE			(DESSERT_EXT_USER + 5)
 
-#define FIFO_BUFFER_MAX_ENTRY_SIZE		128 /* maximal packet count that can be stored in FIFO for one destination */
+#define FIFO_BUFFER_MAX_ENTRY_SIZE	128 /* maximal packet count that can be stored in FIFO for one destination */
 #define DB_CLEANUP_INTERVAL			NET_TRAVERSAL_TIME /* not in rfc */
-#define SCHEDULE_CHECK_INTERVAL			20 /* ms not in rfc */
+#define SCHEDULE_CHECK_INTERVAL		20 /* ms not in rfc */
 
 #define HELLO_INTERVAL				1000 /* ms rfc=1000 */
 
-#define HELLO_SIZE				128 /* bytes */
-#define RREQ_SIZE				128 /* bytes */
+#define HELLO_SIZE					128 /* bytes */
+#define RREQ_SIZE					128 /* bytes */
 
-#define GOSSIPP					 	1		// flooding
+#define GOSSIPP						1 /* flooding */
 #define DESTONLY					false
 
 /**
  * Schedule type = send out packets from FIFO puffer for
  * destination with ether_addr
  */
-#define AODV_SC_SEND_OUT_PACKET			1
+#define AODV_SC_SEND_OUT_PACKET		1
 
 /**
  * Schedule type = repeat RREQ
@@ -76,7 +76,7 @@ For further information and questions please use the web site
 /**
  * Schedule type = send out route error for given next hop
  */
-#define AODV_SC_SEND_OUT_RERR			3
+#define AODV_SC_SEND_OUT_RERR		3
 
 // --- Database Flags
 #define AODV_FLAGS_ROUTE_INVALID 		1
@@ -89,8 +89,8 @@ For further information and questions please use the web site
 
 extern dessert_periodic_t* 			periodic_send_hello;
 extern uint16_t 					hello_size;
-extern uint16_t 							hello_interval;
-extern uint16_t 							rreq_size;
+extern uint16_t 					hello_interval;
+extern uint16_t 					rreq_size;
 extern double 						gossipp;
 extern int 							dest_only;
 

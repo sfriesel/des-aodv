@@ -355,7 +355,7 @@ int aodv_db_rt_getprevhop(uint8_t destination_host[ETH_ALEN], uint8_t originator
 }
 
 // returns true if dest is known
-//         FLASE if des is unknown
+//         false if des is unknown
 int aodv_db_rt_get_destination_sequence_number(uint8_t dhost_ether[ETH_ALEN], uint32_t* destination_sequence_number_out) {
     aodv_rt_entry_t* rt_entry;
     HASH_FIND(hh, rt.entrys, dhost_ether, ETH_ALEN, rt_entry);

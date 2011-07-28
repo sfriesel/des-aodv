@@ -86,7 +86,7 @@ void fl_push_packet(fifo_list_t* fl, dessert_msg_t* msg) {
     }
 
     dessert_msg_t* msg_copy;
-    dessert_msg_clone(&msg_copy, msg, 0);
+    dessert_msg_clone(&msg_copy, msg, false);
     new_el->msg = msg_copy;
     new_el->next = NULL;
 

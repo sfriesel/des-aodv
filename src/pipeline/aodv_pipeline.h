@@ -110,11 +110,6 @@ struct aodv_msg_rerr {
 struct aodv_msg_hello {
 } __attribute__((__packed__));
 
-typedef struct _onlb_dest_list_element {
-    uint8_t 							dhost_ether[ETH_ALEN];
-    struct _onlb_dest_list_element*		prev, *next;
-} _onlb_element_t;
-
 // ------------- pipeline -----------------------------------------------------
 int aodv_handle_hello(dessert_msg_t* msg, size_t len,
                       dessert_msg_proc_t* proc, dessert_meshif_t* iface, dessert_frameid_t id);
@@ -161,7 +156,7 @@ dessert_per_result_t aodv_periodic_send_hello(void* data, struct timeval* schedu
 /** clean up database from old entrys */
 dessert_per_result_t aodv_periodic_cleanup_database(void* data, struct timeval* scheduled, struct timeval* interval);
 
-dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, uint16_t count);
+dessert_msg_t* aodv_create_rerr(aodv_link_break_element_t** destlist);
 
 dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* scheduled, struct timeval* interval);
 

@@ -86,5 +86,5 @@ int hf_comp_u8(uint8_t i, uint8_t j) {
     }
 
     return -1;
-
 }
+

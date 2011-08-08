@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
     hello_interval_t.tv_sec = hello_interval / 1000;
     hello_interval_t.tv_usec = (hello_interval % 1000) * 1000;
     periodic_send_hello = dessert_periodic_add(aodv_periodic_send_hello, NULL, NULL, &hello_interval_t);
-    dessert_notice("setting HELLO interval to [%u]ms", hello_interval);
+    dessert_notice("setting HELLO interval to [%" PRIu16 "]ms", hello_interval);
 
     struct timeval cleanup_interval;
     cleanup_interval.tv_sec = DB_CLEANUP_INTERVAL / 1000;

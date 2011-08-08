@@ -209,13 +209,13 @@ int timeslot_deleteobject(timeslot_t* ts, void* object) {
 
 void timeslot_report(timeslot_t* ts) {
     printf("---------- Time Slot  -------------\n");
-    printf("Timeslot size : %i\n", ts->size);
-    printf("max timestamp : %i s %i ms\n", (int)ts->head->purge_time.tv_sec, (int)ts->head->purge_time.tv_usec);
+    printf("Timeslot size : %" PRIu32 "\n", ts->size);
+    printf("max timestamp : %ld.%.6ld\n", ts->head->purge_time.tv_sec, ts->head->purge_time.tv_usec);
     timeslot_element_t* search_el = ts->tail;
     printf("elements : (");
 
     while(search_el != NULL) {
-        printf(" %i s %i ms", (int)search_el->purge_time.tv_sec, (int)search_el->purge_time.tv_usec);
+        printf(" %ld.%.6ld", search_el->purge_time.tv_sec, search_el->purge_time.tv_usec);
         search_el = search_el->next;
     }
 

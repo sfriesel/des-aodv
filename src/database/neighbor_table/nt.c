@@ -59,10 +59,7 @@ void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void*
     dessert_debug("%s <= x => " MAC, curr_entry->iface->if_name, EXPLODE_ARRAY6(curr_entry->ether_neighbor));
     HASH_DEL(nt.entrys, curr_entry);
 
-    // add schedule
-    struct timeval curr_time;
-    gettimeofday(&curr_time, NULL);
-    aodv_db_sc_addschedule(&curr_time, curr_entry->ether_neighbor, AODV_SC_SEND_OUT_RERR, 0);
+    aodv_db_sc_addschedule(timestamp, curr_entry->ether_neighbor, AODV_SC_SEND_OUT_RERR, 0);
     free(curr_entry);
 }
 
@@ -80,6 +77,10 @@ int db_nt_init() {
     nt.entrys = NULL;
     nt.ts = new_ts;
     return true;
+}
+
+int db_nt_reset() {
+    return db_nt_init();
 }
 
 int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {

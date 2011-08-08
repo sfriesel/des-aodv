@@ -79,8 +79,10 @@ For further information and questions please use the web site
 #define AODV_SC_SEND_OUT_RERR		3
 
 // --- Database Flags
+#define AODV_FLAGS_UNUSED				0
 #define AODV_FLAGS_ROUTE_INVALID 		1
 #define AODV_FLAGS_NEXT_HOP_UNKNOWN		(1 << 1)
+#define AODV_FLAGS_ROUTE_LOCAL_USED		(1 << 3)
 
 #define MAX_MESH_IFACES_COUNT			8
 
@@ -93,5 +95,19 @@ extern uint16_t 					hello_interval;
 extern uint16_t 					rreq_size;
 extern double 						gossipp;
 extern int 							dest_only;
+
+typedef struct aodv_link_break_element {
+    uint8_t host[ETH_ALEN];
+    uint32_t sequence_number;
+    struct aodv_link_break_element* next;
+    struct aodv_link_break_element* prev;
+} aodv_link_break_element_t;
+
+typedef struct aodv_mac_seq {
+    uint8_t host[ETH_ALEN];
+    uint32_t sequence_number;
+} __attribute__((__packed__)) aodv_mac_seq_t;
+
+#define MAX_MAC_SEQ_PER_EXT (DESSERT_MAXEXTDATALEN / sizeof(aodv_mac_seq_t))
 
 #endif

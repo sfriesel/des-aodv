@@ -97,7 +97,7 @@ int rt_srclist_entry_create(aodv_rt_srclist_entry_t** srclist_entry_out,
     return true;
 }
 
-int rt_entry_create(aodv_rt_entry_t** rreqt_entry_out, uint8_t destination_host[ETH_ALEN]) {
+int rt_entry_create(aodv_rt_entry_t** rreqt_entry_out, uint8_t destination_host[ETH_ALEN], struct timeval* timestamp) {
 
     aodv_rt_entry_t* rt_entry = malloc(sizeof(aodv_rt_entry_t));
 
@@ -111,6 +111,8 @@ int rt_entry_create(aodv_rt_entry_t** rreqt_entry_out, uint8_t destination_host[
     rt_entry->src_list = NULL;
     rt_entry->destination_sequence_number = 0; //we know nothing about the destination
     rt_entry->hop_count = UINT8_MAX; //initial
+
+    timeslot_addobject(rt.ts, timestamp, rt_entry);
 
     *rreqt_entry_out = rt_entry;
     return true;
@@ -164,7 +166,7 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
 
     if(rt_entry == NULL) {
         // if not found -> create routing entry
-        if(!rt_entry_create(&rt_entry, destination_host)) {
+        if(!rt_entry_create(&rt_entry, destination_host, timestamp)) {
             return false;
         }
 
@@ -185,15 +187,14 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
 
     int a = hf_comp_u32(srclist_entry->originator_sequence_number, originator_sequence_number);
     int b = hf_comp_u8(srclist_entry->hop_count, hop_count); // METRIC
-    dessert_trace("X: originator_sequence_number=%u:%u - hop_count=%u:%u p=%p", srclist_entry->originator_sequence_number, originator_sequence_number, srclist_entry->hop_count, hop_count, rt_entry);
 
     if(a < 0 || (a == 0 && b >= 0)) {
 
         if(a == 0 && b > 0) {
-            dessert_info("METRIC HIT: originator_sequence_number=%u:%u - hop_count=%u:%u", srclist_entry->originator_sequence_number, originator_sequence_number, srclist_entry->hop_count, hop_count);
+            dessert_info("METRIC HIT: originator_sequence_number=%" PRIu32 ":%" PRIu32 " - hop_count=%" PRIu8 ":%" PRIu8 "", srclist_entry->originator_sequence_number, originator_sequence_number, srclist_entry->hop_count, hop_count);
         }
 
-        dessert_debug("get rreq from " MAC ": originator_sequence_number=%u:%u",
+        dessert_debug("get rreq from " MAC ": originator_sequence_number=%" PRIu32 ":%" PRIu32 "",
                       EXPLODE_ARRAY6(originator_host), srclist_entry->originator_sequence_number, originator_sequence_number);
 
         // overwrite several fields of source entry if source seq_num is newer
@@ -201,11 +202,11 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
         srclist_entry->output_iface = output_iface;
         srclist_entry->originator_sequence_number = originator_sequence_number;
         srclist_entry->hop_count = hop_count;
-        timeslot_addobject(rt.ts, timestamp, rt_entry);
+
         return true;
     }
 
-    dessert_debug("get OLD rreq from " MAC ": originator_sequence_number=%u:%u",
+    dessert_debug("get OLD rreq from " MAC ": originator_sequence_number=%" PRIu32 ":%" PRIu32 "",
                   EXPLODE_ARRAY6(originator_host), srclist_entry->originator_sequence_number, originator_sequence_number);
     return false;
 }
@@ -224,11 +225,11 @@ int aodv_db_rt_capt_rrep(uint8_t destination_host[ETH_ALEN],
 
     if(rt_entry == NULL) {
         // if not found -> create routing entry
-        if(!rt_entry_create(&rt_entry, destination_host)) {
+        if(!rt_entry_create(&rt_entry, destination_host, timestamp)) {
             return false;
         }
 
-        dessert_debug("create route to " MAC ": destination_sequence_number=%u",
+        dessert_debug("create route to " MAC ": destination_sequence_number=%" PRIu32 "",
                       EXPLODE_ARRAY6(destination_host), destination_sequence_number);
 
         HASH_ADD_KEYPTR(hh, rt.entrys, rt_entry->destination_host, ETH_ALEN, rt_entry);
@@ -236,7 +237,7 @@ int aodv_db_rt_capt_rrep(uint8_t destination_host[ETH_ALEN],
 
     int u = (rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN);
     int a = hf_comp_u32(rt_entry->destination_sequence_number, destination_sequence_number);
-    dessert_trace("destination_sequence_number=%u:%u - hop_count=%u:%u p=%p", rt_entry->destination_sequence_number, destination_sequence_number, rt_entry->hop_count, hop_count, rt_entry);
+    dessert_trace("destination_sequence_number=%" PRIu32 ":%" PRIu32 " - hop_count=%" PRIu8 ":%" PRIu8 "", rt_entry->destination_sequence_number, destination_sequence_number, rt_entry->hop_count, hop_count);
 
     if(u || a <= 0) {
 
@@ -293,25 +294,26 @@ int aodv_db_rt_capt_rrep(uint8_t destination_host[ETH_ALEN],
 
         destlist_entry->rt_entry = rt_entry;
 
-        // set/change timestamp of this routing entry
-        timeslot_addobject(rt.ts, timestamp, rt_entry);
         return true;
     }
 
-    dessert_debug("get OLD rrep from " MAC ": destination_sequence_number=%u:%u",
+    dessert_debug("get OLD rrep from " MAC ": destination_sequence_number=%" PRIu32 ":%" PRIu32 "",
                   EXPLODE_ARRAY6(destination_host), rt_entry->destination_sequence_number, destination_sequence_number);
 
     return false;
 }
 
 int aodv_db_rt_getroute2dest(uint8_t destination_host[ETH_ALEN], uint8_t destination_host_next_hop_out[ETH_ALEN],
-                             dessert_meshif_t** output_iface_out, struct timeval* timestamp) {
+                             dessert_meshif_t** output_iface_out, struct timeval* timestamp, uint8_t flags) {
     aodv_rt_entry_t* rt_entry;
     HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
 
     if(rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN || rt_entry->flags & AODV_FLAGS_ROUTE_INVALID) {
+        dessert_info("route to " MAC " is invalid", EXPLODE_ARRAY6(destination_host));
         return false;
     }
+
+    rt_entry->flags |= flags;
 
     memcpy(destination_host_next_hop_out, rt_entry->destination_host_next_hop, ETH_ALEN);
     *output_iface_out = rt_entry->output_iface;
@@ -410,7 +412,7 @@ int aodv_db_rt_get_orginator_hop_count(uint8_t destination_host[ETH_ALEN], uint8
 
 }
 
-int aodv_db_rt_markrouteinv(uint8_t destination_host[ETH_ALEN]) {
+int aodv_db_rt_markrouteinv(uint8_t destination_host[ETH_ALEN], uint32_t destination_sequence_number) {
     aodv_rt_entry_t* rt_entry;
     HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
 
@@ -418,36 +420,93 @@ int aodv_db_rt_markrouteinv(uint8_t destination_host[ETH_ALEN]) {
         return false;
     }
 
-    dessert_debug("route to " MAC " marked as invalid", EXPLODE_ARRAY6(destination_host));
+    if(rt_entry->destination_sequence_number > destination_sequence_number) {
+        dessert_info("route to " MAC " seq=%" PRIu32 ":%" PRIu32 " NOT marked as invalid", EXPLODE_ARRAY6(destination_host), rt_entry->destination_sequence_number, destination_sequence_number);
+        return false;
+    }
+
+    dessert_info("route to " MAC " seq=%" PRIu32 ":%" PRIu32 " marked as invalid", EXPLODE_ARRAY6(destination_host), rt_entry->destination_sequence_number, destination_sequence_number);
     rt_entry->flags |= AODV_FLAGS_ROUTE_INVALID;
     return true;
 }
 
-int aodv_db_rt_inv_route(uint8_t destination_host_next_hop[ETH_ALEN], uint8_t destination_host_out[ETH_ALEN]) {
+int aodv_db_rt_get_destlist(uint8_t dhost_next_hop[ETH_ALEN], aodv_link_break_element_t** destlist) {
     // find appropriate routing entry
     nht_entry_t* nht_entry;
-    nht_destlist_entry_t* nht_dest_entry;
-    HASH_FIND(hh, nht, destination_host_next_hop, ETH_ALEN, nht_entry);
+    HASH_FIND(hh, nht, dhost_next_hop, ETH_ALEN, nht_entry);
 
-    if((nht_entry == NULL) || (nht_entry->dest_list == NULL)) {
+    if(nht_entry == NULL) {
         return false;
     }
 
-    nht_dest_entry = nht_entry->dest_list;
+    struct nht_destlist_entry* dest, *tmp;
 
-    // mark route as invalid and give this destination address back
-    nht_dest_entry->rt_entry->flags |= AODV_FLAGS_ROUTE_INVALID;
-    memcpy(destination_host_out, nht_dest_entry->rt_entry->destination_host, ETH_ALEN);
-
-    // cleanup next hop table
-    HASH_DEL(nht_entry->dest_list, nht_dest_entry);
-    free(nht_dest_entry);
-
-    if(nht_entry->dest_list == NULL) {
-        HASH_DEL(nht, nht_entry);
-        free(nht_entry);
+    HASH_ITER(hh, nht_entry->dest_list, dest, tmp) {
+        aodv_link_break_element_t* el = malloc(sizeof(aodv_link_break_element_t));
+        memcpy(el->host, dest->rt_entry->destination_host, ETH_ALEN);
+        el->sequence_number = dest->rt_entry->destination_sequence_number;
+        dessert_info("createERR: " MAC " seq=%" PRIu32 "", EXPLODE_ARRAY6(el->host), el->sequence_number);
+        DL_APPEND(*destlist, el);
     }
 
+    return true;
+}
+
+int aodv_db_rt_inv_over_nexthop(uint8_t next_hop[ETH_ALEN]) {
+    // mark route as invalid and give this destination address back
+    nht_entry_t* nht_entry;
+    HASH_FIND(hh, nht, next_hop, ETH_ALEN, nht_entry);
+
+    if(nht_entry == NULL) {
+        return false;
+    }
+
+    struct nht_destlist_entry* dest, *tmp;
+
+    HASH_ITER(hh, nht_entry->dest_list, dest, tmp) {
+        dest->rt_entry->flags |= AODV_FLAGS_ROUTE_INVALID;
+    }
+
+    return true;
+}
+
+/*
+ * cleanup next hop table
+ * returns true on success
+ */
+int aodv_db_rt_remove_nexthop(uint8_t next_hop[ETH_ALEN]) {
+
+    nht_entry_t* nht_entry;
+    HASH_FIND(hh, nht, next_hop, ETH_ALEN, nht_entry);
+
+    if(nht_entry == NULL) {
+        return false;
+    }
+
+    struct nht_destlist_entry* dest, *tmp;
+
+    HASH_ITER(hh, nht_entry->dest_list, dest, tmp) {
+        HASH_DEL(nht_entry->dest_list, dest);
+        free(dest);
+    }
+
+    HASH_DEL(nht, nht_entry);
+    free(nht_entry);
+    return true;
+}
+
+int aodv_db_rt_get_active_routes(aodv_link_break_element_t** head) {
+    *head = NULL;
+    aodv_rt_entry_t* dest, *tmp;
+
+    HASH_ITER(hh, rt.entrys, dest, tmp) {
+        if(dest->flags & AODV_FLAGS_ROUTE_LOCAL_USED) {
+            aodv_link_break_element_t* curr_el = malloc(sizeof(aodv_link_break_element_t));
+            memset(curr_el, 0x0, sizeof(aodv_link_break_element_t));
+            memcpy(curr_el->host, dest->destination_host, ETH_ALEN);
+            DL_APPEND(*head, curr_el);
+        }
+    }
     return true;
 }
 

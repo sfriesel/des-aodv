@@ -56,8 +56,8 @@ dessert_per_result_t aodv_periodic_cleanup_database(void* data, struct timeval* 
     }
 }
 
-dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, uint16_t count) {
-    if(*head == NULL || count == 0) {
+dessert_msg_t* aodv_create_rerr(aodv_link_break_element_t** destlist) {
+    if(*destlist == NULL) {
         return NULL;
     }
 
@@ -95,28 +95,31 @@ dessert_msg_t* aodv_create_rerr(_onlb_element_t** head, uint16_t count) {
     MESHIFLIST_ITERATOR_STOP;
 
     rerr_msg->iface_addr_count = ifaces_count;
-    uint8_t max_dl_len = DESSERT_MAXEXTDATALEN / ETH_ALEN;
 
-    while(count) {
-        int dl_len = (count >= max_dl_len) ? max_dl_len : count;
+    while(*destlist) {
+        unsigned long dl_len = 0;
 
-        if(dessert_msg_addext(msg, &ext, RERRDL_EXT_TYPE, dl_len * ETH_ALEN) != DESSERT_OK) {
+        //count the length of destlist up to MAX_MAC_SEQ_PER_EXT elements
+        aodv_link_break_element_t* count_iter;
+
+        for(count_iter = *destlist;
+            (dl_len <= MAX_MAC_SEQ_PER_EXT) && count_iter;
+            ++dl_len, count_iter = count_iter->next) {
+        }
+
+        if(dessert_msg_addext(msg, &ext, RERRDL_EXT_TYPE, dl_len * sizeof(struct aodv_mac_seq)) != DESSERT_OK) {
             break;
         }
 
-        uint8_t* iter;
-        uint8_t* end = ext->data + dl_len * ETH_ALEN;
+        struct aodv_mac_seq* start = (struct aodv_mac_seq*) ext->data, *iter;
 
-        for(iter = ext->data; iter < end; iter += ETH_ALEN) {
-            _onlb_element_t* el = *head;
-            memcpy(iter, el->dhost_ether, ETH_ALEN);
-            DL_DELETE(*head, el);
+        for(iter = start; iter < start + dl_len; ++iter) {
+            aodv_link_break_element_t* el = *destlist;
+            memcpy(iter->host, el->host, ETH_ALEN);
+            iter->sequence_number = el->sequence_number;
+            dessert_info("create rerr to: " MAC " seq=%" PRIu32 "", EXPLODE_ARRAY6(iter->host), iter->sequence_number);
+            DL_DELETE(*destlist, el);
             free(el);
-            --count;
-
-            if(!count) {
-                break;
-            }
         }
     }
 
@@ -131,50 +134,55 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
     gettimeofday(&timestamp, NULL);
 
     if(aodv_db_popschedule(&timestamp, ether_addr, &schedule_type, &schedule_param) == false) {
+        //nothing to do come back later
         return DESSERT_PER_KEEP;
     }
 
-    if(schedule_type == AODV_SC_SEND_OUT_PACKET) {
-        //do nothing
-    }
-    else if(schedule_type == AODV_SC_REPEAT_RREQ) {
-        aodv_send_rreq(ether_addr, &timestamp, (dessert_msg_t*)(schedule_param), 0/*send rreq without initial hop_count*/);
-    }
-    else if(schedule_type == AODV_SC_SEND_OUT_RERR) {
-        uint32_t rerr_count;
-        aodv_db_getrerrcount(&timestamp, &rerr_count);
-
-        if(rerr_count < RERR_RATELIMIT) {
-            uint16_t dest_count = 0;
-            uint8_t dhost_ether[ETH_ALEN];
-            _onlb_element_t* curr_el = NULL;
-            _onlb_element_t* head = NULL;
-
-            while(aodv_db_invroute(ether_addr, dhost_ether) == true) {
-                dessert_debug("invalidate route to " MAC, EXPLODE_ARRAY6(dhost_ether));
-                dest_count++;
-                curr_el = malloc(sizeof(_onlb_element_t));
-                memcpy(curr_el->dhost_ether, dhost_ether, ETH_ALEN);
-                curr_el->next = curr_el->prev = NULL;
-                DL_APPEND(head, curr_el);
-            }
-
-            if(dest_count > 0) {
-                while(head != NULL) {
-                    dessert_msg_t* rerr_msg = aodv_create_rerr(&head, dest_count);
-
-                    if(rerr_msg != NULL) {
-                        dessert_debug("link to " MAC " break -> send RERR", EXPLODE_ARRAY6(dhost_ether));
-                        dessert_meshsend(rerr_msg, NULL);
-                        dessert_msg_destroy(rerr_msg);
-                        aodv_db_putrerr(&timestamp);
-                    }
-                }
-            }
+    switch(schedule_type) {
+        case AODV_SC_SEND_OUT_PACKET: {
+            //do nothing
+            break;
         }
-    }
-    else {
-        dessert_crit("unknown schedule type=%u", schedule_type);
+        case AODV_SC_REPEAT_RREQ: {
+            aodv_send_rreq(ether_addr, &timestamp, (dessert_msg_t*)(schedule_param), 0);
+            break;
+        }
+        case AODV_SC_SEND_OUT_RERR: {
+            uint32_t rerr_count;
+            aodv_db_getrerrcount(&timestamp, &rerr_count);
+
+            if(rerr_count >= RERR_RATELIMIT) {
+                return DESSERT_PER_KEEP;
+            }
+
+            if(!aodv_db_inv_over_nexthop(ether_addr)) {
+                return 0; //nexthop not in nht
+            }
+
+            aodv_link_break_element_t* destlist = NULL;
+
+            if(!aodv_db_get_destlist(ether_addr, &destlist)) {
+                return 0; //nexthop not in nht
+            }
+
+            while(true) {
+                dessert_msg_t* rerr_msg = aodv_create_rerr(&destlist);
+
+                if(!rerr_msg) {
+                    break;
+                }
+
+                dessert_meshsend(rerr_msg, NULL);
+                dessert_msg_destroy(rerr_msg);
+                aodv_db_putrerr(&timestamp);
+            }
+
+            break;
+
+        }
+        default: {
+            dessert_crit("unknown schedule type=%" PRIu8 "", schedule_type);
+        }
     }
 
     return DESSERT_PER_KEEP;

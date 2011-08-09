@@ -33,7 +33,7 @@ typedef struct fifo_list_el {
 typedef struct fifo_list {
     fifo_list_el_t* head;
     fifo_list_el_t* tail;
-    uint8_t         size;
+    uint32_t        size;
 } fifo_list_t;
 
 /**
@@ -56,6 +56,7 @@ typedef struct pb {
 pb_t pbt;
 
 void purge_packets(struct timeval* timestamp, void* src_object, void* object) {
+    dessert_info("purging packet buffer");
     pb_el_t* pb_el = object;
     fifo_list_el_t* fl_el = pb_el->fl.head;
 

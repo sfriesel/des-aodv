@@ -50,7 +50,7 @@ For further information and questions please use the web site
 #define HELLO_EXT_TYPE				(DESSERT_EXT_USER + 4)
 #define BROADCAST_EXT_TYPE			(DESSERT_EXT_USER + 5)
 
-#define FIFO_BUFFER_MAX_ENTRY_SIZE	128 /* maximal packet count that can be stored in FIFO for one destination */
+#define FIFO_BUFFER_MAX_ENTRY_SIZE	UINT32_MAX /* maximal packet count that can be stored in FIFO for one destination */
 #define DB_CLEANUP_INTERVAL			NET_TRAVERSAL_TIME /* not in rfc */
 #define SCHEDULE_CHECK_INTERVAL		20 /* ms not in rfc */
 

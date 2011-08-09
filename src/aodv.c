@@ -68,8 +68,6 @@ int main(int argc, char** argv) {
         dessert_init("AODV", 0x03, DESSERT_OPT_DAEMONIZE);
     }
 
-    register_names();
-
     /* routing table initialization */
     aodv_db_init();
 
@@ -130,6 +128,7 @@ int main(int argc, char** argv) {
 
     /* running cli & daemon */
     cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
+    register_names();
     dessert_cli_run();
     dessert_run();
 

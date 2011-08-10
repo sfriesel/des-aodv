@@ -180,3 +180,19 @@ int cli_show_rt(struct cli_def* cli, char* command, char* argv[], int argc) {
     free(rt_report);
     return CLI_OK;
 }
+
+int cli_show_neighbor_timeslot(struct cli_def* cli, char* command, char* argv[], int argc) {
+    char* report;
+    aodv_db_neighbor_timeslot_report(&report);
+    cli_print(cli, "\n%s\n", report);
+    free(report);
+    return CLI_OK;
+}
+
+int cli_show_packet_buffer_timeslot(struct cli_def* cli, char* command, char* argv[], int argc) {
+    char* report;
+    aodv_db_packet_buffer_timeslot_report(&report);
+    cli_print(cli, "\n%s\n", report);
+    free(report);
+    return CLI_OK;
+}

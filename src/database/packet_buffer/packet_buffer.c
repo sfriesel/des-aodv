@@ -177,6 +177,10 @@ dessert_msg_t* pb_pop_packet(uint8_t dhost_ether[ETH_ALEN]) {
     return msg;
 }
 
+void pb_report(char** str_out) {
+    timeslot_report(pbt.ts, str_out);
+}
+
 int pb_cleanup(struct timeval* timestamp) {
     return timeslot_purgeobjects(pbt.ts, timestamp);
 }

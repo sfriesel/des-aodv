@@ -121,6 +121,10 @@ int db_nt_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* 
     return true;
 }
 
+void nt_report(char** str_out) {
+    timeslot_report(nt.ts, str_out);
+}
+
 int db_nt_cleanup(struct timeval* timestamp) {
     return timeslot_purgeobjects(nt.ts, timestamp);
 }

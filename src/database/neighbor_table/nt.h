@@ -50,6 +50,8 @@ int db_nt_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* 
 
 int db_nt_cleanup(struct timeval* timestamp);
 
+void nt_report(char** str_out);
+
 void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void* object);
 
 #endif

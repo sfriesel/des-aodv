@@ -279,3 +279,15 @@ int aodv_db_view_routing_table(char** str_out) {
     aodv_db_unlock();
     return result;
 }
+
+void aodv_db_neighbor_timeslot_report(char** str_out) {
+    aodv_db_rlock();
+    nt_report(str_out);
+    aodv_db_unlock();
+}
+
+void aodv_db_packet_buffer_timeslot_report(char** str_out) {
+    aodv_db_rlock();
+    pb_report(str_out);
+    aodv_db_unlock();
+}

@@ -40,5 +40,5 @@ void pb_drop_packets(uint8_t dhost_ether[ETH_ALEN]);
 
 int pb_cleanup(struct timeval* timestamp);
 
-
+void pb_report(char** str_out);
 #endif

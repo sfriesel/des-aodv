@@ -120,4 +120,7 @@ int aodv_db_data_capt_data_seq(uint8_t shost_ether[ETH_ALEN], uint16_t shost_seq
 // ----------------------------------- reporiting -------------------------------------------------------------------------
 
 int aodv_db_view_routing_table(char** str_out);
+void aodv_db_neighbor_timeslot_report(char** str_out);
+void aodv_db_packet_buffer_timeslot_report(char** str_out);
+
 #endif

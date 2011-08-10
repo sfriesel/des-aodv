@@ -38,8 +38,12 @@ int create_new_ts_element(timeslot_element_t** ts_el_out, struct timeval* timest
 
     new_el->next = NULL;
     new_el->prev = NULL;
-    new_el->purge_time.tv_sec = timestamp->tv_sec;
-    new_el->purge_time.tv_usec = timestamp->tv_usec;
+
+    struct timeval* purge_time = malloc(sizeof(struct timeval));
+    purge_time->tv_sec = timestamp->tv_sec;
+    purge_time->tv_usec = timestamp->tv_usec;
+    new_el->purge_time = purge_time;
+
     new_el->object = object;
     *ts_el_out = new_el;
     return true;
@@ -57,8 +61,9 @@ int timeslot_create(timeslot_t** ts_out, struct timeval* purge_timeout, void* sr
     ts->tail = NULL;
     ts->size = 0;
     ts->object_purger = object_purger;
-    ts->purge_timeout.tv_sec = purge_timeout->tv_sec;
-    ts->purge_timeout.tv_usec = purge_timeout->tv_usec;
+    ts->purge_timeout = malloc(sizeof(struct timeval));
+    ts->purge_timeout->tv_sec = purge_timeout->tv_sec;
+    ts->purge_timeout->tv_usec = purge_timeout->tv_usec;
     ts->src_object = src_object;
     ts->elements_hash = NULL;
     *ts_out = ts;
@@ -81,7 +86,7 @@ int timeslot_destroy(timeslot_t* ts) {
 int timeslot_purgeobjects(timeslot_t* ts, struct timeval* curr_time) {
     timeslot_element_t* search_el = ts->tail;
 
-    while(search_el != NULL && hf_compare_tv(&search_el->purge_time, curr_time) <= 0) {
+    while(search_el != NULL && hf_compare_tv(search_el->purge_time, curr_time) <= 0) {
         HASH_DEL(ts->elements_hash, search_el);
 
         if(search_el == ts->head) {
@@ -99,7 +104,7 @@ int timeslot_purgeobjects(timeslot_t* ts, struct timeval* curr_time) {
         timeslot_element_t* new_tail = ts->tail;
 
         if(ts->object_purger != NULL) {
-            ts->object_purger(&search_el->purge_time, ts->src_object, search_el->object);
+            ts->object_purger(search_el->purge_time, ts->src_object, search_el->object);
         }
 
         free(search_el);
@@ -112,7 +117,7 @@ int timeslot_purgeobjects(timeslot_t* ts, struct timeval* curr_time) {
 int timeslot_addobject(timeslot_t* ts, struct timeval* timestamp, void* object) {
     timeslot_element_t* new_el;
     struct timeval purge_time;
-    hf_add_tv(&ts->purge_timeout, timestamp, &purge_time);
+    hf_add_tv(ts->purge_timeout, timestamp, &purge_time);
 
     if(create_new_ts_element(&new_el, &purge_time, object) == false) {
         return false;
@@ -133,12 +138,12 @@ int timeslot_addobject(timeslot_t* ts, struct timeval* timestamp, void* object) 
     // insert new element into appropriate place
     timeslot_element_t* search_el = ts->head;
 
-    while(search_el->prev != NULL && (hf_compare_tv(&purge_time, &search_el->purge_time) < 0)) {
+    while(search_el->prev != NULL && (hf_compare_tv(&purge_time, search_el->purge_time) < 0)) {
         // we search for an smaller element
         search_el = search_el->prev;
     }
 
-    if(hf_compare_tv(&purge_time, &search_el->purge_time) >= 0) {
+    if(hf_compare_tv(&purge_time, search_el->purge_time) >= 0) {
         // insert new element after search element
         new_el->prev = search_el;
         new_el->next = search_el->next;
@@ -207,18 +212,44 @@ int timeslot_deleteobject(timeslot_t* ts, void* object) {
     return false;
 }
 
-void timeslot_report(timeslot_t* ts) {
-    printf("---------- Time Slot  -------------\n");
-    printf("Timeslot size : %" PRIu32 "\n", ts->size);
-    printf("max timestamp : %ld.%.6ld\n", ts->head->purge_time.tv_sec, ts->head->purge_time.tv_usec);
-    timeslot_element_t* search_el = ts->tail;
-    printf("elements : (");
+void timeslot_report(timeslot_t* ts, char** str_out) {
 
-    while(search_el != NULL) {
-        printf(" %ld.%.6ld", search_el->purge_time.tv_sec, search_el->purge_time.tv_usec);
+    char* output = calloc(1, 1024);
+    char entry[128];
+
+    if(ts == NULL) {
+        snprintf(entry, 128, "Time Slot: NULL\n");
+        strcat(output, entry);
+        *str_out = output;
+        return;
+    }
+
+    if(ts->head == NULL) {
+        snprintf(entry, 128, "Time Slot: EMPTY\n");
+        strcat(output, entry);
+        *str_out = output;
+        return;
+    }
+
+    snprintf(entry, 128, "---------- Time Slot  -------------\n");
+    strcat(output, entry);
+
+    snprintf(entry, 128, "Timeslot size : %" PRIu32 "\n", ts->size);
+    strcat(output, entry);
+
+    snprintf(entry, 128, "max timestamp : %ld.%.6ld\n", ts->head->purge_time->tv_sec, ts->head->purge_time->tv_usec);
+    strcat(output, entry);
+
+    timeslot_element_t* search_el = ts->tail;
+
+    while(search_el != NULL && search_el->purge_time != NULL) {
+        snprintf(entry, 128, "element       : ");
+        strcat(output, entry);
+        snprintf(entry, 128, "%ld.%.6ld\n", search_el->purge_time->tv_sec, search_el->purge_time->tv_usec);
+        strcat(output, entry);
         search_el = search_el->next;
     }
 
-    printf(")\n");
+    *str_out = output;
 }
 

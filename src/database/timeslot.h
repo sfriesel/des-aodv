@@ -32,7 +32,7 @@ typedef void object_purger_t(struct timeval* purge_time, void* src_object, void*
 typedef struct timeslot_element {
     struct timeslot_element*	prev;
     struct timeslot_element*	next;
-    struct timeval			 	purge_time;
+    struct timeval* 			purge_time;
     void*						object; // key
     UT_hash_handle 				hh;
 } timeslot_element_t;
@@ -42,7 +42,7 @@ typedef struct timeslot {
     struct timeslot_element*	tail;
     uint32_t					size;
     object_purger_t*			object_purger;
-    struct timeval				purge_timeout;
+    struct timeval*				purge_timeout;
     void*						src_object;
     struct timeslot_element*	elements_hash;
 } timeslot_t;
@@ -63,5 +63,7 @@ int timeslot_deleteobject(timeslot_t* ts, void* object);
 
 /**Pudges all objects older with curr_time > purge_time from time-slot*/
 int timeslot_purgeobjects(timeslot_t* sw, struct timeval* curr_time);
+
+void timeslot_report(timeslot_t* ts, char** str_out);
 
 #endif

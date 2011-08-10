@@ -88,6 +88,8 @@ int main(int argc, char** argv) {
     cli_register_command(dessert_cli, dessert_cli_show, "hello_interval", cli_show_hello_interval, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show HELLO packet interval");
     cli_register_command(dessert_cli, dessert_cli_show, "rreq_size", cli_show_rreq_size, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show RREQ packet size");
     cli_register_command(dessert_cli, dessert_cli_show, "rt", cli_show_rt, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show routing table");
+    cli_register_command(dessert_cli, dessert_cli_show, "neighbor_timeslot", cli_show_neighbor_timeslot, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show neighbor table timeslot");
+    cli_register_command(dessert_cli, dessert_cli_show, "packet_buffer_timeslot", cli_show_packet_buffer_timeslot, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show packet buffer timeslot");
 
     cli_register_command(dessert_cli, NULL, "send_rreq", cli_send_rreq, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "send RREQ to destination");
 

@@ -92,6 +92,7 @@ int rt_srclist_entry_create(aodv_rt_srclist_entry_t** srclist_entry_out,
     srclist_entry->output_iface = output_iface;
     srclist_entry->originator_sequence_number = 0; //initial
     srclist_entry->hop_count = UINT8_MAX; //initial
+    srclist_entry->flags = AODV_FLAGS_ROUTE_NEW;
 
     *srclist_entry_out = srclist_entry;
     return true;
@@ -202,6 +203,7 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
         srclist_entry->output_iface = output_iface;
         srclist_entry->originator_sequence_number = originator_sequence_number;
         srclist_entry->hop_count = hop_count;
+        srclist_entry->flags &= ~AODV_FLAGS_ROUTE_NEW;
 
         return true;
     }
@@ -508,6 +510,55 @@ int aodv_db_rt_get_active_routes(aodv_link_break_element_t** head) {
         }
     }
     return true;
+}
+
+int aodv_db_rt_capt_data_seq(uint8_t destination_host[ETH_ALEN],
+                             uint8_t originator_host[ETH_ALEN],
+                             uint8_t originator_host_prev_hop[ETH_ALEN],
+                             dessert_meshif_t* output_iface,
+                             uint16_t shost_data_seq_num,
+                             struct timeval* timestamp) {
+
+    aodv_rt_entry_t* rt_entry;
+    aodv_rt_srclist_entry_t* srclist_entry;
+
+    // find rreqt_entry with dhost_ether address
+    HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
+
+    if(rt_entry == NULL) {
+        // if not found -> create routing entry
+        if(!rt_entry_create(&rt_entry, destination_host, timestamp)) {
+            return false;
+        }
+
+        HASH_ADD_KEYPTR(hh, rt.entrys, rt_entry->destination_host, ETH_ALEN, rt_entry);
+    }
+
+    // find srclist_entry with shost_ether address
+    HASH_FIND(hh, rt_entry->src_list, originator_host, ETH_ALEN, srclist_entry);
+
+    if(srclist_entry == NULL) {
+        // if not found -> create new source entry of source list
+        if(!rt_srclist_entry_create(&srclist_entry, originator_host, originator_host_prev_hop, output_iface)) {
+            return false;
+        }
+
+        HASH_ADD_KEYPTR(hh, rt_entry->src_list, srclist_entry->originator_host, ETH_ALEN, srclist_entry);
+    }
+
+    if((srclist_entry->flags & AODV_FLAGS_ROUTE_NEW) ||
+       (srclist_entry->data_sequence_number - shost_data_seq_num > (1 << 15)) ||
+       (srclist_entry->data_sequence_number < shost_data_seq_num)) {
+
+        //data packet is newer
+        dessert_trace("data packet from mesh - from " MAC " over " MAC " id=%" PRIu16 ":%" PRIu16 "", EXPLODE_ARRAY6(originator_host), EXPLODE_ARRAY6(destination_host), srclist_entry->data_sequence_number, shost_data_seq_num);
+        srclist_entry->data_sequence_number = shost_data_seq_num;
+        return true;
+    }
+
+    //data packet is old
+    dessert_trace("DUP: data packet from mesh - from " MAC " over " MAC " id=%" PRIu16 ":%" PRIu16 "", EXPLODE_ARRAY6(originator_host), EXPLODE_ARRAY6(destination_host), srclist_entry->data_sequence_number, shost_data_seq_num);
+    return false;
 }
 
 int aodv_db_rt_cleanup(struct timeval* timestamp) {

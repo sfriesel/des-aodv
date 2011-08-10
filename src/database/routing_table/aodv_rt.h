@@ -41,7 +41,9 @@ typedef struct aodv_rt_srclist_entry {
     uint8_t				originator_host_prev_hop[ETH_ALEN];
     dessert_meshif_t*	output_iface;
     uint32_t			originator_sequence_number;
-    uint32_t            hop_count;
+    uint32_t			hop_count;
+    uint16_t			data_sequence_number;
+    uint8_t				flags;
     UT_hash_handle		hh;
 } aodv_rt_srclist_entry_t;
 
@@ -119,6 +121,8 @@ int aodv_db_rt_inv_over_nexthop(uint8_t next_hop[ETH_ALEN]);
 int aodv_db_rt_get_destlist(uint8_t dhost_next_hop[ETH_ALEN], aodv_link_break_element_t** destlist);
 
 int aodv_db_rt_get_active_routes(aodv_link_break_element_t** head);
+
+int aodv_db_rt_capt_data_seq(uint8_t destination_host[ETH_ALEN], uint8_t originator_host[ETH_ALEN], uint8_t originator_host_prev_hop[ETH_ALEN], dessert_meshif_t* output_iface, uint16_t shost_data_seq_num, struct timeval* timestamp);
 
 int aodv_db_rt_cleanup(struct timeval* timestamp);
 

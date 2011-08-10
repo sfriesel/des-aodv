@@ -267,13 +267,14 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
 
     rreq_msg->hop_count++;
 
-    if(memcmp(dessert_l25_defsrc, l25h->ether_dhost, ETH_ALEN) != 0) {  // RREQ not for me
-        int x = aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->originator_sequence_number, rreq_msg->hop_count, &ts);
+    int x = aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->originator_sequence_number, rreq_msg->hop_count, &ts);
 
-        if(!x) {
-            dessert_debug("got RREQ for " MAC " from " MAC " seq=%" PRIu32 " hop=%" PRIu8 " ttl=%" PRIu8 " -> don't rebroadcast it is OLD", EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(l25h->ether_shost), rreq_msg->originator_sequence_number, rreq_msg->hop_count, msg->ttl);
-            return DESSERT_MSG_DROP;
-        }
+    if(x == false) {
+        dessert_debug("got RREQ for " MAC " from " MAC " seq=%" PRIu32 " hop=%" PRIu8 " ttl=%" PRIu8 " -> drop it: it is OLD", EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(l25h->ether_shost), rreq_msg->originator_sequence_number, rreq_msg->hop_count, msg->ttl);
+        return DESSERT_MSG_DROP;
+    }
+
+    if(memcmp(dessert_l25_defsrc, l25h->ether_dhost, ETH_ALEN) != 0) {  // RREQ not for me
 
         dessert_trace("incoming RREQ from " MAC " to " MAC " originator_sequence_number=%" PRIu32 "", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->originator_sequence_number);
 
@@ -314,11 +315,12 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         uint32_t destination_sequence_number_copy = ++seq_num_global;
         pthread_rwlock_unlock(&pp_rwlock);
 
+        dessert_debug("incoming RREQ from " MAC " over " MAC " for me originator_sequence_number=%" PRIu32 " -> answer with RREP destination_sequence_number_copy=%" PRIu32 "",
+                      EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), rreq_msg->originator_sequence_number, destination_sequence_number_copy);
+
         dessert_msg_t* rrep_msg = _create_rrep(dessert_l25_defsrc, l25h->ether_shost, msg->l2h.ether_shost, destination_sequence_number_copy, AODV_FLAGS_RREP_A, 0);
         dessert_meshsend(rrep_msg, iface);
         dessert_msg_destroy(rrep_msg);
-        dessert_debug("incoming RREQ from " MAC " over " MAC " for me originator_sequence_number=%" PRIu32 " -> answer with RREP destination_sequence_number_copy=%" PRIu32 "",
-                      EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), rreq_msg->originator_sequence_number, destination_sequence_number_copy);
     }
 
     return DESSERT_MSG_DROP;
@@ -482,16 +484,19 @@ int aodv_forward(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, des
         return DESSERT_MSG_KEEP;
     }
 
-    dessert_meshif_t* output_iface;
     struct timeval timestamp;
+
     gettimeofday(&timestamp, NULL);
-    uint8_t next_hop[ETH_ALEN];
+
     struct ether_header* l25h = dessert_msg_getl25ether(msg);
 
-    if(true != aodv_db_data_capt_data_seq(l25h->ether_shost, msg->u16)) {
+    if(false == aodv_db_capt_data_seq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, msg->u16, &timestamp)) {
         dessert_debug("data packet is known -> DUP");
         return DESSERT_MSG_DROP;
     }
+
+    dessert_meshif_t* output_iface;
+    uint8_t next_hop[ETH_ALEN];
 
     if(aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &timestamp, AODV_FLAGS_UNUSED)) {
         memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
@@ -577,21 +582,19 @@ int aodv_sys2rp(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, dess
         int a = aodv_db_getroute2dest(l25h->ether_dhost, dhost_next_hop, &output_iface, &ts, AODV_FLAGS_ROUTE_LOCAL_USED);
 
         if(a == true) {
-            uint16_t data_seq_copy = 0;
             pthread_rwlock_wrlock(&data_seq_lock);
-            data_seq_copy = ++data_seq_global;
+            msg->u16 = ++data_seq_global;
             pthread_rwlock_unlock(&data_seq_lock);
-            msg->u16 = data_seq_copy;
 
             memcpy(msg->l2h.ether_dhost, dhost_next_hop, ETH_ALEN);
             dessert_meshsend(msg, output_iface);
 
-            dessert_trace("send data packet to mesh - to " MAC " over " MAC " id=%" PRIu16 " route is known", EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(dhost_next_hop), data_seq_global);
+            dessert_trace("send data packet to mesh - to " MAC " over " MAC " id=%" PRIu16 " route is known", EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(dhost_next_hop), msg->u16);
         }
         else {
             aodv_db_push_packet(l25h->ether_dhost, msg, &ts);
             aodv_send_rreq(l25h->ether_dhost, &ts, NULL, 0); // create and send RREQ - without initial hop_count
-            dessert_trace("send data packet to mesh - to " MAC " id=%" PRIu16 " but route is unknown -> push packet to FIFO and send RREQ", EXPLODE_ARRAY6(l25h->ether_dhost), data_seq_global);
+            dessert_trace("try to send data packet to mesh - to " MAC ", but route is unknown -> push packet to FIFO and send RREQ", EXPLODE_ARRAY6(l25h->ether_dhost));
         }
     }
 
@@ -607,13 +610,14 @@ int aodv_local_unicast(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* pro
     if(proc->lflags & DESSERT_RX_FLAG_L25_DST) {
         struct ether_header* l25h = dessert_msg_getl25ether(msg);
 
-        if(true == aodv_db_data_capt_data_seq(l25h->ether_shost, msg->u16)) {
-            dessert_trace("data packet from mesh - from " MAC " over " MAC " id=%" PRIu16 "", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), msg->u16);
-            dessert_syssend_msg(msg);
+        struct timeval timestamp;
+        gettimeofday(&timestamp, NULL);
+
+        if(false == aodv_db_capt_data_seq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, msg->u16, &timestamp)) {
+            return DESSERT_MSG_DROP;
         }
-        else {
-            dessert_trace("data packet from mesh - from " MAC " over " MAC " id=%" PRIu16 " -> DUP", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), msg->u16);
-        }
+
+        dessert_syssend_msg(msg);
     }
 
     return DESSERT_MSG_DROP;

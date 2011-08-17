@@ -35,14 +35,19 @@ uint16_t hello_size = HELLO_SIZE;
 uint16_t hello_interval = HELLO_INTERVAL;
 uint16_t rreq_size = RREQ_SIZE;
 double gossipp = GOSSIPP;
-int dest_only = DESTONLY;
+bool dest_only = DESTONLY;
+uint8_t metric_type = AODV_METRIC;
+uint16_t rreq_interval = RREQ_INTERVAL;
+int8_t signal_strength_threshold = AODV_SIGNAL_STRENGTH_THRESHOLD;
 
-dessert_periodic_t* periodic_send_hello;
+dessert_periodic_t* send_hello_periodic;
+dessert_periodic_t* send_rreq_periodic;
 
 static void register_names() {
     dessert_register_ptr_name(aodv_periodic_send_hello, "aodv_periodic_send_hello");
     dessert_register_ptr_name(aodv_periodic_cleanup_database, "aodv_periodic_cleanup_database");
     dessert_register_ptr_name(aodv_periodic_scexecute, "aodv_periodic_scexecute");
+    dessert_register_ptr_name(aodv_periodic_send_rreq, "aodv_periodic_send_rreq");
 }
 
 int main(int argc, char** argv) {
@@ -79,17 +84,30 @@ int main(int argc, char** argv) {
     cli_register_command(dessert_cli, dessert_cli_cfg_iface, "mesh", dessert_cli_cmd_addmeshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize mesh interface");
 
     cli_register_command(dessert_cli, dessert_cli_set, "hello_size", cli_set_hello_size, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set HELLO packet size");
+    cli_register_command(dessert_cli, dessert_cli_show, "hello_size", cli_show_hello_size, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show HELLO packet size");
+
     cli_register_command(dessert_cli, dessert_cli_set, "hello_interval", cli_set_hello_interval, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set HELLO packet interval");
+    cli_register_command(dessert_cli, dessert_cli_show, "hello_interval", cli_show_hello_interval, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show HELLO packet interval");
+
     cli_register_command(dessert_cli, dessert_cli_set, "rreq_size", cli_set_rreq_size, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set RREQ packet size");
+    cli_register_command(dessert_cli, dessert_cli_show, "rreq_size", cli_show_rreq_size, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show RREQ packet size");
+
+    cli_register_command(dessert_cli, dessert_cli_set, "metric", cli_set_metric, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set metric");
+    cli_register_command(dessert_cli, dessert_cli_show, "metric", cli_show_metric, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show metric");
+
+    cli_register_command(dessert_cli, dessert_cli_set, "periodic_rreq_interval", cli_set_periodic_rreq_interval, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set periodic rreq interval");
+    cli_register_command(dessert_cli, dessert_cli_show, "periodic_rreq_interval", cli_show_periodic_rreq_interval, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show periodic rreq interval");
+
+    cli_register_command(dessert_cli, dessert_cli_set, "signal_strength_threshold", cli_set_preemptive_rreq_signal_strength_threshold, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set preemptive rreq signal strength threshold");
+    cli_register_command(dessert_cli, dessert_cli_show, "signal_strength_threshold", cli_show_preemptive_rreq_signal_strength_threshold, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show preemptive rreq signal strength threshold");
+
     cli_register_command(dessert_cli, dessert_cli_set, "gossip_p", cli_set_gossipp, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set p for gossip  p in [0.0,...,1.0]");
     cli_register_command(dessert_cli, dessert_cli_set, "shortcut", cli_set_shortcut, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set shortcut mode");
 
-    cli_register_command(dessert_cli, dessert_cli_show, "hello_size", cli_show_hello_size, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show HELLO packet size");
-    cli_register_command(dessert_cli, dessert_cli_show, "hello_interval", cli_show_hello_interval, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show HELLO packet interval");
-    cli_register_command(dessert_cli, dessert_cli_show, "rreq_size", cli_show_rreq_size, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show RREQ packet size");
     cli_register_command(dessert_cli, dessert_cli_show, "rt", cli_show_rt, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show routing table");
     cli_register_command(dessert_cli, dessert_cli_show, "neighbor_timeslot", cli_show_neighbor_timeslot, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show neighbor table timeslot");
     cli_register_command(dessert_cli, dessert_cli_show, "packet_buffer_timeslot", cli_show_packet_buffer_timeslot, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show packet buffer timeslot");
+    cli_register_command(dessert_cli, dessert_cli_show, "data_seq_timeslot", cli_show_data_seq_timeslot, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show data seq timeslot");
 
     cli_register_command(dessert_cli, NULL, "send_rreq", cli_send_rreq, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "send RREQ to destination");
 
@@ -115,8 +133,8 @@ int main(int argc, char** argv) {
     struct timeval hello_interval_t;
     hello_interval_t.tv_sec = hello_interval / 1000;
     hello_interval_t.tv_usec = (hello_interval % 1000) * 1000;
-    periodic_send_hello = dessert_periodic_add(aodv_periodic_send_hello, NULL, NULL, &hello_interval_t);
-    dessert_notice("setting HELLO interval to [%" PRIu16 "]ms", hello_interval);
+    send_hello_periodic = dessert_periodic_add(aodv_periodic_send_hello, NULL, NULL, &hello_interval_t);
+    dessert_notice("setting HELLO interval to %" PRIu16 " ms", hello_interval);
 
     struct timeval cleanup_interval;
     cleanup_interval.tv_sec = DB_CLEANUP_INTERVAL / 1000;

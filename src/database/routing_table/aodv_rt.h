@@ -41,8 +41,8 @@ typedef struct aodv_rt_srclist_entry {
     uint8_t				originator_host_prev_hop[ETH_ALEN];
     dessert_meshif_t*	output_iface;
     uint32_t			originator_sequence_number;
-    uint32_t			hop_count;
-    uint16_t			data_sequence_number;
+    metric_t			metric;
+    uint8_t				hop_count;
     uint8_t				flags;
     UT_hash_handle		hh;
 } aodv_rt_srclist_entry_t;
@@ -52,6 +52,7 @@ typedef struct aodv_rt_entry {
     uint8_t				destination_host_next_hop[ETH_ALEN];
     dessert_meshif_t*	output_iface;
     uint32_t			destination_sequence_number;
+    metric_t			metric;
     uint8_t				hop_count;
     /**
      * flags format: 0 0 0 0 0 0 U I
@@ -65,7 +66,7 @@ typedef struct aodv_rt_entry {
 
 
 typedef struct aodv_rt {
-    aodv_rt_entry_t*		entrys;
+    aodv_rt_entry_t*	entrys;
     timeslot_t*			ts;
 } aodv_rt_t;
 
@@ -91,6 +92,7 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
                          uint8_t originator_host_prev_hop[ETH_ALEN],
                          dessert_meshif_t* output_iface,
                          uint32_t originator_sequence_number,
+                         metric_t metric,
                          uint8_t hop_count,
                          struct timeval* timestamp);
 
@@ -98,6 +100,7 @@ int aodv_db_rt_capt_rrep(uint8_t destination_host[ETH_ALEN],
                          uint8_t destination_host_next_hop[ETH_ALEN],
                          dessert_meshif_t* output_iface,
                          uint32_t destination_sequence_number,
+                         metric_t metric,
                          uint8_t hop_count,
                          struct timeval* timestamp);
 
@@ -113,18 +116,20 @@ int aodv_db_rt_get_destination_sequence_number(uint8_t destination_host[ETH_ALEN
 
 int aodv_db_rt_get_originator_sequence_number(uint8_t destination_host[ETH_ALEN], uint8_t originator_host[ETH_ALEN], uint32_t* originator_sequence_number_out);
 
-int aodv_db_rt_get_orginator_hop_count(uint8_t destination_host[ETH_ALEN], uint8_t originator_host[ETH_ALEN], uint8_t* last_hop_count_orginator_out);
+int aodv_db_rt_get_orginator_metric(uint8_t destination_host[ETH_ALEN], uint8_t originator_host[ETH_ALEN], metric_t* last_metric_orginator_out);
 
 int aodv_db_rt_markrouteinv(uint8_t destination_host[ETH_ALEN], uint32_t destination_sequence_number);
 int aodv_db_rt_remove_nexthop(uint8_t next_hop[ETH_ALEN]);
 int aodv_db_rt_inv_over_nexthop(uint8_t next_hop[ETH_ALEN]);
 int aodv_db_rt_get_destlist(uint8_t dhost_next_hop[ETH_ALEN], aodv_link_break_element_t** destlist);
 
+int aodv_db_rt_get_warn_endpoints_from_neighbor_and_set_warn(uint8_t neighbor[ETH_ALEN], aodv_link_break_element_t** head);
+int aodv_db_rt_get_warn_status(uint8_t dhost_ether[ETH_ALEN]);
+
 int aodv_db_rt_get_active_routes(aodv_link_break_element_t** head);
 
-int aodv_db_rt_capt_data_seq(uint8_t destination_host[ETH_ALEN], uint8_t originator_host[ETH_ALEN], uint8_t originator_host_prev_hop[ETH_ALEN], dessert_meshif_t* output_iface, uint16_t shost_data_seq_num, struct timeval* timestamp);
-
 int aodv_db_rt_cleanup(struct timeval* timestamp);
+int aodv_db_rt_routing_reset(uint32_t* count_out);
 
 int aodv_db_rt_report(char** str_out);
 

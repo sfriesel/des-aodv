@@ -52,7 +52,6 @@ int cli_set_shortcut(struct cli_def* cli, char* command, char* argv[], int argc)
     return CLI_OK;
 }
 
-
 int cli_set_hello_size(struct cli_def* cli, char* command, char* argv[], int argc) {
     uint16_t min_size = sizeof(dessert_msg_t) + sizeof(struct ether_header) + 2;
 
@@ -80,13 +79,18 @@ int cli_set_hello_interval(struct cli_def* cli, char* command, char* argv[], int
     }
 
     hello_interval = (uint16_t) strtoul(argv[0], NULL, 10);
-    aodv_db_neighbor_table_reset();
-    dessert_periodic_del(periodic_send_hello);
+
+    uint32_t count = 0;
+    aodv_db_neighbor_reset(&count);
+
+    dessert_periodic_del(send_hello_periodic);
+    send_hello_periodic = NULL;
+
     struct timeval hello_interval_t;
     hello_interval_t.tv_sec = hello_interval / 1000;
     hello_interval_t.tv_usec = (hello_interval % 1000) * 1000;
-    periodic_send_hello = dessert_periodic_add(aodv_periodic_send_hello, NULL, NULL, &hello_interval_t);
-    dessert_notice("setting HELLO interval to %" PRIu16 "", hello_interval);
+    send_hello_periodic = dessert_periodic_add(aodv_periodic_send_hello, NULL, NULL, &hello_interval_t);
+    dessert_notice("setting HELLO interval to %" PRIu16 " ms - %" PRIu32 " neighbors invalidated...", hello_interval, count);
     return CLI_OK;
 }
 
@@ -132,7 +136,7 @@ int cli_set_gossipp(struct cli_def* cli, char* command, char* argv[], int argc) 
 int cli_send_rreq(struct cli_def* cli, char* command, char* argv[], int argc) {
 
     if(argc != 2) {
-        cli_print(cli, "usage of %s command [hardware address as XX:XX:XX:XX:XX:XX] [initial_hop_count]\n", command);
+        cli_print(cli, "usage of %s command [hardware address as XX:XX:XX:XX:XX:XX] [initial_metric]\n", command);
         return CLI_ERROR_ARG;
     }
 
@@ -140,21 +144,175 @@ int cli_send_rreq(struct cli_def* cli, char* command, char* argv[], int argc) {
     int ok = dessert_parse_mac(argv[0], &host);
 
     if(ok != 0) {
-        cli_print(cli, "usage of %s command [hardware address as XX:XX:XX:XX:XX:XX] [initial_hop_count]\n", command);
+        cli_print(cli, "usage of %s command [hardware address as XX:XX:XX:XX:XX:XX] [initial_metric]\n", command);
         return CLI_ERROR_ARG;
     }
 
-    uint8_t initial_hop_count = 0;
-    sscanf(argv[1], "%hhu", &initial_hop_count);
+    metric_t initial_metric = 0;
+    initial_metric = atoi(argv[1]);
 
-    cli_print(cli, MAC " -> using %" PRIu8 " as initial_hop_count\n", EXPLODE_ARRAY6(host), initial_hop_count);
+    cli_print(cli, MAC " -> using %" AODV_PRI_METRIC " as initial_metric\n", EXPLODE_ARRAY6(host), initial_metric);
 
     struct timeval ts;
 
     gettimeofday(&ts, NULL);
 
-    aodv_send_rreq(host, &ts, NULL, initial_hop_count);
+    aodv_send_rreq(host, &ts, NULL, initial_metric);
 
+    return CLI_OK;
+}
+
+int cli_set_metric(struct cli_def* cli, char* command, char* argv[], int argc) {
+
+    if(argc != 1) {
+        cli_print(cli, "usage of %s command [metric]\n", command);
+        return CLI_ERROR_ARG;
+    }
+
+    char* metric_string = argv[0];
+
+    int hop = strcmp(metric_string, "AODV_METRIC_HOP_COUNT");
+
+    if(hop == 0) {
+        metric_type = AODV_METRIC_HOP_COUNT;
+    }
+
+    int rssi = strcmp(metric_string, "AODV_METRIC_RSSI");
+
+    if(rssi == 0) {
+        metric_type = AODV_METRIC_RSSI;
+    }
+
+    int etx = strcmp(metric_string, "AODV_METRIC_ETX");
+
+    if(etx == 0) {
+        metric_string = "AODV_METRIC_ETX -> not implemented! -> using AODV_METRIC_HOP_COUNT as fallback";
+        metric_type = AODV_METRIC_HOP_COUNT;
+    }
+
+    int ett = strcmp(metric_string, "AODV_METRIC_ETT");
+
+    if(ett == 0) {
+        metric_string = "AODV_METRIC_ETT -> not implemented! -> using AODV_METRIC_HOP_COUNT as fallback";
+        metric_type = AODV_METRIC_HOP_COUNT;
+    }
+
+    uint32_t count_out = 0;
+    aodv_db_routing_reset(&count_out);
+
+    cli_print(cli, "metric set to %s....resetting routing table: %" PRIu32 " entries invalidated!", metric_string, count_out);
+    dessert_notice("metric set to %s....resetting routing table: %" PRIu32 " entries invalidated!", metric_string, count_out);
+    return CLI_OK;
+}
+
+int cli_set_periodic_rreq_interval(struct cli_def* cli, char* command, char* argv[], int argc) {
+
+    if(argc != 1) {
+        cli_print(cli, "usage %s [interval in ms]\n", command);
+        return CLI_ERROR;
+    }
+
+    rreq_interval = strtol(argv[0], NULL, 10);
+
+    dessert_periodic_del(send_rreq_periodic);
+    send_rreq_periodic = NULL;
+
+    if(rreq_interval == 0) {
+        cli_print(cli, "periodic RREQ is off");
+        dessert_notice("periodic RREQ is off");
+        return CLI_OK;
+    }
+
+    struct timeval schedule_rreq_interval;
+
+    schedule_rreq_interval.tv_sec = rreq_interval / 1000;
+
+    schedule_rreq_interval.tv_usec = (rreq_interval % 1000) * 1000;
+
+    send_rreq_periodic = dessert_periodic_add(aodv_periodic_send_rreq, NULL, NULL, &schedule_rreq_interval);
+
+    cli_print(cli, "periodic RREQ Interval set to %" PRIu16 " ms", rreq_interval);
+
+    dessert_notice("periodic RREQ Interval set to %" PRIu16 " ms", rreq_interval);
+
+    return CLI_OK;
+}
+
+int cli_show_periodic_rreq_interval(struct cli_def* cli, char* command, char* argv[], int argc) {
+
+    if(rreq_interval == 0) {
+        cli_print(cli, "periodic RREQ is off");
+    }
+    else {
+        cli_print(cli, "periodic RREQ Interval = %" PRIu16 " ms", rreq_interval);
+    }
+
+    return CLI_OK;
+}
+
+int cli_set_preemptive_rreq_signal_strength_threshold(struct cli_def* cli, char* command, char* argv[], int argc) {
+
+    if(argc != 1) {
+        cli_print(cli, "usage %s [threshold in dbm]\n", command);
+        return CLI_ERROR;
+    }
+
+    signal_strength_threshold = strtol(argv[0], NULL, 10);
+
+    if(signal_strength_threshold == 0) {
+        cli_print(cli, "preemptive RREQ is off");
+        dessert_notice("preemptive RREQ is off");
+        return CLI_OK;
+    }
+
+    uint32_t count_out = 0;
+    aodv_db_neighbor_reset(&count_out);
+
+    cli_print(cli, "preemptive RREQ treshold is %" PRId8 " dbm - %" PRIu32 " neighbors invalidated...", signal_strength_threshold, count_out);
+    dessert_notice("preemptive RREQ treshold is %" PRId8 " dbm - %" PRIu32 " neighbors invalidated...", signal_strength_threshold, count_out);
+
+    return CLI_OK;
+}
+
+int cli_show_preemptive_rreq_signal_strength_threshold(struct cli_def* cli, char* command, char* argv[], int argc) {
+
+    if(signal_strength_threshold == 0) {
+        cli_print(cli, "preemptive RREQ is off");
+    }
+    else {
+        cli_print(cli, "preemptive RREQ treshold is %" PRId8 " dbm", signal_strength_threshold);
+    }
+
+    return CLI_OK;
+}
+
+int cli_show_metric(struct cli_def* cli, char* command, char* argv[], int argc) {
+
+    char* metric_string = NULL;
+
+    switch(metric_type) {
+        case AODV_METRIC_HOP_COUNT: {
+            metric_string = "AODV_METRIC_HOP_COUNT";
+            break;
+        }
+        case AODV_METRIC_RSSI: {
+            metric_string = "AODV_METRIC_RSSI";
+            break;
+        }
+        case AODV_METRIC_ETX: {
+            metric_string = "AODV_METRIC_ETX -> not implemented! -> using AODV_METRIC_HOP_COUNT as fallback";
+            break;
+        }
+        case AODV_METRIC_ETT: {
+            metric_string = "AODV_METRIC_ETT -> not implemented! -> using AODV_METRIC_HOP_COUNT as fallback";
+            break;
+        }
+        default: {
+            metric_string = "UNKNOWN METRIC -> you have some serious problems -> using AODV_METRIC_HOP_COUNT as fallback";
+        }
+    }
+
+    cli_print(cli, "metric is set to %s", metric_string);
     return CLI_OK;
 }
 
@@ -192,6 +350,14 @@ int cli_show_neighbor_timeslot(struct cli_def* cli, char* command, char* argv[],
 int cli_show_packet_buffer_timeslot(struct cli_def* cli, char* command, char* argv[], int argc) {
     char* report;
     aodv_db_packet_buffer_timeslot_report(&report);
+    cli_print(cli, "\n%s\n", report);
+    free(report);
+    return CLI_OK;
+}
+
+int cli_show_data_seq_timeslot(struct cli_def* cli, char* command, char* argv[], int argc) {
+    char* report;
+    aodv_db_data_seq_timeslot_report(&report);
     cli_print(cli, "\n%s\n", report);
     free(report);
     return CLI_OK;

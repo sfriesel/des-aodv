@@ -64,8 +64,6 @@ struct aodv_msg_rreq {
      * U - Unknown sequence number; indicates the destination sequence number is unknown
      */
     uint16_t		flags;
-    /** The number of hops from the originator to the node habdling the request */
-    uint8_t		hop_count;
 
     uint32_t		destination_sequence_number;
 
@@ -80,9 +78,6 @@ struct aodv_msg_rrep {
      * A - acknowledgement required;
      */
     uint8_t		flags;
-
-    /**  Hop Count: The number of hops from the originator to destination */
-    uint8_t		hop_count;
 
     uint32_t		destination_sequence_number;
     /**
@@ -149,9 +144,12 @@ int aodv_local_unicast(dessert_msg_t* msg, uint32_t len,
 int aodv_drop_errors(dessert_msg_t* msg, uint32_t len,
                      dessert_msg_proc_t* proc, dessert_meshif_t* iface, dessert_frameid_t id);
 
+void aodv_send_packets_from_buffer(uint8_t ether_dhost[ETH_ALEN], uint8_t next_hop[ETH_ALEN], dessert_meshif_t* iface);
+
 // ------------------------------ periodic ----------------------------------------------------
 
 dessert_per_result_t aodv_periodic_send_hello(void* data, struct timeval* scheduled, struct timeval* interval);
+dessert_per_result_t aodv_periodic_send_rreq(void* data, struct timeval* scheduled, struct timeval* interval);
 
 /** clean up database from old entrys */
 dessert_per_result_t aodv_periodic_cleanup_database(void* data, struct timeval* scheduled, struct timeval* interval);
@@ -160,8 +158,12 @@ dessert_msg_t* aodv_create_rerr(aodv_link_break_element_t** destlist);
 
 dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* scheduled, struct timeval* interval);
 
+// ------------------------------ metric ----------------------------------------------------
+
+int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_t* iface);
+
 // ------------------------------ helper ------------------------------------------------------
 
-void aodv_send_rreq(uint8_t dhost_ether[ETH_ALEN], struct timeval* ts, dessert_msg_t* rreq_msg, uint8_t initial_hop_count);
+void aodv_send_rreq(uint8_t dhost_ether[ETH_ALEN], struct timeval* ts, dessert_msg_t* rreq_msg, metric_t initial_metric);
 
 #endif

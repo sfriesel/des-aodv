@@ -28,19 +28,47 @@ For further information and questions please use the web site
 #include <pthread.h>
 #include <utlist.h>
 
+uint16_t seq_num_hello = 0;
+pthread_rwlock_t hello_rwlock = PTHREAD_RWLOCK_INITIALIZER;
+
 dessert_per_result_t aodv_periodic_send_hello(void* data, struct timeval* scheduled, struct timeval* interval) {
-    // create new HELLO message with hello_ext.
-    dessert_msg_t* hello_msg;
-    dessert_msg_new(&hello_msg);
-    hello_msg->ttl = 2;
+
+    dessert_msg_t* msg;
+    dessert_msg_new(&msg);
+    msg->ttl = 2;
+
+    pthread_rwlock_wrlock(&hello_rwlock);
+    msg->u16 = seq_num_hello++;
+    pthread_rwlock_unlock(&hello_rwlock);
 
     dessert_ext_t* ext;
-    dessert_msg_addext(hello_msg, &ext, HELLO_EXT_TYPE, sizeof(struct aodv_msg_hello));
+    dessert_msg_addext(msg, &ext, HELLO_EXT_TYPE, sizeof(struct aodv_msg_hello));
 
-    dessert_msg_dummy_payload(hello_msg, hello_size);
+    dessert_msg_dummy_payload(msg, hello_size);
 
-    dessert_meshsend(hello_msg, NULL);
-    dessert_msg_destroy(hello_msg);
+    dessert_meshsend(msg, NULL);
+    dessert_msg_destroy(msg);
+    return DESSERT_PER_KEEP;
+}
+
+dessert_per_result_t aodv_periodic_send_rreq(void* data, struct timeval* scheduled, struct timeval* interval) {
+    dessert_trace("call periodic send rreq");
+
+    struct timeval timestamp;
+    gettimeofday(&timestamp, NULL);
+
+    aodv_link_break_element_t* head = NULL;
+
+    if(!aodv_db_get_active_routes(&head)) {
+        return DESSERT_PER_UNREGISTER;
+    }
+
+    aodv_link_break_element_t* dest, *tmp;
+    DL_FOREACH_SAFE(head, dest, tmp) {
+        dessert_info("periodic send rreq to: " MAC " - interval=%" PRIu16 " ms", EXPLODE_ARRAY6(dest->host), rreq_interval);
+        aodv_send_rreq(dest->host, &timestamp, NULL, 0);
+        free(dest);
+    }
     return DESSERT_PER_KEEP;
 }
 
@@ -178,7 +206,31 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
             }
 
             break;
+        }
+        case AODV_SC_SEND_OUT_RWARN: {
+            aodv_link_break_element_t* head = NULL;
+            aodv_db_get_warn_endpoints_from_neighbor_and_set_warn(ether_addr, &head);
 
+            aodv_link_break_element_t* dest, *tmp;
+            DL_FOREACH_SAFE(head, dest, tmp) {
+                dessert_debug("AODV_SC_SEND_OUT_RWARN: " MAC " -> " MAC,
+                              EXPLODE_ARRAY6(ether_addr),
+                              EXPLODE_ARRAY6(dest->host));
+                aodv_send_rreq(dest->host, &timestamp, NULL, 0);
+            }
+            break;
+        }
+        case AODV_SC_UPDATE_RSSI: {
+            dessert_meshif_t* iface = (dessert_meshif_t*)(schedule_param);
+            int8_t diff = aodv_db_update_rssi(ether_addr, iface, &timestamp);
+
+            if(diff > signal_strength_threshold) {
+                //walking away -> we need to send a new warn
+                dessert_debug("%s <= W => " MAC, iface->if_name, EXPLODE_ARRAY6(ether_addr));
+                aodv_db_addschedule(&timestamp, ether_addr, AODV_SC_SEND_OUT_RWARN, 0);
+            }
+
+            break;
         }
         default: {
             dessert_crit("unknown schedule type=%" PRIu8 "", schedule_type);

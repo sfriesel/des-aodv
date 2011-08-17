@@ -31,6 +31,25 @@ For further information and questions please use the web site
 #include <linux/if_ether.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include "config.h"
+
+/******************************************************************************/
+
+/**
+ * Compares two integers
+ * returns 0 if i = j
+ * return 1 if i > j (cirlce diff < (MAXUINT8 / 2))
+ * return -1 if i < j (circle diff > (MAXUINT8 / 2))
+ */
+int hf_comp_u8(uint8_t i, uint8_t j);
+
+/**
+ * Compares two integers
+ * returns 0 if i = j
+ * return 1 if i > j (cirlce diff < (MAXUINT16 / 2))
+ * return -1 if i < j (circle diff > (MAXUINT16 / 2))
+ */
+int hf_comp_u16(uint16_t i, uint16_t j);
 
 /**
  * Compares two integers
@@ -39,6 +58,12 @@ For further information and questions please use the web site
  * return -1 if i < j (circle diff > (MAXUINT32 / 2))
  */
 int hf_comp_u32(uint32_t i, uint32_t j);
+
+/******************************************************************************/
+
+int hf_comp_metric(metric_t i, metric_t j);
+
+/******************************************************************************/
 
 /**
  * Compares two timevals.
@@ -53,12 +78,9 @@ int hf_compare_tv(struct timeval* tv1, struct timeval* tv2);
  */
 int hf_add_tv(struct timeval* tv1, struct timeval* tv2, struct timeval* sum);
 
-/**
- * Compares two integers
- * returns 0 if i = j
- * return 1 if i > j (cirlce diff < (MAXUINT8 / 2))
- * return -1 if i < j (circle diff > (MAXUINT8 / 2))
- */
-int hf_comp_u8(uint8_t i, uint8_t j);
+/******************************************************************************/
+
+/** Return value between 1 and 5 for rssi values */
+uint8_t hf_rssi2interval(int8_t rssi);
 
 #endif

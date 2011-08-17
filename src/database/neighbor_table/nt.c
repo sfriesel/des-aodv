@@ -30,6 +30,8 @@ typedef struct neighbor_entry {
     struct __attribute__((__packed__)) {  // key
         uint8_t             ether_neighbor[ETH_ALEN];
         dessert_meshif_t*   iface;
+        uint16_t            last_hello_seq;
+        int8_t              max_rssi;
     };
     UT_hash_handle          hh;
 } neighbor_entry_t;
@@ -51,6 +53,8 @@ neighbor_entry_t* db_neighbor_entry_create(uint8_t ether_neighbor_addr[ETH_ALEN]
 
     memcpy(new_entry->ether_neighbor, ether_neighbor_addr, ETH_ALEN);
     new_entry->iface = iface;
+    new_entry->last_hello_seq = 0; /* initial */
+    new_entry->max_rssi = AODV_SIGNAL_STRENGTH_INIT;
     return new_entry;
 }
 
@@ -60,7 +64,55 @@ void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void*
     HASH_DEL(nt.entrys, curr_entry);
 
     aodv_db_sc_addschedule(timestamp, curr_entry->ether_neighbor, AODV_SC_SEND_OUT_RERR, 0);
+    aodv_db_sc_dropschedule(curr_entry->ether_neighbor, AODV_SC_UPDATE_RSSI);
     free(curr_entry);
+}
+
+int db_nt_reset_rssi(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {
+    neighbor_entry_t* curr_entry = NULL;
+    uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
+    memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
+    memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
+    HASH_FIND(hh, nt.entrys, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
+
+    if(curr_entry == NULL) {
+        return false;
+    }
+
+    dessert_debug("neighbor reset rssi: " MAC " -> %" PRId8 ":%" PRId8 "", EXPLODE_ARRAY6(ether_neighbor_addr), curr_entry->max_rssi, AODV_SIGNAL_STRENGTH_INIT);
+    curr_entry->max_rssi = AODV_SIGNAL_STRENGTH_INIT;
+
+    return true;
+}
+
+int8_t db_nt_update_rssi(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {
+
+    neighbor_entry_t* curr_entry = NULL;
+    uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
+    memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
+    memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
+    HASH_FIND(hh, nt.entrys, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
+
+    if(curr_entry == NULL) {
+        return 0;
+    }
+
+    int8_t new = AODV_SIGNAL_STRENGTH_INIT;
+    avg_node_result_t neigh_result = dessert_rssi_avg(ether_neighbor_addr, curr_entry->iface);
+
+    if(neigh_result.avg_rssi != 0) {
+        new = neigh_result.avg_rssi;
+    }
+
+    int8_t diff = (curr_entry->max_rssi - new);
+
+    if(diff < 0) {
+        //walking to the ap
+        dessert_debug("%s <= R %" PRId8 " > %" PRId8 " => " MAC, iface->if_name, curr_entry->max_rssi, new, EXPLODE_ARRAY6(ether_neighbor_addr));
+        curr_entry->max_rssi = new;
+    }
+
+    return diff;
 }
 
 int db_nt_init() {
@@ -79,11 +131,31 @@ int db_nt_init() {
     return true;
 }
 
-int db_nt_reset() {
-    return db_nt_init();
+int aodv_db_nt_neighbor_destroy(uint32_t* count_out) {
+    *count_out = 0;
+
+    neighbor_entry_t* neigh = NULL;
+    neighbor_entry_t* tmp = NULL;
+    HASH_ITER(hh, nt.entrys, neigh, tmp) {
+        aodv_db_sc_dropschedule(neigh->ether_neighbor, AODV_SC_UPDATE_RSSI);
+        HASH_DEL(nt.entrys, neigh);
+        free(neigh);
+        (*count_out)++;
+    }
+    return true;
 }
 
-int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {
+int aodv_db_nt_neighbor_reset(uint32_t* count_out) {
+
+    int result = true;
+    result &= aodv_db_nt_neighbor_destroy(count_out);
+    result &= timeslot_destroy(nt.ts);
+    result &= db_nt_init();
+
+    return result;
+}
+
+int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp) {
     neighbor_entry_t* curr_entry = NULL;
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
     memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
@@ -100,6 +172,13 @@ int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* if
 
         HASH_ADD_KEYPTR(hh, nt.entrys, curr_entry->ether_neighbor, ETH_ALEN + sizeof(void*), curr_entry);
         dessert_debug("%s <=====> " MAC, iface->if_name, EXPLODE_ARRAY6(ether_neighbor_addr));
+    }
+
+    curr_entry->last_hello_seq = hello_seq;
+
+    if(signal_strength_threshold > 0) {
+        /* preemptive rreq is turned on */
+        aodv_db_sc_addschedule(timestamp, curr_entry->ether_neighbor, AODV_SC_UPDATE_RSSI, (void*) iface);
     }
 
     timeslot_addobject(nt.ts, timestamp, curr_entry);

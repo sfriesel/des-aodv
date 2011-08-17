@@ -21,38 +21,24 @@ For further information and questions please use the web site
        http://www.des-testbed.net
 *******************************************************************************/
 
-#ifndef AODV_NT
-#define AODV_NT
-
 #include <dessert.h>
+#include <uthash.h>
+#include "../timeslot.h"
+#include "../../config.h"
+#include "../../helper.h"
 
 #ifdef ANDROID
 #include <linux/if_ether.h>
 #endif
 
 /** initialize neighbor table */
-int db_nt_init();
+int db_ds_init();
 
-int aodv_db_nt_neighbor_reset(uint32_t* count_out);
+int aodv_db_ds_capt_data_seq(uint8_t src_addr[ETH_ALEN], uint16_t data_seq_num, uint8_t hop_count, struct timeval* timestamp);
 
-int db_nt_reset_rssi(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
+int db_ds_cleanup(struct timeval* timestamp);
 
-int8_t db_nt_update_rssi(uint8_t ether_neighbor[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
-/**
- * Take a record that the given neighbor seems to be
- * 1 hop bidirectional neighbor
- */
-int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp);
+void ds_report(char** str_out);
 
-/**
- * Check whether given neighbor is 1 hop bidirectional neighbor
- */
-int db_nt_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
+void db_ds_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void* object);
 
-int db_nt_cleanup(struct timeval* timestamp);
-
-void nt_report(char** str_out);
-
-void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void* object);
-
-#endif

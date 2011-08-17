@@ -35,7 +35,7 @@ For further information and questions please use the web site
 /** initialize all tables of routing database */
 int aodv_db_init();
 
-int aodv_db_neighbor_table_reset();
+int aodv_db_neighbor_reset(uint32_t* count_out);
 
 /** cleanup (purge) old entrys from all database tables */
 int aodv_db_cleanup(struct timeval* timestamp);
@@ -54,6 +54,7 @@ int aodv_db_capt_rreq(uint8_t destination_host[ETH_ALEN],
                       uint8_t originator_host_prev_hop[ETH_ALEN],
                       dessert_meshif_t* output_iface,
                       uint32_t originator_sequence_number,
+                      metric_t metric,
                       uint8_t hop_count,
                       struct timeval* timestamp);
 
@@ -61,6 +62,7 @@ int aodv_db_capt_rrep(uint8_t destination_host[ETH_ALEN],
                       uint8_t destination_host_next_hop[ETH_ALEN],
                       dessert_meshif_t* output_iface,
                       uint32_t destination_sequence_number,
+                      metric_t metric,
                       uint8_t hop_count,
                       struct timeval* timestamp);
 /**
@@ -79,25 +81,34 @@ int aodv_db_get_destination_sequence_number(uint8_t dhost_ether[ETH_ALEN], uint3
 
 int aodv_db_get_originator_sequence_number(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN], uint32_t* originator_sequence_number_out);
 
-int aodv_db_get_orginator_hop_count(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN], uint8_t* last_hop_count_orginator_out);
+int aodv_db_get_orginator_metric(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN], metric_t* last_metric_orginator_out);
 
 int aodv_db_markrouteinv(uint8_t dhost_ether[ETH_ALEN], uint32_t destination_sequence_number);
 int aodv_db_remove_nexthop(uint8_t next_hop[ETH_ALEN]);
 int aodv_db_inv_over_nexthop(uint8_t next_hop[ETH_ALEN]);
 int aodv_db_get_destlist(uint8_t dhost_next_hop[ETH_ALEN], aodv_link_break_element_t** destlist);
 
+int aodv_db_get_warn_endpoints_from_neighbor_and_set_warn(uint8_t neighbor[ETH_ALEN], aodv_link_break_element_t** head);
+int aodv_db_get_warn_status(uint8_t dhost_ether[ETH_ALEN]);
+
 int aodv_db_get_active_routes(aodv_link_break_element_t** head);
+
+int aodv_db_routing_reset(uint32_t* count_out);
 
 /**
  * Take a record that the given neighbor seems to be
  * the 1 hop bidirectional neighbor
  */
-int aodv_db_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
+int aodv_db_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp);
 
 /**
  * Check whether given neighbor is 1 hop bidirectional neighbor
  */
 int aodv_db_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
+
+int aodv_db_reset_rssi(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
+
+int8_t aodv_db_update_rssi(uint8_t ether_neighbor[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
 
 int aodv_db_addschedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, void* param);
 
@@ -115,12 +126,13 @@ void aodv_db_putrerr(struct timeval* timestamp);
 
 void aodv_db_getrerrcount(struct timeval* timestamp, uint32_t* count_out);
 
-int aodv_db_capt_data_seq(uint8_t destination_host[ETH_ALEN], uint8_t originator_host[ETH_ALEN], uint8_t originator_host_prev_hop[ETH_ALEN], dessert_meshif_t* output_iface, uint16_t shost_data_seq_num, struct timeval* timestamp);
+int aodv_db_capt_data_seq(uint8_t src_addr[ETH_ALEN], uint16_t data_seq_num, uint8_t hop_count, struct timeval* timestamp);
 
 // ----------------------------------- reporiting -------------------------------------------------------------------------
 
 int aodv_db_view_routing_table(char** str_out);
 void aodv_db_neighbor_timeslot_report(char** str_out);
 void aodv_db_packet_buffer_timeslot_report(char** str_out);
+void aodv_db_data_seq_timeslot_report(char** str_out);
 
 #endif

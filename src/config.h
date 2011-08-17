@@ -62,6 +62,19 @@ For further information and questions please use the web site
 #define GOSSIPP						1 /* flooding */
 #define DESTONLY					false
 
+#define AODV_METRIC_HOP_COUNT		1
+#define AODV_METRIC_RSSI			2
+#define AODV_METRIC_ETX				3
+#define AODV_METRIC_ETT				4
+#define AODV_METRIC					AODV_METRIC_HOP_COUNT /* DEFAULT */
+typedef uint16_t metric_t;
+#define AODV_PRI_METRIC				PRIu16
+#define AODV_MAX_METRIC				UINT16_MAX /* the type of the variable in the packets -> u16 it is the maximum value of a metric */
+
+#define RREQ_INTERVAL				0 /* off */
+
+#define AODV_DATA_SEQ_TIMEOUT		MY_ROUTE_TIMEOUT /* wait MY_ROUTE_TIMEOUT for dropping data seq information -> this is the time a route is valid */
+
 /**
  * Schedule type = send out packets from FIFO puffer for
  * destination with ether_addr
@@ -77,11 +90,17 @@ For further information and questions please use the web site
  * Schedule type = send out route error for given next hop
  */
 #define AODV_SC_SEND_OUT_RERR		3
+#define AODV_SC_SEND_OUT_RWARN		4
+#define AODV_SC_UPDATE_RSSI			5
+
+#define AODV_SIGNAL_STRENGTH_THRESHOLD	0 /* dbm (off)*/
+#define AODV_SIGNAL_STRENGTH_INIT		-120
 
 // --- Database Flags
 #define AODV_FLAGS_UNUSED				0
 #define AODV_FLAGS_ROUTE_INVALID 		1
 #define AODV_FLAGS_NEXT_HOP_UNKNOWN		(1 << 1)
+#define AODV_FLAGS_ROUTE_WARN			(1 << 2)
 #define AODV_FLAGS_ROUTE_LOCAL_USED		(1 << 3)
 #define AODV_FLAGS_ROUTE_NEW	    	(1 << 4)
 
@@ -90,12 +109,18 @@ For further information and questions please use the web site
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 
-extern dessert_periodic_t* 			periodic_send_hello;
+extern dessert_periodic_t* 			send_hello_periodic;
+
+extern dessert_periodic_t* 			send_rreq_periodic;
+extern uint16_t 					rreq_interval;
+
 extern uint16_t 					hello_size;
 extern uint16_t 					hello_interval;
 extern uint16_t 					rreq_size;
 extern double 						gossipp;
-extern int 							dest_only;
+extern bool							dest_only;
+extern uint8_t						metric_type;
+extern int8_t						signal_strength_threshold;
 
 typedef struct aodv_link_break_element {
     uint8_t host[ETH_ALEN];

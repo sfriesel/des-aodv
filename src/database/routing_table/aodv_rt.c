@@ -196,7 +196,7 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
     if(a < 0 || (a == 0 && b >= 0)) {
 
         if(a == 0 && b > 0) {
-            dessert_info("METRIC HIT: originator_sequence_number=%" PRIu32 ":%" PRIu32 " - metric=%" AODV_PRI_METRIC ":%" AODV_PRI_METRIC "", srclist_entry->originator_sequence_number, originator_sequence_number, srclist_entry->metric, metric);
+            dessert_debug("METRIC HIT: originator_sequence_number=%" PRIu32 ":%" PRIu32 " - metric=%" AODV_PRI_METRIC ":%" AODV_PRI_METRIC "", srclist_entry->originator_sequence_number, originator_sequence_number, srclist_entry->metric, metric);
         }
 
         dessert_debug("get rreq from " MAC ": originator_sequence_number=%" PRIu32 ":%" PRIu32 " hop_count=%" PRIu8 "",
@@ -326,7 +326,7 @@ int aodv_db_rt_getroute2dest(uint8_t destination_host[ETH_ALEN], uint8_t destina
     HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
 
     if(rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN || rt_entry->flags & AODV_FLAGS_ROUTE_INVALID) {
-        dessert_info("route to " MAC " is invalid", EXPLODE_ARRAY6(destination_host));
+        dessert_debug("route to " MAC " is invalid", EXPLODE_ARRAY6(destination_host));
         return false;
     }
 
@@ -438,11 +438,11 @@ int aodv_db_rt_markrouteinv(uint8_t destination_host[ETH_ALEN], uint32_t destina
     }
 
     if(rt_entry->destination_sequence_number > destination_sequence_number) {
-        dessert_info("route to " MAC " seq=%" PRIu32 ":%" PRIu32 " NOT marked as invalid", EXPLODE_ARRAY6(destination_host), rt_entry->destination_sequence_number, destination_sequence_number);
+        dessert_debug("route to " MAC " seq=%" PRIu32 ":%" PRIu32 " NOT marked as invalid", EXPLODE_ARRAY6(destination_host), rt_entry->destination_sequence_number, destination_sequence_number);
         return false;
     }
 
-    dessert_info("route to " MAC " seq=%" PRIu32 ":%" PRIu32 " marked as invalid", EXPLODE_ARRAY6(destination_host), rt_entry->destination_sequence_number, destination_sequence_number);
+    dessert_debug("route to " MAC " seq=%" PRIu32 ":%" PRIu32 " marked as invalid", EXPLODE_ARRAY6(destination_host), rt_entry->destination_sequence_number, destination_sequence_number);
     rt_entry->flags |= AODV_FLAGS_ROUTE_INVALID;
     return true;
 }
@@ -462,7 +462,7 @@ int aodv_db_rt_get_destlist(uint8_t dhost_next_hop[ETH_ALEN], aodv_link_break_el
         aodv_link_break_element_t* el = malloc(sizeof(aodv_link_break_element_t));
         memcpy(el->host, dest->rt_entry->destination_host, ETH_ALEN);
         el->sequence_number = dest->rt_entry->destination_sequence_number;
-        dessert_info("createERR: " MAC " seq=%" PRIu32 "", EXPLODE_ARRAY6(el->host), el->sequence_number);
+        dessert_debug("createERR: " MAC " seq=%" PRIu32 "", EXPLODE_ARRAY6(el->host), el->sequence_number);
         DL_APPEND(*destlist, el);
     }
 

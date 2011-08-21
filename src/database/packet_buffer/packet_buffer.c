@@ -56,7 +56,7 @@ typedef struct pb {
 pb_t pbt;
 
 void purge_packets(struct timeval* timestamp, void* src_object, void* object) {
-    dessert_info("purging packet buffer");
+    dessert_debug("purging packet buffer");
     pb_el_t* pb_el = object;
     fifo_list_el_t* fl_el = pb_el->fl.head;
 

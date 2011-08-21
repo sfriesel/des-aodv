@@ -65,7 +65,7 @@ dessert_per_result_t aodv_periodic_send_rreq(void* data, struct timeval* schedul
 
     aodv_link_break_element_t* dest, *tmp;
     DL_FOREACH_SAFE(head, dest, tmp) {
-        dessert_info("periodic send rreq to: " MAC " - interval=%" PRIu16 " ms", EXPLODE_ARRAY6(dest->host), rreq_interval);
+        dessert_debug("periodic send rreq to: " MAC " - interval=%" PRIu16 " ms", EXPLODE_ARRAY6(dest->host), rreq_interval);
         aodv_send_rreq(dest->host, &timestamp, NULL, 0);
         free(dest);
     }
@@ -145,7 +145,7 @@ dessert_msg_t* aodv_create_rerr(aodv_link_break_element_t** destlist) {
             aodv_link_break_element_t* el = *destlist;
             memcpy(iter->host, el->host, ETH_ALEN);
             iter->sequence_number = el->sequence_number;
-            dessert_info("create rerr to: " MAC " seq=%" PRIu32 "", EXPLODE_ARRAY6(iter->host), iter->sequence_number);
+            dessert_debug("create rerr to: " MAC " seq=%" PRIu32 "", EXPLODE_ARRAY6(iter->host), iter->sequence_number);
             DL_DELETE(*destlist, el);
             free(el);
         }

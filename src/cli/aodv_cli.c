@@ -41,11 +41,11 @@ int cli_set_shortcut(struct cli_def* cli, char* command, char* argv[], int argc)
     }
 
     if(mode == 1) {
-        dessert_info("use dest_only = true");
+        dessert_notice("use dest_only = true");
         dest_only = true;
     }
     else {
-        dessert_info("use dest_only = false");
+        dessert_notice("use dest_only = false");
         dest_only = false;
     }
 

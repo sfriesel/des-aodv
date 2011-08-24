@@ -129,6 +129,15 @@ void aodv_send_rreq(uint8_t dhost_ether[ETH_ALEN], struct timeval* ts, dessert_m
 
         msg = _create_rreq(dhost_ether, TTL_START, initial_metric); // create RREQ
     }
+    else {
+        dessert_ext_t* ext;
+
+        dessert_msg_getext(msg, &ext, RREQ_EXT_TYPE, 0);
+        struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) ext->data;
+        pthread_rwlock_wrlock(&pp_rwlock);
+        rreq_msg->originator_sequence_number = ++seq_num_global;
+        pthread_rwlock_unlock(&pp_rwlock);
+    }
 
     dessert_ext_t* ext;
     dessert_msg_getext(msg, &ext, RREQ_EXT_TYPE, 0);

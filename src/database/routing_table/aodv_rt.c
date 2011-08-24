@@ -193,7 +193,7 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
     int a = hf_comp_u32(srclist_entry->originator_sequence_number, originator_sequence_number);
     int b = hf_comp_metric(srclist_entry->metric, metric); // METRIC
 
-    if(a < 0 || (a == 0 && b >= 0)) {
+    if(a < 0 || (a == 0 && b > 0)) {
 
         if(a == 0 && b > 0) {
             dessert_debug("METRIC HIT: originator_sequence_number=%" PRIu32 ":%" PRIu32 " - metric=%" AODV_PRI_METRIC ":%" AODV_PRI_METRIC "", srclist_entry->originator_sequence_number, originator_sequence_number, srclist_entry->metric, metric);

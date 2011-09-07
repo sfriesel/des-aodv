@@ -176,13 +176,13 @@ int cli_set_metric(struct cli_def* cli, char* command, char* argv[], int argc) {
     if(hop == 0) {
         metric_type = AODV_METRIC_HOP_COUNT;
     }
-
+#ifndef ANDROID
     int rssi = strcmp(metric_string, "AODV_METRIC_RSSI");
 
     if(rssi == 0) {
         metric_type = AODV_METRIC_RSSI;
     }
-
+#endif
     int etx = strcmp(metric_string, "AODV_METRIC_ETX");
 
     if(etx == 0) {
@@ -295,10 +295,12 @@ int cli_show_metric(struct cli_def* cli, char* command, char* argv[], int argc) 
             metric_string = "AODV_METRIC_HOP_COUNT";
             break;
         }
+#ifndef ANDROID
         case AODV_METRIC_RSSI: {
             metric_string = "AODV_METRIC_RSSI";
             break;
         }
+#endif
         case AODV_METRIC_ETX: {
             metric_string = "AODV_METRIC_ETX -> not implemented! -> using AODV_METRIC_HOP_COUNT as fallback";
             break;

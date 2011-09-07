@@ -242,12 +242,13 @@ int aodv_db_rt_capt_rrep(uint8_t destination_host[ETH_ALEN],
 
         HASH_ADD_KEYPTR(hh, rt.entrys, rt_entry->destination_host, ETH_ALEN, rt_entry);
     }
-
+#ifndef ANDROID
     if(signal_strength_threshold > 0) {
         /* preemptive rreq is turned on */
         //this is a routing update, so reset the max rssi val of the next hop
         db_nt_reset_rssi(destination_host_next_hop, output_iface, timestamp);
     }
+#endif
 
     int z = destination_sequence_number; /* == 0 -> force */
     int u = (rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN);

@@ -235,6 +235,7 @@ int aodv_db_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t
     return result;
 }
 
+#ifndef ANDROID
 int aodv_db_reset_rssi(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {
     aodv_db_wlock();
     int result = db_nt_reset_rssi(ether_neighbor_addr, iface, timestamp);
@@ -248,6 +249,7 @@ int8_t aodv_db_update_rssi(uint8_t ether_neighbor[ETH_ALEN], dessert_meshif_t* i
     aodv_db_unlock();
     return result;
 }
+#endif
 
 int aodv_db_addschedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, void* param) {
     aodv_db_wlock();

@@ -32,6 +32,7 @@ int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_
             (*metric)++;
             break;
         }
+#ifndef ANDROID
         case AODV_METRIC_RSSI: {
             struct avg_node_result sample = dessert_rssi_avg(last_hop, iface);
             uint8_t interval = hf_rssi2interval(sample.avg_rssi);
@@ -39,6 +40,7 @@ int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_
             (*metric) += interval;
             break;
         }
+#endif
         case AODV_METRIC_ETX: {
             dessert_crit("AODV_METRIC_ETX -> not implemented! -> using AODV_METRIC_HOP_COUNT as fallback");
             (*metric)++; /* HOP_COUNT */

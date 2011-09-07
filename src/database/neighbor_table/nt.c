@@ -68,6 +68,7 @@ void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void*
     free(curr_entry);
 }
 
+#ifndef ANDROID
 int db_nt_reset_rssi(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {
     neighbor_entry_t* curr_entry = NULL;
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
@@ -114,6 +115,7 @@ int8_t db_nt_update_rssi(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t
 
     return diff;
 }
+#endif
 
 int db_nt_init() {
     timeslot_t* new_ts;

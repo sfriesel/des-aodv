@@ -62,8 +62,10 @@ For further information and questions please use the web site
 #define GOSSIPP						1 /* flooding */
 #define DESTONLY					false
 
-#define AODV_METRIC_HOP_COUNT		1
+#define AODV_METRIC_HOP_COUNT		        1
+#ifndef ANDROID
 #define AODV_METRIC_RSSI			2
+#endif
 #define AODV_METRIC_ETX				3
 #define AODV_METRIC_ETT				4
 #define AODV_METRIC					AODV_METRIC_HOP_COUNT /* DEFAULT */

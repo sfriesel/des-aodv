@@ -220,6 +220,7 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
             }
             break;
         }
+#ifndef ANDROID
         case AODV_SC_UPDATE_RSSI: {
             dessert_meshif_t* iface = (dessert_meshif_t*)(schedule_param);
             int8_t diff = aodv_db_update_rssi(ether_addr, iface, &timestamp);
@@ -232,6 +233,7 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
 
             break;
         }
+#endif
         default: {
             dessert_crit("unknown schedule type=%" PRIu8 "", schedule_type);
         }

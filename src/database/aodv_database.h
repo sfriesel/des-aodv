@@ -37,7 +37,28 @@ int aodv_db_init();
 
 int aodv_db_neighbor_reset(uint32_t* count_out);
 
-/** cleanup (purge) old entrys from all database tables */
+/**
+ * Functions for pdr tracking
+ */
+int aodv_db_pdr_neighbor_reset(uint32_t* count_out);
+
+int aodv_db_pdr_upd_expected(uint16_t new_interval);
+
+int aodv_db_pdr_cap_hello(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_seq, uint16_t hello_interv, struct timeval* timestamp);
+
+int aodv_db_pdr_cap_hellorsp(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_interv, uint8_t hello_count, struct timeval* timestamp);
+
+int aodv_db_pdr_get_pdr(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* pdr_out, struct timeval* timestamp);
+
+int aodv_db_pdr_get_etx_mul(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* etx_out, struct timeval* timestamp);
+
+int aodv_db_pdr_get_etx_add(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* etx_out, struct timeval* timestamp);
+
+int aodv_db_pdr_get_rcvdhellocount(uint8_t ether_neighbor_addr[ETH_ALEN], uint8_t* count_out, struct timeval* timestamp);
+
+/**END: Functions for pdr tracking*/
+
+/** cleanup (purge) old entrys from all database tables except from pdr_tracker */
 int aodv_db_cleanup(struct timeval* timestamp);
 
 void aodv_db_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct timeval* timestamp);
@@ -131,6 +152,7 @@ int aodv_db_capt_data_seq(uint8_t src_addr[ETH_ALEN], uint16_t data_seq_num, uin
 // ----------------------------------- reporiting -------------------------------------------------------------------------
 
 int aodv_db_view_routing_table(char** str_out);
+int aodv_db_view_pdr_nt(char** str_out);
 void aodv_db_neighbor_timeslot_report(char** str_out);
 void aodv_db_packet_buffer_timeslot_report(char** str_out);
 void aodv_db_data_seq_timeslot_report(char** str_out);

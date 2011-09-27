@@ -54,6 +54,15 @@ int hf_comp_u16(uint16_t i, uint16_t j) {
     return -1;
 }
 
+int hf_comp_u16_wo_overflow(uint16_t i, uint16_t j) {
+    if(i==j) {
+        return 0;
+    }
+    else if (i>j) {
+        return 1;
+    }
+    return -1;
+}
 
 int hf_comp_u32(uint32_t i, uint32_t j) {
     if(i == j) {
@@ -76,11 +85,24 @@ int hf_comp_metric(metric_t i, metric_t j) {
         return 0;
     }
 
+    if (metric_type == AODV_METRIC_ETX_MUL || metric_type == AODV_METRIC_PDR) {
+        if(i > j) {
+            return -1;
+        }
+        return 1;
+    }
+
+    if(i > j) {
+        return 1;
+    }
+
+    /** OLD BEHAVIOR 
     metric_t diff = i - j;
 
     if(diff < (AODV_MAX_METRIC >> 1)) {
         return 1;
     }
+    */
 
     return -1;
 }

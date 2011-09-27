@@ -44,6 +44,10 @@ dessert_per_result_t aodv_periodic_send_hello(void* data, struct timeval* schedu
     dessert_ext_t* ext;
     dessert_msg_addext(msg, &ext, HELLO_EXT_TYPE, sizeof(struct aodv_msg_hello));
 
+    struct aodv_msg_hello* hello_msg = (struct aodv_msg_hello*) ext->data;
+    hello_msg->hello_rcvd_count = 0;
+    hello_msg->hello_interval = hello_interval;
+
     dessert_msg_dummy_payload(msg, hello_size);
 
     dessert_meshsend(msg, NULL);
@@ -66,7 +70,7 @@ dessert_per_result_t aodv_periodic_send_rreq(void* data, struct timeval* schedul
     aodv_link_break_element_t* dest, *tmp;
     DL_FOREACH_SAFE(head, dest, tmp) {
         dessert_debug("periodic send rreq to: " MAC " - interval=%" PRIu16 " ms", EXPLODE_ARRAY6(dest->host), rreq_interval);
-        aodv_send_rreq(dest->host, &timestamp, NULL, 0);
+        aodv_send_rreq(dest->host, &timestamp, NULL, metric_startvalue);
         free(dest);
     }
     return DESSERT_PER_KEEP;
@@ -172,7 +176,7 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
             break;
         }
         case AODV_SC_REPEAT_RREQ: {
-            aodv_send_rreq(ether_addr, &timestamp, (dessert_msg_t*)(schedule_param), 0);
+            aodv_send_rreq(ether_addr, &timestamp, (dessert_msg_t*)(schedule_param), metric_startvalue);
             break;
         }
         case AODV_SC_SEND_OUT_RERR: {
@@ -216,7 +220,7 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
                 dessert_debug("AODV_SC_SEND_OUT_RWARN: " MAC " -> " MAC,
                               EXPLODE_ARRAY6(ether_addr),
                               EXPLODE_ARRAY6(dest->host));
-                aodv_send_rreq(dest->host, &timestamp, NULL, 0);
+                aodv_send_rreq(dest->host, &timestamp, NULL, metric_startvalue);
             }
             break;
         }

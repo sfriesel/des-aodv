@@ -103,6 +103,10 @@ struct aodv_msg_rerr {
 
 /** HELLO - Hello Message */
 struct aodv_msg_hello {
+    /** rcvd hellos in last interval */
+    uint8_t 		hello_rcvd_count;
+    /** Hello Interval in ms */
+    uint16_t		hello_interval;
 } __attribute__((__packed__));
 
 // ------------- pipeline -----------------------------------------------------
@@ -160,7 +164,7 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
 
 // ------------------------------ metric ----------------------------------------------------
 
-int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_t* iface);
+int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
 
 // ------------------------------ helper ------------------------------------------------------
 

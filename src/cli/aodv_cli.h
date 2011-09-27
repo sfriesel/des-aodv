@@ -42,7 +42,9 @@ int cli_show_metric(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_show_hello_size(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_show_hello_interval(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_show_rreq_size(struct cli_def* cli, char* command, char* argv[], int argc);
+
 int cli_show_rt(struct cli_def* cli, char* command, char* argv[], int argc);
+int cli_show_pdr_nt(struct cli_def* cli, char* command, char* argv[], int argc);
 
 int cli_show_neighbor_timeslot(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_show_packet_buffer_timeslot(struct cli_def* cli, char* command, char* argv[], int argc);

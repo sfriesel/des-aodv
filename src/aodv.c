@@ -37,6 +37,7 @@ uint16_t rreq_size = RREQ_SIZE;
 double gossipp = GOSSIPP;
 bool dest_only = DESTONLY;
 uint8_t metric_type = AODV_METRIC;
+uint16_t metric_startvalue = AODV_METRIC_STARTVAL;
 uint16_t rreq_interval = RREQ_INTERVAL;
 int8_t signal_strength_threshold = AODV_SIGNAL_STRENGTH_THRESHOLD;
 
@@ -105,6 +106,8 @@ int main(int argc, char** argv) {
     cli_register_command(dessert_cli, dessert_cli_set, "shortcut", cli_set_shortcut, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set shortcut mode");
 
     cli_register_command(dessert_cli, dessert_cli_show, "rt", cli_show_rt, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show routing table");
+    cli_register_command(dessert_cli, dessert_cli_show, "pdr_nt", cli_show_pdr_nt, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show pdr tracking table");
+
     cli_register_command(dessert_cli, dessert_cli_show, "neighbor_timeslot", cli_show_neighbor_timeslot, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show neighbor table timeslot");
     cli_register_command(dessert_cli, dessert_cli_show, "packet_buffer_timeslot", cli_show_packet_buffer_timeslot, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show packet buffer timeslot");
     cli_register_command(dessert_cli, dessert_cli_show, "data_seq_timeslot", cli_show_data_seq_timeslot, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show data seq timeslot");

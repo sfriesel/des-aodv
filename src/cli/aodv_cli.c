@@ -90,6 +90,9 @@ int cli_set_hello_interval(struct cli_def* cli, char* command, char* argv[], int
     hello_interval_t.tv_sec = hello_interval / 1000;
     hello_interval_t.tv_usec = (hello_interval % 1000) * 1000;
     send_hello_periodic = dessert_periodic_add(aodv_periodic_send_hello, NULL, NULL, &hello_interval_t);
+
+    aodv_db_pdr_upd_expected(hello_interval);
+
     dessert_notice("setting HELLO interval to %" PRIu16 " ms - %" PRIu32 " neighbors invalidated...", hello_interval, count);
     return CLI_OK;
 }
@@ -148,7 +151,7 @@ int cli_send_rreq(struct cli_def* cli, char* command, char* argv[], int argc) {
         return CLI_ERROR_ARG;
     }
 
-    metric_t initial_metric = 0;
+    metric_t initial_metric = metric_startvalue;
     initial_metric = atoi(argv[1]);
 
     cli_print(cli, MAC " -> using %" AODV_PRI_METRIC " as initial_metric\n", EXPLODE_ARRAY6(host), initial_metric);
@@ -175,26 +178,36 @@ int cli_set_metric(struct cli_def* cli, char* command, char* argv[], int argc) {
 
     if(hop == 0) {
         metric_type = AODV_METRIC_HOP_COUNT;
+        metric_startvalue = 0;
     }
 #ifndef ANDROID
     int rssi = strcmp(metric_string, "AODV_METRIC_RSSI");
 
     if(rssi == 0) {
         metric_type = AODV_METRIC_RSSI;
+        metric_startvalue = 0;
     }
 #endif
-    int etx = strcmp(metric_string, "AODV_METRIC_ETX");
 
-    if(etx == 0) {
-        metric_string = "AODV_METRIC_ETX -> not implemented! -> using AODV_METRIC_HOP_COUNT as fallback";
-        metric_type = AODV_METRIC_HOP_COUNT;
+    int etxadd = strcmp(metric_string, "AODV_METRIC_ETX_ADD");
+
+    if(etxadd == 0) {
+        metric_type = AODV_METRIC_ETX_ADD;
+        metric_startvalue = 0;
     }
 
-    int ett = strcmp(metric_string, "AODV_METRIC_ETT");
+    int etxmul = strcmp(metric_string, "AODV_METRIC_ETX_MUL");
 
-    if(ett == 0) {
-        metric_string = "AODV_METRIC_ETT -> not implemented! -> using AODV_METRIC_HOP_COUNT as fallback";
-        metric_type = AODV_METRIC_HOP_COUNT;
+    if(etxmul == 0) {
+        metric_type = AODV_METRIC_ETX_MUL;
+        metric_startvalue = 10000;
+    }
+
+    int pdr = strcmp(metric_string, "AODV_METRIC_PDR");
+
+    if(pdr == 0) {
+        metric_type = AODV_METRIC_PDR;
+        metric_startvalue = 10000;
     }
 
     uint32_t count_out = 0;
@@ -301,12 +314,16 @@ int cli_show_metric(struct cli_def* cli, char* command, char* argv[], int argc) 
             break;
         }
 #endif
-        case AODV_METRIC_ETX: {
-            metric_string = "AODV_METRIC_ETX -> not implemented! -> using AODV_METRIC_HOP_COUNT as fallback";
+        case AODV_METRIC_ETX_ADD: {
+            metric_string = "AODV_METRIC_ETX_ADD";
             break;
         }
-        case AODV_METRIC_ETT: {
-            metric_string = "AODV_METRIC_ETT -> not implemented! -> using AODV_METRIC_HOP_COUNT as fallback";
+        case AODV_METRIC_ETX_MUL: {
+            metric_string = "AODV_METRIC_ETX_MUL";
+            break;
+        }
+        case AODV_METRIC_PDR: {
+            metric_string = "AODV_METRIC_PDR";
             break;
         }
         default: {
@@ -338,6 +355,14 @@ int cli_show_rt(struct cli_def* cli, char* command, char* argv[], int argc) {
     aodv_db_view_routing_table(&rt_report);
     cli_print(cli, "\n%s\n", rt_report);
     free(rt_report);
+    return CLI_OK;
+}
+
+int cli_show_pdr_nt(struct cli_def* cli, char* command, char* argv[], int argc) {
+    char* pdr_nt_report;
+    aodv_db_view_pdr_nt(&pdr_nt_report);
+    cli_print(cli, "\n%s\n", pdr_nt_report);
+    free(pdr_nt_report);
     return CLI_OK;
 }
 

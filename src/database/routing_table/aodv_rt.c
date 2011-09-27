@@ -24,8 +24,6 @@ For further information and questions please use the web site
 #include "aodv_rt.h"
 #include "../neighbor_table/nt.h"
 
-#define REPORT_RT_STR_LEN 150
-
 aodv_rt_t				rt;
 nht_entry_t*				nht = NULL;
 
@@ -196,6 +194,7 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
     if(a < 0 || (a == 0 && b > 0)) {
 
         if(a == 0 && b > 0) {
+            //dessert_info("Rcvd RREQ with %" AODV_PRI_METRIC " SEQ known, but process because old metric %" AODV_PRI_METRIC " ", metric, srclist_entry->metric);
             dessert_debug("METRIC HIT: originator_sequence_number=%" PRIu32 ":%" PRIu32 " - metric=%" AODV_PRI_METRIC ":%" AODV_PRI_METRIC "", srclist_entry->originator_sequence_number, originator_sequence_number, srclist_entry->metric, metric);
         }
 

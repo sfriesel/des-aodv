@@ -52,6 +52,14 @@ int hf_comp_u8(uint8_t i, uint8_t j);
 int hf_comp_u16(uint16_t i, uint16_t j);
 
 /**
+ * Compares two integers without checking for possible overflow
+ * returns 0 if i = j
+ * return 1 if i > j
+ * return -1 if i < j
+ */
+int hf_comp_u16_wo_overflow(uint16_t i, uint16_t j);
+
+/**
  * Compares two integers
  * returns 0 if i = j
  * return 1 if i > j (cirlce diff < (MAXUINT32 / 2))

@@ -23,9 +23,10 @@ For further information and questions please use the web site
 
 #include "../config.h"
 #include "../helper.h"
+#include "../database/aodv_database.h"
 #include "aodv_pipeline.h"
 
-int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_t* iface) {
+int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {
 
     switch(metric_type) {
         case AODV_METRIC_HOP_COUNT: {
@@ -41,14 +42,59 @@ int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_
             break;
         }
 #endif
-        case AODV_METRIC_ETX: {
-            dessert_crit("AODV_METRIC_ETX -> not implemented! -> using AODV_METRIC_HOP_COUNT as fallback");
-            (*metric)++; /* HOP_COUNT */
+        case AODV_METRIC_ETX_ADD: {
+            uint16_t link_etx_add = 0;
+            if(aodv_db_pdr_get_etx_add(last_hop, &link_etx_add, timestamp) == true) {
+                /**Detect Overflow*/
+                dessert_debug("Old metricval %" AODV_PRI_METRIC " ETX_ADD rcvd =%" PRIu16 " for this hop " MAC, (*metric), link_etx_add, EXPLODE_ARRAY6(last_hop));
+                if(((uint16_t)(65535 - link_etx_add)) >= (*metric)) {
+                    (*metric) += link_etx_add;
+                }
+                else {
+                    (*metric) = 65535;
+                }
+            }
+            else {
+                /**Detect Overflow*/
+                dessert_debug("Old metricval %" AODV_PRI_METRIC " ETX_ADD for hop " MAC " failed", (*metric), EXPLODE_ARRAY6(last_hop));
+                if(((uint16_t)(65535-2000)) >= (*metric)) {
+                    (*metric) += 2000;
+                }
+                else {
+                    (*metric) = 65535;
+                }
+            }
+            dessert_debug("New metric value =%" AODV_PRI_METRIC " for hop " MAC, (*metric), EXPLODE_ARRAY6(last_hop));
             break;
         }
-        case AODV_METRIC_ETT: {
-            dessert_crit("AODV_METRIC_ETT -> not implemented! -> using AODV_METRIC_HOP_COUNT as fallback");
-            (*metric)++; /* HOP_COUNT */
+        case AODV_METRIC_ETX_MUL: {
+            uint16_t link_etx_mul = 0;
+            if(aodv_db_pdr_get_etx_mul(last_hop, &link_etx_mul, timestamp) == true) {
+                dessert_debug("Old metricval %" AODV_PRI_METRIC " ETX_MUL rcvd =%" PRIu16 " for this hop " MAC, (*metric), link_etx_mul, EXPLODE_ARRAY6(last_hop));
+                uint32_t result = (*metric) * (uint32_t)link_etx_mul;
+                result = result / 10000;
+                (*metric) = (metric_t) result;
+            }
+            else {
+                dessert_debug("Old metricval %" AODV_PRI_METRIC " ETX_MUL for hop " MAC " failed", (*metric), EXPLODE_ARRAY6(last_hop));
+                (*metric) = 0;
+            }
+            dessert_debug("New metric value =%" AODV_PRI_METRIC " for hop " MAC, (*metric), EXPLODE_ARRAY6(last_hop));
+            break;
+        }
+        case AODV_METRIC_PDR: {
+            uint16_t link_pdr = 0;
+            if(aodv_db_pdr_get_pdr(last_hop, &link_pdr, timestamp) == true){
+                dessert_debug("Old metricval %" AODV_PRI_METRIC " PDR rcvd =%" PRIu16 " for this hop " MAC, (*metric), link_pdr, EXPLODE_ARRAY6(last_hop));
+                uint32_t result = (*metric) * (uint32_t)link_pdr;
+                result = result / 10000;
+                (*metric) = (metric_t) result;
+            }
+            else {
+                dessert_debug("Old metricval %" AODV_PRI_METRIC " PDR for hop " MAC " failed", (*metric), EXPLODE_ARRAY6(last_hop));
+                (*metric) = 0;
+            }
+            dessert_debug("New metric value =%" AODV_PRI_METRIC " for hop " MAC, (*metric), EXPLODE_ARRAY6(last_hop));
             break;
         }
         default: {

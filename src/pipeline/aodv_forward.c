@@ -228,7 +228,7 @@ int aodv_sys2rp(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, dess
         }
         else {
             aodv_db_push_packet(l25h->ether_dhost, msg, &ts);
-            aodv_send_rreq(l25h->ether_dhost, &ts, NULL, 0); // create and send RREQ - without initial metric
+            aodv_send_rreq(l25h->ether_dhost, &ts, NULL, metric_startvalue); // create and send RREQ - without initial metric
             dessert_trace("try to send data packet to mesh - to " MAC ", but route is unknown -> push packet to FIFO and send RREQ", EXPLODE_ARRAY6(l25h->ether_dhost));
         }
     }

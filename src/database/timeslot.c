@@ -158,7 +158,73 @@ int timeslot_addobject(timeslot_t* ts, struct timeval* timestamp, void* object) 
         }
     }
     else {
-        // insert new element bevor search element
+        // insert new element before search element
+        new_el->prev = search_el->prev;
+        new_el->next = search_el;
+        search_el->prev = new_el;
+
+        if(new_el->prev != NULL) {
+            new_el->prev->next = new_el;
+        }
+
+        if(ts->tail == search_el) {
+            ts->tail = new_el;
+        }
+    }
+
+    ts->size++;
+
+    struct timeval curr_time;
+    gettimeofday(&curr_time, NULL);
+    timeslot_purgeobjects(ts, &curr_time);
+    return true;
+}
+
+int timeslot_addobject_varpurge(timeslot_t* ts, struct timeval* timestamp, void* object, struct timeval* not_def_lifetime) {
+    timeslot_element_t* new_el;
+    struct timeval purge_time;
+    hf_add_tv(not_def_lifetime, timestamp, &purge_time);
+
+    if(create_new_ts_element(&new_el, &purge_time, object) == false) {
+        return false;
+    }
+
+    // first find element with *object pointer and delete this element
+    timeslot_deleteobject(ts, object);
+
+    HASH_ADD_KEYPTR(hh, ts->elements_hash, &new_el->object, sizeof(void*), new_el);
+
+    // if this is a first element -> set tail and head
+    if(ts->size == 0) {
+        ts->head = ts->tail = new_el;
+        ts->size = 1;
+        return true;
+    }
+
+    // insert new element into appropriate place
+    timeslot_element_t* search_el = ts->head;
+
+    while(search_el->prev != NULL && (hf_compare_tv(&purge_time, search_el->purge_time) < 0)) {
+        // we search for an smaller element
+        search_el = search_el->prev;
+    }
+
+    if(hf_compare_tv(&purge_time, search_el->purge_time) >= 0) {
+        // insert new element after search element
+        new_el->prev = search_el;
+        new_el->next = search_el->next;
+        search_el->next = new_el;
+
+        if(new_el->next != NULL) {
+            new_el->next->prev = new_el;
+        }
+
+        if(ts->head == search_el) {
+            ts->head = new_el;
+        }
+    }
+    else {
+        // insert new element before search element
         new_el->prev = search_el->prev;
         new_el->next = search_el;
         search_el->prev = new_el;

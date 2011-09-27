@@ -62,17 +62,24 @@ For further information and questions please use the web site
 #define GOSSIPP						1 /* flooding */
 #define DESTONLY					false
 
-#define AODV_METRIC_HOP_COUNT		        1
+#define AODV_METRIC_HOP_COUNT		1
 #ifndef ANDROID
 #define AODV_METRIC_RSSI			2
 #endif
-#define AODV_METRIC_ETX				3
-#define AODV_METRIC_ETT				4
+#define AODV_METRIC_ETX_ADD			3
+#define AODV_METRIC_ETX_MUL			4
+#define AODV_METRIC_PDR				5
 #define AODV_METRIC					AODV_METRIC_HOP_COUNT /* DEFAULT */
 typedef uint16_t metric_t;
 #define AODV_PRI_METRIC				PRIu16
 #define AODV_MAX_METRIC				UINT16_MAX /* the type of the variable in the packets -> u16 it is the maximum value of a metric */
+#define AODV_METRIC_STARTVAL		0
 
+#define PDR_TRACKING_FACTOR			10 /* length of pdr tracking interval for a nb := nb_hello_interval * PDR_TRACKING_FACTOR */
+#define PDR_TRACKING_PURGE_FACTOR	2  /* timeout for nb entry in pdr tracker := nb_hello_interval * PDR_TRACKING_FACTOR * PDR_TRACKING_PURGE_FACTOR */
+#define PDR_MIN_TRACKING_INTERVAL	500 /* minimum tracking interval in ms */
+
+#define REPORT_RT_STR_LEN			150 /* default: 150 (should not be switched, needed for string inits)*/
 #define RREQ_INTERVAL				0 /* off */
 
 #define AODV_DATA_SEQ_TIMEOUT		MY_ROUTE_TIMEOUT /* wait MY_ROUTE_TIMEOUT for dropping data seq information -> this is the time a route is valid */
@@ -122,6 +129,7 @@ extern uint16_t 					rreq_size;
 extern double 						gossipp;
 extern bool							dest_only;
 extern uint8_t						metric_type;
+extern uint16_t 					metric_startvalue;
 extern int8_t						signal_strength_threshold;
 
 typedef struct aodv_link_break_element {

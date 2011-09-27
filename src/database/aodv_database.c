@@ -26,6 +26,7 @@ For further information and questions please use the web site
 
 #include "aodv_database.h"
 #include "../config.h"
+#include "pdr_tracker/pdr.h"
 #include "routing_table/aodv_rt.h"
 #include "neighbor_table/nt.h"
 #include "data_seq/ds.h"
@@ -52,6 +53,7 @@ int aodv_db_init() {
     int success = true;
     aodv_db_wlock();
     success &= db_nt_init();
+    success &= aodv_db_pdr_nt_init();
     success &= db_ds_init();
     success &= aodv_db_rt_init();
     success &= pb_init();
@@ -68,6 +70,7 @@ int aodv_db_cleanup(struct timeval* timestamp) {
     success &= db_ds_cleanup(timestamp);
     success &= aodv_db_rt_cleanup(timestamp);
     success &= pb_cleanup(timestamp);
+    success &= aodv_db_pdr_nt_cleanup(timestamp);
     aodv_db_unlock();
     return success;
 }
@@ -76,6 +79,62 @@ int aodv_db_neighbor_reset(uint32_t* count_out) {
     pthread_rwlock_wrlock(&db_rwlock);
     int result = aodv_db_nt_neighbor_reset(count_out);
     pthread_rwlock_unlock(&db_rwlock);
+    return result;
+}
+
+int aodv_db_pdr_neighbor_reset(uint32_t* count_out) {
+    aodv_db_wlock();
+    int result = aodv_db_pdr_nt_neighbor_reset(count_out);
+    aodv_db_unlock();
+    return result;
+}
+
+int aodv_db_pdr_upd_expected(uint16_t new_interval) {
+    aodv_db_wlock();
+    int result = aodv_db_pdr_nt_upd_expected(new_interval);
+    aodv_db_unlock();
+    return result;
+}
+
+int aodv_db_pdr_cap_hello(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_seq, uint16_t hello_interv, struct timeval* timestamp) {
+    aodv_db_wlock();
+    int result = aodv_db_pdr_nt_cap_hello(ether_neighbor_addr, hello_seq, hello_interv, timestamp);
+    aodv_db_unlock();
+    return result;
+}
+
+int aodv_db_pdr_cap_hellorsp(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_interv, uint8_t hello_count, struct timeval* timestamp) {
+    aodv_db_wlock();
+    int result = aodv_db_pdr_nt_cap_hellorsp(ether_neighbor_addr, hello_interv, hello_count, timestamp);
+    aodv_db_unlock();
+    return result;
+}
+
+int aodv_db_pdr_get_pdr(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* pdr_out, struct timeval* timestamp) {
+    aodv_db_wlock();
+    int result = aodv_db_pdr_nt_get_pdr(ether_neighbor_addr, pdr_out, timestamp);
+    aodv_db_unlock();
+    return result;
+}
+
+int aodv_db_pdr_get_etx_mul(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* etx_out, struct timeval* timestamp) {
+    aodv_db_wlock();
+    int result = aodv_db_pdr_nt_get_etx_mul(ether_neighbor_addr, etx_out, timestamp);
+    aodv_db_unlock();
+    return result;
+}
+
+int aodv_db_pdr_get_etx_add(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* etx_out, struct timeval* timestamp) {
+    aodv_db_wlock();
+    int result = aodv_db_pdr_nt_get_etx_add(ether_neighbor_addr, etx_out, timestamp);
+    aodv_db_unlock();
+    return result;
+}
+
+int aodv_db_pdr_get_rcvdhellocount(uint8_t ether_neighbor_addr[ETH_ALEN], uint8_t* count_out, struct timeval* timestamp) {
+    aodv_db_wlock();
+    int result = aodv_db_pdr_nt_get_rcvdhellocount(ether_neighbor_addr, count_out, timestamp);
+    aodv_db_unlock();
     return result;
 }
 
@@ -315,6 +374,13 @@ int aodv_db_capt_data_seq(uint8_t src_addr[ETH_ALEN], uint16_t data_seq_num, uin
 int aodv_db_view_routing_table(char** str_out) {
     aodv_db_rlock();
     int result =  aodv_db_rt_report(str_out);
+    aodv_db_unlock();
+    return result;
+}
+
+int aodv_db_view_pdr_nt(char** str_out) {
+    aodv_db_rlock();
+    int result = aodv_db_pdr_nt_report(str_out);
     aodv_db_unlock();
     return result;
 }

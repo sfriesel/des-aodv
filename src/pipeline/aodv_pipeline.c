@@ -210,10 +210,21 @@ int aodv_handle_hello(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc
         return DESSERT_MSG_KEEP;
     }
 
+    struct aodv_msg_hello* hello_msg = (struct aodv_msg_hello*) hallo_ext->data;
+
+    struct timeval ts;
+    gettimeofday(&ts, NULL);
+
     msg->ttl--;
 
     if(msg->ttl >= 1) {
         // hello req
+        uint8_t rcvd_hellos = 0;
+        aodv_db_pdr_cap_hello(msg->l2h.ether_shost, msg->u16, hello_msg->hello_interval, &ts);
+        if(aodv_db_pdr_get_rcvdhellocount(msg->l2h.ether_shost, &rcvd_hellos, &ts) == true) {
+            hello_msg->hello_rcvd_count = rcvd_hellos;
+        }
+        hello_msg->hello_interval = hello_interval; 
         memcpy(msg->l2h.ether_dhost, msg->l2h.ether_shost, ETH_ALEN);
         dessert_meshsend(msg, iface);
         // dessert_trace("got hello-req from " MAC, EXPLODE_ARRAY6(msg->l2h.ether_shost));
@@ -221,8 +232,7 @@ int aodv_handle_hello(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc
     else {
         //hello rep
         if(memcmp(iface->hwaddr, msg->l2h.ether_dhost, ETH_ALEN) == 0) {
-            struct timeval ts;
-            gettimeofday(&ts, NULL);
+            aodv_db_pdr_cap_hellorsp(msg->l2h.ether_shost, hello_msg->hello_interval, hello_msg->hello_rcvd_count, &ts);
             // dessert_trace("got hello-rep from " MAC, EXPLODE_ARRAY6(msg->l2h.ether_dhost));
             aodv_db_cap2Dneigh(msg->l2h.ether_shost, msg->u16, iface, &ts);
         }
@@ -254,7 +264,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) rreq_ext->data;
 
     /********** METRIC *************/
-    aodv_metric_do(&(msg->u16), msg->l2h.ether_shost, iface);
+    aodv_metric_do(&(msg->u16), msg->l2h.ether_shost, iface, &ts);
     /********** METRIC *************/
 
     int x = aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->originator_sequence_number, msg->u16, msg->u8, &ts);
@@ -308,7 +318,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         dessert_debug("incoming RREQ from " MAC " over " MAC " for me originator_sequence_number=%" PRIu32 " -> answer with RREP destination_sequence_number_copy=%" PRIu32 "",
                       EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), rreq_msg->originator_sequence_number, destination_sequence_number_copy);
 
-        dessert_msg_t* rrep_msg = _create_rrep(dessert_l25_defsrc, l25h->ether_shost, msg->l2h.ether_shost, destination_sequence_number_copy, AODV_FLAGS_RREP_A, 0);
+        dessert_msg_t* rrep_msg = _create_rrep(dessert_l25_defsrc, l25h->ether_shost, msg->l2h.ether_shost, destination_sequence_number_copy, AODV_FLAGS_RREP_A, metric_startvalue);
         dessert_meshsend(rrep_msg, iface);
         dessert_msg_destroy(rrep_msg);
 
@@ -421,7 +431,7 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     gettimeofday(&ts, NULL);
 
     /********** METRIC *************/
-    aodv_metric_do(&(msg->u16), msg->l2h.ether_shost, iface);
+    aodv_metric_do(&(msg->u16), msg->l2h.ether_shost, iface, &ts);
     /********** METRIC *************/
 
     int x = aodv_db_capt_rrep(l25h->ether_shost, msg->l2h.ether_shost, iface, rrep_msg->destination_sequence_number, msg->u16, msg->u8, &ts);

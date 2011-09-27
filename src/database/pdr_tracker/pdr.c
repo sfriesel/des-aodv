@@ -38,14 +38,14 @@ pdr_neighbor_entry_t* pdr_neighbor_entry_create(uint8_t ether_neighbor_addr[ETH_
     new_entry->hello_interv = hello_interv;
     new_entry->msg_list = NULL;
 
-    if(hello_interv*PDR_TRACKING_FACTOR >= PDR_MIN_TRACKING_INTERVAL) {
-        new_entry->expected_hellos = PDR_TRACKING_FACTOR;
+    if(hello_interv*tracking_factor >= PDR_MIN_TRACKING_INTERVAL) {
+        new_entry->expected_hellos = tracking_factor;
     }
     else {
         new_entry->expected_hellos = PDR_MIN_TRACKING_INTERVAL / hello_interv;
     }
 
-    uint32_t purge_ms = (uint32_t) hello_interv * PDR_TRACKING_FACTOR * PDR_TRACKING_PURGE_FACTOR;
+    uint32_t purge_ms = (uint32_t) hello_interv * tracking_factor * PDR_TRACKING_PURGE_FACTOR;
     new_entry->purge_tv.tv_sec = purge_ms / 1000;
     new_entry->purge_tv.tv_usec = (purge_ms % 1000) * 1000;
 
@@ -67,14 +67,14 @@ pdr_neighbor_hello_msg_t* pdr_hello_entry_create(uint16_t hello_seq) {
 
 void pdr_neighbor_entry_update(pdr_neighbor_entry_t* update_entry, uint16_t new_interval) {
     update_entry->hello_interv = new_interval;
-    if(new_interval*PDR_TRACKING_FACTOR >= PDR_MIN_TRACKING_INTERVAL) {
-        update_entry->expected_hellos = PDR_TRACKING_FACTOR;
+    if(new_interval*tracking_factor >= PDR_MIN_TRACKING_INTERVAL) {
+        update_entry->expected_hellos = tracking_factor;
     }
     else {
         update_entry->expected_hellos = PDR_MIN_TRACKING_INTERVAL / new_interval;
     }
 
-    uint32_t purge_ms = (uint32_t) new_interval * PDR_TRACKING_FACTOR * PDR_TRACKING_PURGE_FACTOR;
+    uint32_t purge_ms = (uint32_t) new_interval * tracking_factor * PDR_TRACKING_PURGE_FACTOR;
     update_entry->purge_tv.tv_sec = purge_ms / 1000;
     update_entry->purge_tv.tv_usec = (purge_ms % 1000) * 1000;
 }
@@ -101,8 +101,8 @@ void pdr_nt_purge_nb(struct timeval* timestamp, void* src_object, void* del_obje
 int aodv_db_pdr_nt_init() {
     pdr_nt.entrys = NULL;
 
-    if(hello_interval*PDR_TRACKING_FACTOR >= PDR_MIN_TRACKING_INTERVAL) {
-        pdr_nt.nb_expected_hellos = PDR_TRACKING_FACTOR;
+    if(hello_interval*tracking_factor >= PDR_MIN_TRACKING_INTERVAL) {
+        pdr_nt.nb_expected_hellos = tracking_factor;
     }
     else {
         pdr_nt.nb_expected_hellos = (uint16_t) PDR_MIN_TRACKING_INTERVAL / hello_interval;
@@ -110,7 +110,7 @@ int aodv_db_pdr_nt_init() {
 
     //creating default purge timeout, should normally not be used when adding an entry
     //but needed for initialization
-    uint32_t def_purge_ms = (uint32_t) hello_interval * PDR_TRACKING_FACTOR * PDR_TRACKING_PURGE_FACTOR;
+    uint32_t def_purge_ms = (uint32_t) hello_interval * tracking_factor * PDR_TRACKING_PURGE_FACTOR;
     struct timeval  def_purge_tv;
     def_purge_tv.tv_sec = def_purge_ms / 1000;
     def_purge_tv.tv_usec = (def_purge_ms % 1000) * 1000;
@@ -119,8 +119,8 @@ int aodv_db_pdr_nt_init() {
 }
 
 int aodv_db_pdr_nt_upd_expected(uint16_t new_interval) {
-    if(new_interval*PDR_TRACKING_FACTOR >= PDR_MIN_TRACKING_INTERVAL) {
-        pdr_nt.nb_expected_hellos = PDR_TRACKING_FACTOR;
+    if(new_interval*tracking_factor >= PDR_MIN_TRACKING_INTERVAL) {
+        pdr_nt.nb_expected_hellos = tracking_factor;
     }
     else {
         pdr_nt.nb_expected_hellos = (uint16_t) PDR_MIN_TRACKING_INTERVAL / new_interval;
@@ -182,10 +182,10 @@ int aodv_db_pdr_nt_cap_hello(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hel
             return false;
         }
 
-        /** Determine Track Interval with PDR_TRACKING_FACTOR*hello_interv - Minimum is 500 ms*/
+        /** Determine Track Interval with tracking_factor*hello_interv - Minimum is 500 ms*/
         struct timeval pdr_watch_interval;
-        if (hello_interv*PDR_TRACKING_FACTOR >= PDR_MIN_TRACKING_INTERVAL) {
-            uint32_t tracking_interval = hello_interv * PDR_TRACKING_FACTOR;
+        if (hello_interv*tracking_factor >= PDR_MIN_TRACKING_INTERVAL) {
+            uint32_t tracking_interval = hello_interv * tracking_factor;
             pdr_watch_interval.tv_sec = tracking_interval / 1000;
             pdr_watch_interval.tv_usec = (tracking_interval % 1000) * 1000;
         }
@@ -250,10 +250,10 @@ int aodv_db_pdr_nt_cap_hellorsp(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t 
             return false;
         }
 
-        /** Determine Track Interval with PDR_TRACKING_FACTOR*hello_interv - Minimum is 500 ms*/
+        /** Determine Track Interval with tracking_factor*hello_interv - Minimum is 500 ms*/
         struct timeval pdr_watch_interval;
-        if (hello_interv*PDR_TRACKING_FACTOR >= PDR_MIN_TRACKING_INTERVAL) {
-            uint32_t tracking_interval = hello_interv * PDR_TRACKING_FACTOR;
+        if (hello_interv*tracking_factor >= PDR_MIN_TRACKING_INTERVAL) {
+            uint32_t tracking_interval = hello_interv * tracking_factor;
             pdr_watch_interval.tv_sec = tracking_interval / 1000;
             pdr_watch_interval.tv_usec = (tracking_interval % 1000) * 1000;
         }

@@ -40,6 +40,7 @@ uint8_t metric_type = AODV_METRIC;
 uint16_t metric_startvalue = AODV_METRIC_STARTVAL;
 uint16_t rreq_interval = RREQ_INTERVAL;
 int8_t signal_strength_threshold = AODV_SIGNAL_STRENGTH_THRESHOLD;
+uint16_t tracking_factor = PDR_TRACKING_FACTOR;
 
 dessert_periodic_t* send_hello_periodic;
 dessert_periodic_t* send_rreq_periodic;
@@ -92,6 +93,9 @@ int main(int argc, char** argv) {
 
     cli_register_command(dessert_cli, dessert_cli_set, "rreq_size", cli_set_rreq_size, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set RREQ packet size");
     cli_register_command(dessert_cli, dessert_cli_show, "rreq_size", cli_show_rreq_size, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show RREQ packet size");
+
+    cli_register_command(dessert_cli, dessert_cli_set, "pdr_tracking_factor", cli_set_tracking_factor, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set factor for pdr tracking interval length");
+    cli_register_command(dessert_cli, dessert_cli_show, "pdr_tracking_factor", cli_show_tracking_factor, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show factor for pdr tracking interval length");
 
     cli_register_command(dessert_cli, dessert_cli_set, "metric", cli_set_metric, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set metric");
     cli_register_command(dessert_cli, dessert_cli_show, "metric", cli_show_metric, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show metric");

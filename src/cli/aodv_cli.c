@@ -136,6 +136,27 @@ int cli_set_gossipp(struct cli_def* cli, char* command, char* argv[], int argc) 
     return CLI_OK;
 }
 
+int cli_set_tracking_factor(struct cli_def* cli, char* command, char* argv[], int argc) { 
+
+    if(argc != 1) { 
+    label_out_usage: 
+        cli_print(cli, "usage %s [0..1000]\n", command); 
+        return CLI_ERROR; 
+    } 
+
+    uint16_t ptracking_factor = (uint16_t) strtoul(argv[0], NULL, 10); 
+
+    if(ptracking_factor > 1000) { 
+        goto label_out_usage; 
+    } 
+
+    tracking_factor = ptracking_factor; 
+    aodv_db_pdr_upd_expected(hello_interval);
+
+    dessert_notice("setting PDR_TRACKING_FACTOR to %" PRIu16 "", ptracking_factor); 
+    return CLI_OK; 
+} 
+
 int cli_send_rreq(struct cli_def* cli, char* command, char* argv[], int argc) {
 
     if(argc != 2) {
@@ -349,6 +370,11 @@ int cli_show_rreq_size(struct cli_def* cli, char* command, char* argv[], int arg
     cli_print(cli, "RREQ size = %" PRIu16 " bytes\n", rreq_size);
     return CLI_OK;
 }
+
+int cli_show_tracking_factor(struct cli_def* cli, char* command, char* argv[], int argc) { 
+    cli_print(cli, "PDR_TRACKING_FACTOR = %" PRIu16 "\n", tracking_factor); 
+    return CLI_OK; 
+} 
 
 int cli_show_rt(struct cli_def* cli, char* command, char* argv[], int argc) {
     char* rt_report;

@@ -126,6 +126,7 @@ extern uint16_t 					rreq_interval;
 extern uint16_t 					hello_size;
 extern uint16_t 					hello_interval;
 extern uint16_t 					rreq_size;
+extern uint16_t						tracking_factor;
 extern double 						gossipp;
 extern bool							dest_only;
 extern uint8_t						metric_type;

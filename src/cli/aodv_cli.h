@@ -30,6 +30,7 @@ For further information and questions please use the web site
 int cli_set_hello_size(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_hello_interval(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_rreq_size(struct cli_def* cli, char* command, char* argv[], int argc);
+int cli_set_tracking_factor(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_gossipp(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_shortcut(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_metric(struct cli_def* cli, char* command, char* argv[], int argc);
@@ -42,6 +43,7 @@ int cli_show_metric(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_show_hello_size(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_show_hello_interval(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_show_rreq_size(struct cli_def* cli, char* command, char* argv[], int argc);
+int cli_show_tracking_factor(struct cli_def* cli, char* command, char* argv[], int argc);
 
 int cli_show_rt(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_show_pdr_nt(struct cli_def* cli, char* command, char* argv[], int argc);

@@ -36,6 +36,7 @@ uint16_t hello_interval = HELLO_INTERVAL;
 uint16_t rreq_size = RREQ_SIZE;
 double gossipp = GOSSIPP;
 bool dest_only = DESTONLY;
+uint8_t gossip_type = GOSSIP_TYPE;
 uint8_t metric_type = AODV_METRIC;
 uint16_t metric_startvalue = AODV_METRIC_STARTVAL;
 uint16_t rreq_interval = RREQ_INTERVAL;
@@ -107,7 +108,7 @@ int main(int argc, char** argv) {
     cli_register_command(dessert_cli, dessert_cli_show, "signal_strength_threshold", cli_show_preemptive_rreq_signal_strength_threshold, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show preemptive rreq signal strength threshold");
 
     cli_register_command(dessert_cli, dessert_cli_set, "gossip_p", cli_set_gossipp, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set p for gossip  p in [0.0,...,1.0]");
-    cli_register_command(dessert_cli, dessert_cli_set, "shortcut", cli_set_shortcut, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set shortcut mode");
+    cli_register_command(dessert_cli, dessert_cli_set, "dest_only", cli_set_dest_only, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set destonly mode");
 
     cli_register_command(dessert_cli, dessert_cli_show, "rt", cli_show_rt, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show routing table");
     cli_register_command(dessert_cli, dessert_cli_show, "pdr_nt", cli_show_pdr_nt, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show pdr tracking table");

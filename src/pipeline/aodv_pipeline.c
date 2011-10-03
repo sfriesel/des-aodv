@@ -149,7 +149,9 @@ void aodv_send_rreq(uint8_t dhost_ether[ETH_ALEN], struct timeval* ts, dessert_m
         msg->ttl = TTL_MAX;
     }
 
-    dessert_debug("rreq send for " MAC " ttl=%" PRIu8 " id=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), msg->ttl, rreq_msg->originator_sequence_number);
+    // gossip 3
+    msg->ttl = 2;
+    dessert_debug("RREQ send for " MAC " ttl=%" PRIu8 " id=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), msg->ttl, rreq_msg->originator_sequence_number);
     dessert_meshsend(msg, NULL);
     aodv_db_putrreq(ts);
 
@@ -250,9 +252,13 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
 
     struct ether_header* l25h = dessert_msg_getl25ether(msg);
 
-    if(msg->ttl <= 0) {
-        return DESSERT_MSG_DROP;
-    }
+    struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) rreq_ext->data;
+
+    dessert_debug("incoming RREQ from " MAC " over " MAC " to " MAC " seq=%i ttl=%d", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost),  EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->originator_sequence_number, msg->ttl);
+
+//    if(msg->ttl <= 0) {
+//        return DESSERT_MSG_DROP;
+//    }
 
     msg->ttl--;
     msg->u8++; /* hop count */
@@ -260,8 +266,6 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     struct timeval ts;
 
     gettimeofday(&ts, NULL);
-
-    struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) rreq_ext->data;
 
     /********** METRIC *************/
     aodv_metric_do(&(msg->u16), msg->l2h.ether_shost, iface, &ts);
@@ -287,7 +291,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         //rreq_src sends it's last rrep seq, do we have newer information?
         if(!d && !u && (s == true) && hs < 0) {
             //rreq_src needs local repair and
-            //we have a routte to this dest and
+            //we have a route to this dest and
             //we have never info
             // i know route to destination that have seq_num greater then that of source (route is newer)
 
@@ -300,8 +304,8 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
             dessert_msg_destroy(rrep_msg);
         }
         else {
-            if(random() < (((long double) gossipp)*((long double) RAND_MAX))) {
-                // gossip 0
+            if(aodv_gossip(msg)) {
+                // gossip
                 dessert_debug("route to " MAC " originator_sequence_number=%" PRIu32 " is unknown for me OR we can't repair -> rebroadcast RREQ", EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->originator_sequence_number);
                 dessert_meshsend(msg, NULL);
             }
@@ -415,6 +419,9 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     }
 
     struct ether_header* l25h = dessert_msg_getl25ether(msg);
+
+    dessert_debug("incoming RREP from " MAC " over " MAC " to " MAC " ttl=%d", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), msg->ttl);
+
 
     if(msg->ttl <= 0) {
         dessert_debug("got RREP from " MAC " but TTL is <= 0", EXPLODE_ARRAY6(l25h->ether_dhost));

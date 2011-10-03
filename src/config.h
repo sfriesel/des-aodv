@@ -35,7 +35,7 @@ For further information and questions please use the web site
 
 #define ACTIVE_ROUTE_TIMEOUT		3000 /* ms rfc=3000 */
 #define ALLOWED_HELLO_LOST			4 /* christian=4 rfc=2 */
-#define NODE_TRAVERSAL_TIME			2 /* ms christian=2 rfc=40 */
+#define NODE_TRAVERSAL_TIME			20 /* ms christian=2 rfc=40 */
 #define NET_DIAMETER				16 /* christian=8 rfc=35 */
 #define NET_TRAVERSAL_TIME			(2 * NODE_TRAVERSAL_TIME * NET_DIAMETER) /* rfc */
 #define BLACKLIST_TIMEOUT			(RREQ_RETRIES * NET_TRAVERSAL_TIME) /* rfc */
@@ -61,7 +61,11 @@ For further information and questions please use the web site
 
 #define GOSSIPP						1 /* flooding */
 #define DESTONLY					false
+#define GOSSIP_TYPE                 GOSSIP_0
+#define GOSSIP_1                    1
+#define GOSSIP_0					0
 
+#define AODV_METRIC_RFC             0
 #define AODV_METRIC_HOP_COUNT		1
 #ifndef ANDROID
 #define AODV_METRIC_RSSI			2
@@ -69,7 +73,7 @@ For further information and questions please use the web site
 #define AODV_METRIC_ETX_ADD			3
 #define AODV_METRIC_ETX_MUL			4
 #define AODV_METRIC_PDR				5
-#define AODV_METRIC					AODV_METRIC_HOP_COUNT /* DEFAULT */
+#define AODV_METRIC					AODV_METRIC_RFC /* DEFAULT */
 typedef uint16_t metric_t;
 #define AODV_PRI_METRIC				PRIu16
 #define AODV_MAX_METRIC				UINT16_MAX /* the type of the variable in the packets -> u16 it is the maximum value of a metric */
@@ -129,6 +133,7 @@ extern uint16_t 					rreq_size;
 extern uint16_t						tracking_factor;
 extern double 						gossipp;
 extern bool							dest_only;
+extern uint8_t						gossip_type;
 extern uint8_t						metric_type;
 extern uint16_t 					metric_startvalue;
 extern int8_t						signal_strength_threshold;

@@ -97,6 +97,9 @@ int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_
             dessert_debug("New metric value =%" AODV_PRI_METRIC " for hop " MAC, (*metric), EXPLODE_ARRAY6(last_hop));
             break;
         }
+        case AODV_METRIC_RFC: {
+            break;
+        }
         default: {
             dessert_crit("unknown metric=%" PRIu8 " -> using HOP_COUNT as fallback", metric_type);
             (*metric)++; /* HOP_COUNT */

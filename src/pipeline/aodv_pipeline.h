@@ -166,6 +166,11 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
 
 int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
 
+// ------------------------------ gossip ----------------------------------------------------
+
+int aodv_gossip(dessert_msg_t* msg);
+int aodv_gossip_0();
+
 // ------------------------------ helper ------------------------------------------------------
 
 void aodv_send_rreq(uint8_t dhost_ether[ETH_ALEN], struct timeval* ts, dessert_msg_t* rreq_msg, metric_t initial_metric);

@@ -32,7 +32,7 @@ For further information and questions please use the web site
 
 // -------------------- Testing ------------------------------------------------------------
 
-int cli_set_shortcut(struct cli_def* cli, char* command, char* argv[], int argc) {
+int cli_set_dest_only(struct cli_def* cli, char* command, char* argv[], int argc) {
     uint32_t mode;
 
     if(argc != 1 || sscanf(argv[0], "%" PRIu32 "", &mode) != 1 || (mode != 0 && mode != 1)) {
@@ -132,6 +132,7 @@ int cli_set_gossipp(struct cli_def* cli, char* command, char* argv[], int argc) 
     }
 
     gossipp = psize;
+    cli_print(cli, "setting p for gossip to %lf", gossipp);
     dessert_notice("setting p for gossip to %lf", gossipp);
     return CLI_OK;
 }
@@ -186,6 +187,12 @@ int cli_send_rreq(struct cli_def* cli, char* command, char* argv[], int argc) {
     return CLI_OK;
 }
 
+
+int cli_show_gossip_p(struct cli_def *cli, char *command, char *argv[], int argc) {
+    cli_print(cli, "GOSSIPP = %lf \n", gossipp);
+    return CLI_OK;
+}
+
 int cli_set_metric(struct cli_def* cli, char* command, char* argv[], int argc) {
 
     if(argc != 1) {
@@ -222,6 +229,13 @@ int cli_set_metric(struct cli_def* cli, char* command, char* argv[], int argc) {
     if(etxmul == 0) {
         metric_type = AODV_METRIC_ETX_MUL;
         metric_startvalue = 10000;
+    }
+
+    int rfc = strcmp(metric_string, "AODV_METRIC_RFC");
+
+    if(rfc == 0) {
+        metric_type = AODV_METRIC_RFC;
+        metric_startvalue = 0;
     }
 
     int pdr = strcmp(metric_string, "AODV_METRIC_PDR");
@@ -338,6 +352,10 @@ int cli_show_metric(struct cli_def* cli, char* command, char* argv[], int argc) 
         case AODV_METRIC_ETX_ADD: {
             metric_string = "AODV_METRIC_ETX_ADD";
             break;
+            break;
+        }
+        case AODV_METRIC_RFC: {
+            metric_string = "AODV_METRIC_RFC";
         }
         case AODV_METRIC_ETX_MUL: {
             metric_string = "AODV_METRIC_ETX_MUL";

@@ -101,8 +101,7 @@ int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_
             break;
         }
         default: {
-            dessert_crit("unknown metric=%" PRIu8 " -> using HOP_COUNT as fallback", metric_type);
-            (*metric)++; /* HOP_COUNT */
+            dessert_crit("unknown metric set -> using AODV_METRIC_RFC as fallback");
             return false;
         }
     }

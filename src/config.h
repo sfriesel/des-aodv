@@ -61,19 +61,21 @@ For further information and questions please use the web site
 
 #define GOSSIPP						1 /* flooding */
 #define DESTONLY					false
-#define GOSSIP_TYPE                 GOSSIP_0
-#define GOSSIP_1                    1
-#define GOSSIP_0					0
 
-#define AODV_METRIC_RFC             0
-#define AODV_METRIC_HOP_COUNT		1
-#ifndef ANDROID
-#define AODV_METRIC_RSSI			2
-#endif
-#define AODV_METRIC_ETX_ADD			3
-#define AODV_METRIC_ETX_MUL			4
-#define AODV_METRIC_PDR				5
-#define AODV_METRIC					AODV_METRIC_RFC /* DEFAULT */
+typedef enum aodv_gossip {
+    GOSSIP_0 = 0,
+    GOSSIP_1
+} aodv_gossip_t;
+
+typedef enum aodv_metric {
+    AODV_METRIC_RFC = 0,
+    AODV_METRIC_HOP_COUNT,
+    AODV_METRIC_RSSI,
+    AODV_METRIC_ETX_ADD,
+    AODV_METRIC_ETX_MUL,
+    AODV_METRIC_PDR
+} aodv_metric_t;
+
 typedef uint16_t metric_t;
 #define AODV_PRI_METRIC				PRIu16
 #define AODV_MAX_METRIC				UINT16_MAX /* the type of the variable in the packets -> u16 it is the maximum value of a metric */
@@ -133,8 +135,8 @@ extern uint16_t 					rreq_size;
 extern uint16_t						tracking_factor;
 extern double 						gossipp;
 extern bool							dest_only;
-extern uint8_t						gossip_type;
-extern uint8_t						metric_type;
+extern aodv_gossip_t				gossip_type;
+extern aodv_metric_t				metric_type;
 extern uint16_t 					metric_startvalue;
 extern int8_t						signal_strength_threshold;
 

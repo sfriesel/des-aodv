@@ -352,10 +352,10 @@ int cli_show_metric(struct cli_def* cli, char* command, char* argv[], int argc) 
         case AODV_METRIC_ETX_ADD: {
             metric_string = "AODV_METRIC_ETX_ADD";
             break;
-            break;
         }
         case AODV_METRIC_RFC: {
             metric_string = "AODV_METRIC_RFC";
+            break;
         }
         case AODV_METRIC_ETX_MUL: {
             metric_string = "AODV_METRIC_ETX_MUL";

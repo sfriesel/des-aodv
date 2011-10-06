@@ -34,8 +34,9 @@ For further information and questions please use the web site
 uint16_t hello_size = HELLO_SIZE;
 uint16_t hello_interval = HELLO_INTERVAL;
 uint16_t rreq_size = RREQ_SIZE;
-double gossipp = GOSSIPP;
-bool dest_only = DESTONLY;
+double gossip_p = GOSSIP_P;
+bool dest_only = DEST_ONLY;
+bool ring_search = RING_SEARCH;
 aodv_gossip_t gossip_type = GOSSIP_0;
 aodv_metric_t metric_type = AODV_METRIC_RFC;
 uint16_t metric_startvalue = AODV_METRIC_STARTVAL;
@@ -107,8 +108,9 @@ int main(int argc, char** argv) {
     cli_register_command(dessert_cli, dessert_cli_set, "signal_strength_threshold", cli_set_preemptive_rreq_signal_strength_threshold, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set preemptive rreq signal strength threshold");
     cli_register_command(dessert_cli, dessert_cli_show, "signal_strength_threshold", cli_show_preemptive_rreq_signal_strength_threshold, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show preemptive rreq signal strength threshold");
 
-    cli_register_command(dessert_cli, dessert_cli_set, "gossip_p", cli_set_gossipp, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set p for gossip  p in [0.0,...,1.0]");
+    cli_register_command(dessert_cli, dessert_cli_set, "gossip_p", cli_set_gossip_p, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set p for gossip  p in [0.0,...,1.0]");
     cli_register_command(dessert_cli, dessert_cli_set, "dest_only", cli_set_dest_only, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set destonly mode");
+    cli_register_command(dessert_cli, dessert_cli_set, "ring_search", cli_set_ring_search, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set ring_search  On/Off");
 
     cli_register_command(dessert_cli, dessert_cli_show, "rt", cli_show_rt, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show routing table");
     cli_register_command(dessert_cli, dessert_cli_show, "pdr_nt", cli_show_pdr_nt, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show pdr tracking table");

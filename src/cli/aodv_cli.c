@@ -48,9 +48,28 @@ int cli_set_dest_only(struct cli_def* cli, char* command, char* argv[], int argc
         dessert_notice("use dest_only = false");
         dest_only = false;
     }
-
     return CLI_OK;
 }
+
+int cli_set_ring_search(struct cli_def* cli, char* command, char* argv[], int argc) {
+    uint32_t mode;
+
+    if(argc != 1 || sscanf(argv[0], "%" PRIu32 "", &mode) != 1 || (mode != 0 && mode != 1)) {
+        cli_print(cli, "usage of %s command [0, 1]\n", command);
+        return CLI_ERROR_ARG;
+    }
+
+    if(mode == 1) {
+        dessert_notice("use ring_search = true");
+        ring_search = true;
+    }
+    else {
+        dessert_notice("use ring_search = false");
+        ring_search = false;
+    }
+    return CLI_OK;
+}
+
 
 int cli_set_hello_size(struct cli_def* cli, char* command, char* argv[], int argc) {
     uint16_t min_size = sizeof(dessert_msg_t) + sizeof(struct ether_header) + 2;
@@ -117,7 +136,7 @@ int cli_set_rreq_size(struct cli_def* cli, char* command, char* argv[], int argc
     return CLI_OK;
 }
 
-int cli_set_gossipp(struct cli_def* cli, char* command, char* argv[], int argc) {
+int cli_set_gossip_p(struct cli_def* cli, char* command, char* argv[], int argc) {
 
     if(argc != 1) {
     label_out_usage:
@@ -131,9 +150,9 @@ int cli_set_gossipp(struct cli_def* cli, char* command, char* argv[], int argc) 
         goto label_out_usage;
     }
 
-    gossipp = psize;
-    cli_print(cli, "setting p for gossip to %lf", gossipp);
-    dessert_notice("setting p for gossip to %lf", gossipp);
+    gossip_p = psize;
+    cli_print(cli, "setting p for gossip to %lf", gossip_p);
+    dessert_notice("setting p for gossip to %lf", gossip_p);
     return CLI_OK;
 }
 
@@ -189,7 +208,7 @@ int cli_send_rreq(struct cli_def* cli, char* command, char* argv[], int argc) {
 
 
 int cli_show_gossip_p(struct cli_def *cli, char *command, char *argv[], int argc) {
-    cli_print(cli, "GOSSIPP = %lf \n", gossipp);
+    cli_print(cli, "GOSSIPP = %lf \n", gossip_p);
     return CLI_OK;
 }
 

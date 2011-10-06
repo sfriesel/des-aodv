@@ -31,8 +31,9 @@ int cli_set_hello_size(struct cli_def* cli, char* command, char* argv[], int arg
 int cli_set_hello_interval(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_rreq_size(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_tracking_factor(struct cli_def* cli, char* command, char* argv[], int argc);
-int cli_set_gossipp(struct cli_def* cli, char* command, char* argv[], int argc);
+int cli_set_gossip_p(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_dest_only(struct cli_def* cli, char* command, char* argv[], int argc);
+int cli_set_ring_search(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_metric(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_periodic_rreq_interval(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_preemptive_rreq_signal_strength_threshold(struct cli_def* cli, char* command, char* argv[], int argc);

@@ -26,7 +26,7 @@ For further information and questions please use the web site
 #include "aodv_pipeline.h"
 
 int aodv_gossip_0(){
-	return (random() < (((long double) gossipp)*((long double) RAND_MAX)));
+	return (random() < (((long double) gossip_p)*((long double) RAND_MAX)));
 }
 
 int aodv_gossip(dessert_msg_t* msg){
@@ -35,12 +35,19 @@ int aodv_gossip(dessert_msg_t* msg){
 	 		 return aodv_gossip_0();
 	 		 break;
 	 	 }
+	 	 /*
+	 	  * Gossip 1 use ttl-field, it will not work together with ring_search=1.
+	 	  */
 	 	 case GOSSIP_1:{
 	 		 if(msg->ttl < 3)
 	 			 return 1;
 	 		 else
 	 			 return aodv_gossip_0();
 	 		 break;
+	 	 }
+	 	 default: {
+	 		 dessert_crit("unknown gossip type -> using GOSSIP_0 as fallback");
+	 		 return aodv_gossip_0();
 	 	 }
 	 }
 }

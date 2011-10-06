@@ -149,8 +149,6 @@ void aodv_send_rreq(uint8_t dhost_ether[ETH_ALEN], struct timeval* ts, dessert_m
         msg->ttl = TTL_MAX;
     }
 
-    // gossip 3
-    msg->ttl = 2;
     dessert_debug("RREQ send for " MAC " ttl=%" PRIu8 " id=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), msg->ttl, rreq_msg->originator_sequence_number);
     dessert_meshsend(msg, NULL);
     aodv_db_putrreq(ts);
@@ -256,9 +254,9 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
 
     dessert_debug("incoming RREQ from " MAC " over " MAC " to " MAC " seq=%i ttl=%d", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost),  EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->originator_sequence_number, msg->ttl);
 
-//    if(msg->ttl <= 0) {
-//        return DESSERT_MSG_DROP;
-//    }
+    if(ring_search && msg->ttl <= 0) {
+        return DESSERT_MSG_DROP;
+    }
 
     msg->ttl--;
     msg->u8++; /* hop count */

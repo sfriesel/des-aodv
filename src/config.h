@@ -59,8 +59,9 @@ For further information and questions please use the web site
 #define HELLO_SIZE					128 /* bytes */
 #define RREQ_SIZE					128 /* bytes */
 
-#define GOSSIPP						1 /* flooding */
-#define DESTONLY					false
+#define GOSSIP_P						1 /* flooding */
+#define DEST_ONLY					false /* only destination answer a RRequest */
+#define RING_SEARCH			 		true /* use expanding ring search */
 
 typedef enum aodv_gossip {
     GOSSIP_0 = 0,
@@ -133,8 +134,9 @@ extern uint16_t 					hello_size;
 extern uint16_t 					hello_interval;
 extern uint16_t 					rreq_size;
 extern uint16_t						tracking_factor;
-extern double 						gossipp;
+extern double 						gossip_p;
 extern bool							dest_only;
+extern bool 						ring_search;
 extern aodv_gossip_t				gossip_type;
 extern aodv_metric_t				metric_type;
 extern uint16_t 					metric_startvalue;

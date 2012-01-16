@@ -254,7 +254,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
 
     dessert_debug("incoming RREQ from " MAC " over " MAC " to " MAC " seq=%i ttl=%d", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost),  EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->originator_sequence_number, msg->ttl);
 
-    if(ring_search && msg->ttl <= 0) {
+    if(msg->ttl <= 0) {
         return DESSERT_MSG_DROP;
     }
 

@@ -286,13 +286,13 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         int s = aodv_db_get_destination_sequence_number(l25h->ether_dhost, &last_destination_sequence_number);
         int hs = hf_comp_u32(rreq_msg->destination_sequence_number, last_destination_sequence_number);
 
-        //rreq_src sends it's last rrep seq, do we have newer information?
-        if(!d && !u && (s == true) && hs < 0) {
-            //rreq_src needs local repair and
-            //we have a route to this dest and
-            //we have never info
-            // i know route to destination that have seq_num greater then that of source (route is newer)
-
+        if(!d && !u && s && hs < 0) {
+            /*
+             * - RREQ is not destination_only
+             * - rreq_src has valid sequence number for dest
+             * - we have a valid sequence number for dest (we have a route)
+             * - our sequence number is newer (our route is newer)
+             */
             metric_t last_metric_orginator;
             aodv_db_get_orginator_metric(l25h->ether_dhost, l25h->ether_shost, &last_metric_orginator);
             dessert_msg_t* rrep_msg = _create_rrep(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, last_destination_sequence_number /*this is what we know*/ , AODV_FLAGS_RREP_A, last_metric_orginator);

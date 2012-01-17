@@ -64,7 +64,8 @@ For further information and questions please use the web site
 #define RING_SEARCH			 		true /* use expanding ring search */
 
 typedef enum aodv_gossip {
-    GOSSIP_0 = 0,
+    GOSSIP_NONE,
+    GOSSIP_0,
     GOSSIP_1
 } aodv_gossip_t;
 

@@ -37,7 +37,8 @@ uint16_t rreq_size = RREQ_SIZE;
 double gossip_p = GOSSIP_P;
 bool dest_only = DEST_ONLY;
 bool ring_search = RING_SEARCH;
-aodv_gossip_t gossip_type = GOSSIP_0;
+/* gossip uses the ttl field specially, it should not be used together with ring_search. */
+aodv_gossip_t gossip_type = GOSSIP_NONE;
 aodv_metric_t metric_type = AODV_METRIC_RFC;
 uint16_t metric_startvalue = AODV_METRIC_STARTVAL;
 uint16_t rreq_interval = RREQ_INTERVAL;

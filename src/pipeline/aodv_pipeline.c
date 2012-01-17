@@ -302,8 +302,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
             dessert_msg_destroy(rrep_msg);
         }
         else {
-            if(aodv_gossip(msg)) {
-                // gossip
+            if(gossip_type == GOSSIP_NONE || aodv_gossip(msg)) {
                 dessert_debug("route to " MAC " originator_sequence_number=%" PRIu32 " is unknown for me OR we can't repair -> rebroadcast RREQ", EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->originator_sequence_number);
                 dessert_meshsend(msg, NULL);
             }

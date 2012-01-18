@@ -323,19 +323,17 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         dessert_meshsend(rrep_msg, iface);
         dessert_msg_destroy(rrep_msg);
 
-        /* RREQ gives route to his source. Process RREQ also as RREP */
-        int y = aodv_db_capt_rrep(l25h->ether_shost, msg->l2h.ether_shost, iface, 0 /* force */, msg->u16, msg->u8, &ts);
-
-        if(y == true) {
-            // no need to search for next hop. Next hop is RREQ.msg->l2h.ether_shost
-            aodv_send_packets_from_buffer(l25h->ether_shost, msg->l2h.ether_shost, iface);
-        }
-        else {
-            dessert_debug(MAC ": we know a better route already", EXPLODE_ARRAY6(l25h->ether_shost));
-        }
-
     }
-
+    /* RREQ gives route to his source. Process RREQ also as RREP */
+    int y = aodv_db_capt_rrep(l25h->ether_shost, msg->l2h.ether_shost, iface, 0 /* force */, msg->u16, msg->u8, &ts);
+    if(y == true) {
+        dessert_debug("new route to: " MAC, EXPLODE_ARRAY6(l25h->ether_shost));
+        // no need to search for next hop. Next hop is RREQ.msg->l2h.ether_shost
+        aodv_send_packets_from_buffer(l25h->ether_shost, msg->l2h.ether_shost, iface);
+    }
+    else {
+        dessert_debug("we know a better route: " MAC, EXPLODE_ARRAY6(l25h->ether_shost));
+    }
     return DESSERT_MSG_DROP;
 }
 

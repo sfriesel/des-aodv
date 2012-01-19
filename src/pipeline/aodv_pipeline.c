@@ -284,26 +284,27 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         return DESSERT_MSG_DROP;
     }
 
-    if(memcmp(dessert_l25_defsrc, l25h->ether_dhost, ETH_ALEN) != 0) {  // RREQ not for me
-
+    if(!(proc->lflags & DESSERT_RX_FLAG_L25_DST)) {
         dessert_trace("incoming RREQ from " MAC " to " MAC " originator_sequence_number=%" PRIu32 "", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), rreq_msg->originator_sequence_number);
 
-        int d = (rreq_msg->flags & AODV_FLAGS_RREQ_D);
-        int u = (rreq_msg->flags & AODV_FLAGS_RREQ_U);
-        uint32_t last_destination_sequence_number;
-        int s = aodv_db_get_destination_sequence_number(l25h->ether_dhost, &last_destination_sequence_number);
-        int hs = hf_comp_u32(rreq_msg->destination_sequence_number, last_destination_sequence_number);
+        uint16_t dest_only_flag       = rreq_msg->flags & AODV_FLAGS_RREQ_D;
+        uint16_t unknown_seq_num_flag = rreq_msg->flags & AODV_FLAGS_RREQ_U;
+        uint32_t our_dest_seq_num;
+        int we_have_seq_num = aodv_db_get_destination_sequence_number(l25h->ether_dhost, &our_dest_seq_num);
+        // do local repair if D flag is not set and we have a valid route to dest
+        bool local_repair = !dest_only_flag && we_have_seq_num;
+        if(we_have_seq_num && !unknown_seq_num_flag) {
+            uint32_t rreq_dest_seq_num = rreq_msg->destination_sequence_number;
+            // but don't repair if rreq has newer dest_seq_num
+            if(hf_comp_u32(rreq_dest_seq_num, our_dest_seq_num) > 0) {
+                local_repair = false;
+            }
+        }
 
-        if(!d && !u && s && hs < 0) {
-            /*
-             * - RREQ is not destination_only
-             * - rreq_src has valid sequence number for dest
-             * - we have a valid sequence number for dest (we have a route)
-             * - our sequence number is newer (our route is newer)
-             */
+        if(local_repair) {
             metric_t last_metric_orginator;
             aodv_db_get_orginator_metric(l25h->ether_dhost, l25h->ether_shost, &last_metric_orginator);
-            dessert_msg_t* rrep_msg = _create_rrep(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, last_destination_sequence_number /*this is what we know*/ , AODV_FLAGS_RREP_A, last_metric_orginator);
+            dessert_msg_t* rrep_msg = _create_rrep(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, our_dest_seq_num, 0, last_metric_orginator);
             dessert_debug("repair link to " MAC, EXPLODE_ARRAY6(l25h->ether_dhost));
 
             dessert_meshsend(rrep_msg, iface);

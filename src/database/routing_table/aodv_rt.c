@@ -388,26 +388,16 @@ int aodv_db_rt_get_destination_sequence_number(uint8_t dhost_ether[ETH_ALEN], ui
     return true;
 }
 
-int aodv_db_rt_get_orginator_metric(uint8_t destination_host[ETH_ALEN], uint8_t originator_host[ETH_ALEN], metric_t* last_metric_orginator_out) {
+int aodv_db_rt_get_metric(uint8_t destination_host[ETH_ALEN], metric_t* last_metric_out) {
     aodv_rt_entry_t* rt_entry;
     HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
 
     if(rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN) {
-        *last_metric_orginator_out = AODV_MAX_METRIC;
+        *last_metric_out = AODV_MAX_METRIC;
         return false;
     }
-
-    aodv_rt_srclist_entry_t* src_entry;
-    HASH_FIND(hh, rt_entry->src_list, originator_host, ETH_ALEN, src_entry);
-
-    if(src_entry == NULL) {
-        *last_metric_orginator_out = AODV_MAX_METRIC;
-        return false;
-    }
-
-    *last_metric_orginator_out = src_entry->metric;
+    *last_metric_out =  rt_entry->metric;
     return true;
-
 }
 
 int aodv_db_rt_markrouteinv(uint8_t destination_host[ETH_ALEN], uint32_t destination_sequence_number) {

@@ -302,9 +302,9 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         }
 
         if(local_repair) {
-            metric_t last_metric_orginator;
-            aodv_db_get_orginator_metric(l25h->ether_dhost, l25h->ether_shost, &last_metric_orginator);
-            dessert_msg_t* rrep_msg = _create_rrep(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, our_dest_seq_num, 0, last_metric_orginator);
+            metric_t dest_metric;
+            aodv_db_get_metric(l25h->ether_dhost, &dest_metric);
+            dessert_msg_t* rrep_msg = _create_rrep(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, our_dest_seq_num, 0, dest_metric);
             dessert_debug("repair link to " MAC, EXPLODE_ARRAY6(l25h->ether_dhost));
 
             dessert_meshsend(rrep_msg, iface);

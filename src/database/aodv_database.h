@@ -101,7 +101,7 @@ int aodv_db_getprevhop(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_AL
 
 int aodv_db_get_destination_sequence_number(uint8_t dhost_ether[ETH_ALEN], uint32_t* destination_sequence_number_out);
 
-int aodv_db_get_orginator_metric(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN], metric_t* last_metric_orginator_out);
+int aodv_db_get_metric(uint8_t dhost_ether[ETH_ALEN], metric_t* last_metric_out);
 
 int aodv_db_markrouteinv(uint8_t dhost_ether[ETH_ALEN], uint32_t destination_sequence_number);
 int aodv_db_remove_nexthop(uint8_t next_hop[ETH_ALEN]);

@@ -203,9 +203,9 @@ int aodv_db_get_destination_sequence_number(uint8_t dhost_ether[ETH_ALEN], uint3
     return result;
 }
 
-int aodv_db_get_orginator_metric(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN], metric_t* last_metric_orginator_out) {
+int aodv_db_get_metric(uint8_t dhost_ether[ETH_ALEN], metric_t* last_metric_out) {
     aodv_db_rlock();
-    int result = aodv_db_rt_get_orginator_metric(dhost_ether, shost_ether, last_metric_orginator_out);
+    int result = aodv_db_rt_get_metric(dhost_ether, last_metric_out);
     aodv_db_unlock();
     return result;
 }

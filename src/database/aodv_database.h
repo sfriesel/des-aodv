@@ -86,15 +86,16 @@ int aodv_db_capt_rrep(uint8_t destination_host[ETH_ALEN],
                       metric_t metric,
                       uint8_t hop_count,
                       struct timeval* timestamp);
-/**
- * gets prev_hop adress and output_iface towards source with shost_ether address
- * that has produces an RREQ to destination with dhost_ether address
- */
+
 int aodv_db_getroute2dest(uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop_out[ETH_ALEN],
                           dessert_meshif_t** output_iface_out, struct timeval* timestamp, uint8_t flags);
 
 int aodv_db_getnexthop(uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop_out[ETH_ALEN]);
 
+/**
+ * gets prev_hop address and output_iface towards source with shost_ether address
+ * that has produced a RREQ to destination with dhost_ether address
+ */
 int aodv_db_getprevhop(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN],
                        uint8_t shost_next_hop_out[ETH_ALEN], dessert_meshif_t** output_iface_out);
 

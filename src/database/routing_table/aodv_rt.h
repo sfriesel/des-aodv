@@ -114,8 +114,6 @@ int aodv_db_rt_getprevhop(uint8_t destination_host[ETH_ALEN], uint8_t originator
 
 int aodv_db_rt_get_destination_sequence_number(uint8_t destination_host[ETH_ALEN], uint32_t* destination_sequence_number_out);
 
-int aodv_db_rt_get_originator_sequence_number(uint8_t destination_host[ETH_ALEN], uint8_t originator_host[ETH_ALEN], uint32_t* originator_sequence_number_out);
-
 int aodv_db_rt_get_orginator_metric(uint8_t destination_host[ETH_ALEN], uint8_t originator_host[ETH_ALEN], metric_t* last_metric_orginator_out);
 
 int aodv_db_rt_markrouteinv(uint8_t destination_host[ETH_ALEN], uint32_t destination_sequence_number);

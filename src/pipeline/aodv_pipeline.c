@@ -131,6 +131,9 @@ void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_
         uint8_t ttl = ring_search ? TTL_START : NET_DIAMETER;
         msg = _create_rreq(dhost_ether, ttl, initial_metric);
     }
+    else {
+        msg = retry->msg;
+    }
 
     if(ring_search && msg->ttl > TTL_THRESHOLD) {
         dessert_debug("RREQ to " MAC ": TTL_THRESHOLD is reached - send RREQ with NET_DIAMETER=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), NET_DIAMETER);

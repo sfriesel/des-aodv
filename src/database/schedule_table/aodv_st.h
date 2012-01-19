@@ -25,14 +25,14 @@ For further information and questions please use the web site
 #define AODV_ST
 
 #include <time.h>
-#include <linux/if_ether.h>
+#include <dessert.h>
 
-int aodv_db_sc_addschedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, void* param);
+int aodv_db_sc_addschedule(struct timeval* execute_ts, mac_addr ether_addr, uint8_t type, void* param);
 
-int aodv_db_sc_popschedule(struct timeval* timestamp, uint8_t ether_addr_out[ETH_ALEN], uint8_t* type, void** param);
+int aodv_db_sc_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, uint8_t* type, void** param);
 
-int aodv_db_sc_schedule_exists(uint8_t ether_addr[ETH_ALEN], uint8_t type);
+int aodv_db_sc_schedule_exists(mac_addr ether_addr, uint8_t type);
 
-int aodv_db_sc_dropschedule(uint8_t ether_addr[ETH_ALEN], uint8_t type);
+int aodv_db_sc_dropschedule(mac_addr ether_addr, uint8_t type);
 
 #endif

@@ -161,7 +161,7 @@ dessert_msg_t* aodv_create_rerr(aodv_link_break_element_t** destlist) {
 dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* scheduled, struct timeval* interval) {
     uint8_t schedule_type;
     void* schedule_param = NULL;
-    uint8_t ether_addr[ETH_ALEN];
+    mac_addr ether_addr;
     struct timeval timestamp;
     gettimeofday(&timestamp, NULL);
 

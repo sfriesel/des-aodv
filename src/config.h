@@ -93,12 +93,6 @@ typedef uint16_t metric_t;
 #define AODV_DATA_SEQ_TIMEOUT		MY_ROUTE_TIMEOUT /* wait MY_ROUTE_TIMEOUT for dropping data seq information -> this is the time a route is valid */
 
 /**
- * Schedule type = send out packets from FIFO puffer for
- * destination with ether_addr
- */
-#define AODV_SC_SEND_OUT_PACKET		1
-
-/**
  * Schedule type = repeat RREQ
  */
 #define AODV_SC_REPEAT_RREQ			2

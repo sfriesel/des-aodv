@@ -172,7 +172,7 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
 
     switch(schedule_type) {
         case AODV_SC_REPEAT_RREQ: {
-            aodv_send_rreq(ether_addr, &timestamp, (dessert_msg_t*)(schedule_param), metric_startvalue);
+            aodv_send_rreq(ether_addr, &timestamp, (struct aodv_retry_rreq*)schedule_param, metric_startvalue);
             break;
         }
         case AODV_SC_SEND_OUT_RERR: {

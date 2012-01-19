@@ -110,64 +110,72 @@ dessert_msg_t* _create_rrep(uint8_t route_dest[ETH_ALEN], uint8_t route_source[E
     return msg;
 }
 
-void aodv_send_rreq(uint8_t dhost_ether[ETH_ALEN], struct timeval* ts, dessert_msg_t* msg, metric_t initial_metric) {
-    if(msg == NULL) {
-        // rreq_msg == NULL means: this is a first try from RREQ_RETRIES
+void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_rreq* retry, metric_t initial_metric) {
+    // reschedule if we sent more than RREQ_LIMIT RREQ messages in the last second
+    uint32_t rreq_count;
+    aodv_db_getrreqcount(ts, &rreq_count);
+
+    if(rreq_count > RREQ_RATELIMIT) {
+        dessert_trace("we have reached RREQ_RATELIMIT");
+        aodv_db_addschedule(ts, dhost_ether, AODV_SC_REPEAT_RREQ, retry);
+        return;
+    }
+
+    dessert_msg_t* msg;
+    if(!retry) {
         if(aodv_db_schedule_exists(dhost_ether, AODV_SC_REPEAT_RREQ)) {
             dessert_trace("there is a rreq_schedule to this dest we dont start a new series");
             return;
         }
 
-        // check if we have sent more then RREQ_LIMITH RREQ messages at last 1 sek.
-        uint32_t rreq_count;
-        aodv_db_getrreqcount(ts, &rreq_count);
-
-        if(rreq_count >= RREQ_RATELIMIT) {
-            dessert_trace("we have reached RREQ_RATELIMIT");
-            return;
-        }
-
-        msg = _create_rreq(dhost_ether, TTL_START, initial_metric); // create RREQ
+        uint8_t ttl = ring_search ? TTL_START : NET_DIAMETER;
+        msg = _create_rreq(dhost_ether, ttl, initial_metric);
     }
-    else {
-        dessert_ext_t* ext;
 
-        dessert_msg_getext(msg, &ext, RREQ_EXT_TYPE, 0);
-        struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) ext->data;
-        pthread_rwlock_wrlock(&pp_rwlock);
-        rreq_msg->originator_sequence_number = ++seq_num_global;
-        pthread_rwlock_unlock(&pp_rwlock);
+    if(ring_search && msg->ttl > TTL_THRESHOLD) {
+        dessert_debug("RREQ to " MAC ": TTL_THRESHOLD is reached - send RREQ with NET_DIAMETER=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), NET_DIAMETER);
+        msg->ttl = NET_DIAMETER;
     }
 
     dessert_ext_t* ext;
     dessert_msg_getext(msg, &ext, RREQ_EXT_TYPE, 0);
     struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) ext->data;
-    struct ether_header* l25h = dessert_msg_getl25ether(msg);
-
-    if(msg->ttl > TTL_THRESHOLD) {
-        dessert_debug("RREQ to " MAC ": TTL_THRESHOLD is reached - send a last RREQ with TTL_MAX=%" PRIu8 "", EXPLODE_ARRAY6(l25h->ether_dhost), TTL_MAX);
-        msg->ttl = TTL_MAX;
-    }
+    pthread_rwlock_wrlock(&pp_rwlock);
+    rreq_msg->originator_sequence_number = ++seq_num_global;
+    pthread_rwlock_unlock(&pp_rwlock);
 
     dessert_debug("RREQ send for " MAC " ttl=%" PRIu8 " id=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), msg->ttl, rreq_msg->originator_sequence_number);
     dessert_meshsend(msg, NULL);
     aodv_db_putrreq(ts);
 
-    if(msg->ttl > TTL_THRESHOLD) {
-        dessert_msg_destroy(msg);
+    if(!retry) {
+        retry = malloc(sizeof(*retry));
+        retry->msg = msg;
+        retry->count = 0;
+    }
+    retry->count++;
+
+    if(retry->count > RREQ_RETRIES) {
+        /* RREQ has been tried for the max. number of times -- give up */
+        dessert_msg_destroy(retry->msg);
+        free(retry);
         return;
     }
 
+    /* repeat_time corresponds to NET_TRAVERSAL_TIME if ring_search is off */
+    uint32_t repeat_time = 2 * NODE_TRAVERSAL_TIME * msg->ttl;
     dessert_trace("add task to repeat RREQ");
-    msg->ttl += TTL_INCREMENT;
-    uint32_t rep_time = (msg->ttl > TTL_THRESHOLD) ? NET_TRAVERSAL_TIME : (2 * NODE_TRAVERSAL_TIME * (msg->ttl));
-    struct timeval rreq_repeat_time;
-    rreq_repeat_time.tv_sec = rep_time / 1000;
-    rreq_repeat_time.tv_usec = (rep_time % 1000) * 1000;
+    if(ring_search) {
+        msg->ttl += TTL_INCREMENT;
+        if(msg->ttl > TTL_THRESHOLD) {
+            msg->ttl = NET_DIAMETER;
+        }
+    }
+
+    struct timeval rreq_repeat_time = { repeat_time / 1000, (repeat_time % 1000) * 1000 };
     hf_add_tv(ts, &rreq_repeat_time, &rreq_repeat_time);
 
-    aodv_db_addschedule(&rreq_repeat_time, dhost_ether, AODV_SC_REPEAT_RREQ, msg);
-
+    aodv_db_addschedule(&rreq_repeat_time, dhost_ether, AODV_SC_REPEAT_RREQ, retry);
 }
 
 // ---------------------------- pipeline callbacks ---------------------------------------------

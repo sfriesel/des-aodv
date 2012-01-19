@@ -152,10 +152,10 @@ int main(int argc, char** argv) {
     cleanup_interval.tv_usec = (DB_CLEANUP_INTERVAL % 1000) * 1000;
     dessert_periodic_add(aodv_periodic_cleanup_database, NULL, NULL, &cleanup_interval);
 
-    struct timeval schedule_chec_interval;
-    schedule_chec_interval.tv_sec = SCHEDULE_CHECK_INTERVAL / 1000;
-    schedule_chec_interval.tv_usec = (SCHEDULE_CHECK_INTERVAL % 1000) * 1000;
-    dessert_periodic_add(aodv_periodic_scexecute, NULL, NULL, &schedule_chec_interval);
+    struct timeval schedule_check_interval;
+    schedule_check_interval.tv_sec = SCHEDULE_CHECK_INTERVAL / 1000;
+    schedule_check_interval.tv_usec = (SCHEDULE_CHECK_INTERVAL % 1000) * 1000;
+    dessert_periodic_add(aodv_periodic_scexecute, NULL, NULL, &schedule_check_interval);
 
     /* running cli & daemon */
     cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);

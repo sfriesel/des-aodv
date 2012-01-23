@@ -110,6 +110,7 @@ int main(int argc, char** argv) {
     cli_register_command(dessert_cli, dessert_cli_show, "signal_strength_threshold", cli_show_preemptive_rreq_signal_strength_threshold, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show preemptive rreq signal strength threshold");
 
     cli_register_command(dessert_cli, dessert_cli_set, "gossip_p", cli_set_gossip_p, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set p for gossip  p in [0.0,...,1.0]");
+    cli_register_command(dessert_cli, dessert_cli_show, "gossip_p", cli_show_gossip_p, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show p for gossip p in [0.0,...,1.0]");
     cli_register_command(dessert_cli, dessert_cli_set, "dest_only", cli_set_dest_only, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set destonly mode");
     cli_register_command(dessert_cli, dessert_cli_set, "ring_search", cli_set_ring_search, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set ring_search  On/Off");
 

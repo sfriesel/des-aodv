@@ -34,31 +34,6 @@ For further information and questions please use the web site
 #include "config.h"
 
 /******************************************************************************/
-
-/**
- * Compares two integers
- * returns 0 if i = j
- * return 1 if i > j (cirlce diff < (MAXUINT8 / 2))
- * return -1 if i < j (circle diff > (MAXUINT8 / 2))
- */
-int hf_comp_u8(uint8_t i, uint8_t j);
-
-/**
- * Compares two integers
- * returns 0 if i = j
- * return 1 if i > j (cirlce diff < (MAXUINT16 / 2))
- * return -1 if i < j (circle diff > (MAXUINT16 / 2))
- */
-int hf_comp_u16(uint16_t i, uint16_t j);
-
-/**
- * Compares two integers without checking for possible overflow
- * returns 0 if i = j
- * return 1 if i > j
- * return -1 if i < j
- */
-int hf_comp_u16_wo_overflow(uint16_t i, uint16_t j);
-
 /**
  * Compares two integers
  * returns 0 if i = j

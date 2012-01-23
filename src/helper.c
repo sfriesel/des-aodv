@@ -26,44 +26,6 @@ For further information and questions please use the web site
 
 /******************************************************************************/
 
-int hf_comp_u8(uint8_t i, uint8_t j) {
-    if(i == j) {
-        return 0;
-    }
-
-    uint32_t diff = i - j;
-
-    if(diff < (UINT8_MAX >> 1)) {
-        return 1;
-    }
-
-    return -1;
-}
-
-int hf_comp_u16(uint16_t i, uint16_t j) {
-    if(i == j) {
-        return 0;
-    }
-
-    uint16_t diff = i - j;
-
-    if(diff < (UINT16_MAX >> 1)) {
-        return 1;
-    }
-
-    return -1;
-}
-
-int hf_comp_u16_wo_overflow(uint16_t i, uint16_t j) {
-    if(i==j) {
-        return 0;
-    }
-    else if (i>j) {
-        return 1;
-    }
-    return -1;
-}
-
 int hf_comp_u32(uint32_t i, uint32_t j) {
     if(i == j) {
         return 0;

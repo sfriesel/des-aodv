@@ -21,9 +21,8 @@ FILE_DEFAULT = etc/$(DAEMONNAME).default
 FILE_ETC = etc/$(DAEMONNAME).conf
 FILE_INIT = etc/$(DAEMONNAME).init
 
-LIBS = dessert pthread cli
-CFLAGS += -ggdb -Wall -DTARGET_$(UNAME) -D_GNU_SOURCE -I/usr/include
-LDFLAGS += $(addprefix -l,$(LIBS))
+LIBS = -ldessert -lpthread -lcli
+CFLAGS += -ggdb -Wall -DTARGET_$(UNAME) -D_GNU_SOURCE
 
 all: build
 
@@ -43,8 +42,10 @@ install:
 	mkdir -p $(DIR_INIT)
 	install -m 755 $(FILE_INIT) $(DIR_INIT)/$(DAEMONNAME)
 
-build: $(addsuffix .o,$(MODULES))
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(DAEMONNAME) $(addsuffix .o,$(MODULES))
+build: $(DAEMONNAME)
+
+$(DAEMONNAME): $(addsuffix .o,$(MODULES))
+	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 android: CC=android-gcc
 android: CFLAGS=-I$(DESSERT_LIB)/include

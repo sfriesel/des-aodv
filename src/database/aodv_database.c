@@ -203,6 +203,13 @@ int aodv_db_get_destination_sequence_number(uint8_t dhost_ether[ETH_ALEN], uint3
     return result;
 }
 
+int aodv_db_get_hopcount(mac_addr dhost_ether, uint8_t* hop_count_out) {
+    aodv_db_rlock();
+    int result = aodv_db_rt_get_hopcount(dhost_ether, hop_count_out);
+    aodv_db_unlock();
+    return result;
+}
+
 int aodv_db_get_metric(uint8_t dhost_ether[ETH_ALEN], metric_t* last_metric_out) {
     aodv_db_rlock();
     int result = aodv_db_rt_get_metric(dhost_ether, last_metric_out);

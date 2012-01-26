@@ -83,13 +83,13 @@ dessert_msg_t* _create_rreq(uint8_t dhost_ether[ETH_ALEN], uint8_t ttl, metric_t
     return msg;
 }
 
-dessert_msg_t* _create_rrep(uint8_t route_dest[ETH_ALEN], uint8_t route_source[ETH_ALEN], uint8_t rrep_next_hop[ETH_ALEN], uint32_t destination_sequence_number, uint8_t flags, metric_t initial_metric) {
+dessert_msg_t* _create_rrep(uint8_t route_dest[ETH_ALEN], uint8_t route_source[ETH_ALEN], uint8_t rrep_next_hop[ETH_ALEN], uint32_t destination_sequence_number, uint8_t flags, uint8_t hop_count, metric_t initial_metric) {
     dessert_msg_t* msg;
     dessert_ext_t* ext;
     dessert_msg_new(&msg);
 
     msg->ttl = TTL_MAX;
-    msg->u8 = 0; /*hop count */
+    msg->u8 = hop_count;
 
     // add l25h header
     dessert_msg_addext(msg, &ext, DESSERT_EXT_ETH, ETHER_HDR_LEN);
@@ -307,8 +307,10 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
 
         if(local_repair) {
             metric_t dest_metric;
+            uint8_t dest_hop_count;
             aodv_db_get_metric(l25h->ether_dhost, &dest_metric);
-            dessert_msg_t* rrep_msg = _create_rrep(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, our_dest_seq_num, 0, dest_metric);
+            aodv_db_get_hopcount(l25h->ether_dhost, &dest_hop_count);
+            dessert_msg_t* rrep_msg = _create_rrep(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, our_dest_seq_num, 0, dest_hop_count, dest_metric);
             dessert_debug("repair link to " MAC, EXPLODE_ARRAY6(l25h->ether_dhost));
 
             dessert_meshsend(rrep_msg, iface);
@@ -332,7 +334,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         dessert_debug("incoming RREQ from " MAC " over " MAC " for me originator_sequence_number=%" PRIu32 " -> answer with RREP destination_sequence_number_copy=%" PRIu32 "",
                       EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), rreq_msg->originator_sequence_number, destination_sequence_number_copy);
 
-        dessert_msg_t* rrep_msg = _create_rrep(dessert_l25_defsrc, l25h->ether_shost, msg->l2h.ether_shost, destination_sequence_number_copy, AODV_FLAGS_RREP_A, metric_startvalue);
+        dessert_msg_t* rrep_msg = _create_rrep(dessert_l25_defsrc, l25h->ether_shost, msg->l2h.ether_shost, destination_sequence_number_copy, 0, 0, metric_startvalue);
         dessert_meshsend(rrep_msg, iface);
         dessert_msg_destroy(rrep_msg);
 

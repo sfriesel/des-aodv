@@ -388,6 +388,18 @@ int aodv_db_rt_get_destination_sequence_number(uint8_t dhost_ether[ETH_ALEN], ui
     return true;
 }
 
+int aodv_db_rt_get_hopcount(mac_addr destination_host, uint8_t* hop_count_out) {
+    aodv_rt_entry_t* rt_entry;
+    HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
+
+    if(rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN) {
+        *hop_count_out = UINT8_MAX;
+        return false;
+    }
+    *hop_count_out =  rt_entry->hop_count;
+    return true;
+}
+
 int aodv_db_rt_get_metric(uint8_t destination_host[ETH_ALEN], metric_t* last_metric_out) {
     aodv_rt_entry_t* rt_entry;
     HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);

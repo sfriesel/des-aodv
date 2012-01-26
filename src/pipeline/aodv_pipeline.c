@@ -128,7 +128,7 @@ void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_
             return;
         }
 
-        uint8_t ttl = ring_search ? TTL_START : NET_DIAMETER;
+        uint8_t ttl = ring_search ? TTL_START : TTL_MAX;
         msg = _create_rreq(dhost_ether, ttl, initial_metric);
     }
     else {
@@ -136,8 +136,9 @@ void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_
     }
 
     if(ring_search && msg->ttl > TTL_THRESHOLD) {
-        dessert_debug("RREQ to " MAC ": TTL_THRESHOLD is reached - send RREQ with NET_DIAMETER=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), NET_DIAMETER);
-        msg->ttl = NET_DIAMETER;
+        dessert_debug("RREQ to " MAC ": TTL_THRESHOLD is reached - send RREQ with TTL_MAX=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), TTL_MAX);
+        //RFC: NET_DIAMETER, but we don't need ttl for loop detection
+        msg->ttl = TTL_MAX;
     }
 
     dessert_ext_t* ext;

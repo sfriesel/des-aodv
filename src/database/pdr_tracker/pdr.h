@@ -52,7 +52,7 @@ typedef struct pdr_neighbor_entry {
 } pdr_neighbor_entry_t;
 
 typedef struct pdr_neighbor_table {
-    pdr_neighbor_entry_t*   entrys;
+    pdr_neighbor_entry_t*   entries;
     uint16_t				nb_expected_hellos;
     timeslot_t*				ts;
 } pdr_neighbor_table_t;

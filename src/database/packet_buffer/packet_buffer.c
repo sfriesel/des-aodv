@@ -49,7 +49,7 @@ typedef struct pb_el {
  * Packet buffer
  */
 typedef struct pb {
-    pb_el_t*    entrys;
+    pb_el_t*    entries;
     timeslot_t* ts;
 } pb_t;
 
@@ -67,12 +67,12 @@ void purge_packets(struct timeval* timestamp, void* src_object, void* object) {
         fl_el = pb_el->fl.head;
     }
 
-    HASH_DEL(pbt.entrys, pb_el);
+    HASH_DEL(pbt.entries, pb_el);
     free(pb_el);
 }
 
 int pb_init() {
-    pbt.entrys = NULL;
+    pbt.entries = NULL;
     struct timeval timeout;
     timeout.tv_sec = BLACKLIST_TIMEOUT / 1000;
     timeout.tv_usec = (BLACKLIST_TIMEOUT % 1000) * 1000;
@@ -138,7 +138,7 @@ dessert_msg_t* fl_pop_packet(fifo_list_t* fl) {
 void pb_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct timeval* timestamp) {
     pb_cleanup(timestamp);
     pb_el_t* pb_el;
-    HASH_FIND(hh, pbt.entrys, dhost_ether, ETH_ALEN, pb_el);
+    HASH_FIND(hh, pbt.entries, dhost_ether, ETH_ALEN, pb_el);
 
     if(pb_el == NULL) {
         pb_el = malloc(sizeof(pb_el_t));
@@ -151,7 +151,7 @@ void pb_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct ti
         memcpy(pb_el->dhost_ether, dhost_ether, ETH_ALEN);
         pb_el->fl.head = pb_el->fl.tail = NULL;
         pb_el->fl.size = 0;
-        HASH_ADD_KEYPTR(hh, pbt.entrys, pb_el->dhost_ether, ETH_ALEN, pb_el);
+        HASH_ADD_KEYPTR(hh, pbt.entries, pb_el->dhost_ether, ETH_ALEN, pb_el);
     }
 
     fl_push_packet(&pb_el->fl, msg);
@@ -160,7 +160,7 @@ void pb_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct ti
 
 dessert_msg_t* pb_pop_packet(uint8_t dhost_ether[ETH_ALEN]) {
     pb_el_t* pb_el;
-    HASH_FIND(hh, pbt.entrys, dhost_ether, ETH_ALEN, pb_el);
+    HASH_FIND(hh, pbt.entries, dhost_ether, ETH_ALEN, pb_el);
 
     if(pb_el == NULL) {
         return NULL;
@@ -169,7 +169,7 @@ dessert_msg_t* pb_pop_packet(uint8_t dhost_ether[ETH_ALEN]) {
     dessert_msg_t* msg = fl_pop_packet(&pb_el->fl);
 
     if(pb_el->fl.head == NULL) {
-        HASH_DEL(pbt.entrys, pb_el);
+        HASH_DEL(pbt.entries, pb_el);
         timeslot_deleteobject(pbt.ts, pb_el);
         free(pb_el);
     }

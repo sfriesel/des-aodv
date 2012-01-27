@@ -30,7 +30,7 @@ typedef struct data_packet_id {
 } data_packet_id_t;
 
 typedef struct aodv_ds {
-    data_packet_id_t*	entrys;
+    data_packet_id_t*	entries;
     timeslot_t*			ts;
 } data_seq_t;
 
@@ -54,7 +54,7 @@ data_packet_id_t* ds_entry_create(uint8_t src_addr[ETH_ALEN], uint16_t seq_num) 
 void db_nt_on_ds_timeout(struct timeval* timestamp, void* src_object, void* object) {
     data_packet_id_t* curr_entry = object;
     dessert_debug("data seq timeout:" MAC " last_seq_num=% " PRIu16 "", EXPLODE_ARRAY6(curr_entry->src_addr), curr_entry->seq_num);
-    HASH_DEL(ds.entrys, curr_entry);
+    HASH_DEL(ds.entries, curr_entry);
 
     free(curr_entry);
 }
@@ -70,7 +70,7 @@ int db_ds_init() {
         return false;
     }
 
-    ds.entrys = NULL;
+    ds.entries = NULL;
     ds.ts = new_ts;
     return true;
 }
@@ -78,7 +78,7 @@ int db_ds_init() {
 int aodv_db_ds_capt_data_seq(uint8_t src_addr[ETH_ALEN], uint16_t data_seq_num, uint8_t hop_count, struct timeval* timestamp) {
 
     data_packet_id_t* curr_entry = NULL;
-    HASH_FIND(hh, ds.entrys, src_addr, ETH_ALEN, curr_entry);
+    HASH_FIND(hh, ds.entries, src_addr, ETH_ALEN, curr_entry);
 
     if(curr_entry == NULL) {
         //never got data from this host
@@ -89,7 +89,7 @@ int aodv_db_ds_capt_data_seq(uint8_t src_addr[ETH_ALEN], uint16_t data_seq_num, 
             return false;
         }
 
-        HASH_ADD_KEYPTR(hh, ds.entrys, curr_entry->src_addr, ETH_ALEN, curr_entry);
+        HASH_ADD_KEYPTR(hh, ds.entries, curr_entry->src_addr, ETH_ALEN, curr_entry);
         dessert_debug("data seq - new source: " MAC " data_seq=% " PRIu16 "", EXPLODE_ARRAY6(src_addr), data_seq_num);
         timeslot_addobject(ds.ts, timestamp, curr_entry);
         return true;

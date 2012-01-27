@@ -58,7 +58,7 @@ int aodv_db_pdr_get_rcvdhellocount(uint8_t ether_neighbor_addr[ETH_ALEN], uint8_
 
 /**END: Functions for pdr tracking*/
 
-/** cleanup (purge) old entrys from all database tables except from pdr_tracker */
+/** cleanup (purge) old entries from all database tables except from pdr_tracker */
 int aodv_db_cleanup(struct timeval* timestamp);
 
 void aodv_db_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct timeval* timestamp);

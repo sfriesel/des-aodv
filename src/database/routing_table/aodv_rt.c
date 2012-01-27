@@ -31,7 +31,7 @@ void purge_rt_entry(struct timeval* timestamp, void* src_object, void* del_objec
     aodv_rt_entry_t* rt_entry = del_object;
     aodv_rt_srclist_entry_t* src_list_entry;
 
-    // delete all src_list entrys from routing entry
+    // delete all src_list entries from routing entry
     while(rt_entry->src_list != NULL) {
         src_list_entry = rt_entry->src_list;
         HASH_DEL(rt_entry->src_list, src_list_entry);
@@ -61,12 +61,12 @@ void purge_rt_entry(struct timeval* timestamp, void* src_object, void* del_objec
 
     // delete routing entry
     dessert_debug("delete route to " MAC, EXPLODE_ARRAY6(rt_entry->destination_host));
-    HASH_DEL(rt.entrys, rt_entry);
+    HASH_DEL(rt.entries, rt_entry);
     free(rt_entry);
 }
 
 int aodv_db_rt_init() {
-    rt.entrys = NULL;
+    rt.entries = NULL;
 
     struct timeval	mrt; // my route timeout
     mrt.tv_sec = MY_ROUTE_TIMEOUT / 1000;
@@ -165,7 +165,7 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
     aodv_rt_srclist_entry_t* srclist_entry;
 
     // find rreqt_entry with dhost_ether address
-    HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
+    HASH_FIND(hh, rt.entries, destination_host, ETH_ALEN, rt_entry);
 
     if(rt_entry == NULL) {
         // if not found -> create routing entry
@@ -173,7 +173,7 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
             return false;
         }
 
-        HASH_ADD_KEYPTR(hh, rt.entrys, rt_entry->destination_host, ETH_ALEN, rt_entry);
+        HASH_ADD_KEYPTR(hh, rt.entries, rt_entry->destination_host, ETH_ALEN, rt_entry);
     }
 
     // find srclist_entry with shost_ether address
@@ -228,7 +228,7 @@ int aodv_db_rt_capt_rrep(uint8_t destination_host[ETH_ALEN],
                          struct timeval* timestamp) {
 
     aodv_rt_entry_t* rt_entry;
-    HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
+    HASH_FIND(hh, rt.entries, destination_host, ETH_ALEN, rt_entry);
 
     if(rt_entry == NULL) {
         // if not found -> create routing entry
@@ -239,7 +239,7 @@ int aodv_db_rt_capt_rrep(uint8_t destination_host[ETH_ALEN],
         dessert_debug("create route to " MAC ": destination_sequence_number=%" PRIu32 "",
                       EXPLODE_ARRAY6(destination_host), destination_sequence_number);
 
-        HASH_ADD_KEYPTR(hh, rt.entrys, rt_entry->destination_host, ETH_ALEN, rt_entry);
+        HASH_ADD_KEYPTR(hh, rt.entries, rt_entry->destination_host, ETH_ALEN, rt_entry);
     }
 #ifndef ANDROID
     if(signal_strength_threshold > 0) {
@@ -323,7 +323,7 @@ int aodv_db_rt_capt_rrep(uint8_t destination_host[ETH_ALEN],
 int aodv_db_rt_getroute2dest(uint8_t destination_host[ETH_ALEN], uint8_t destination_host_next_hop_out[ETH_ALEN],
                              dessert_meshif_t** output_iface_out, struct timeval* timestamp, uint8_t flags) {
     aodv_rt_entry_t* rt_entry;
-    HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
+    HASH_FIND(hh, rt.entries, destination_host, ETH_ALEN, rt_entry);
 
     if(rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN || rt_entry->flags & AODV_FLAGS_ROUTE_INVALID) {
         dessert_debug("route to " MAC " is invalid", EXPLODE_ARRAY6(destination_host));
@@ -340,7 +340,7 @@ int aodv_db_rt_getroute2dest(uint8_t destination_host[ETH_ALEN], uint8_t destina
 
 int aodv_db_rt_getnexthop(uint8_t destination_host[ETH_ALEN], uint8_t destination_host_next_hop_out[ETH_ALEN]) {
     aodv_rt_entry_t* rt_entry;
-    HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
+    HASH_FIND(hh, rt.entries, destination_host, ETH_ALEN, rt_entry);
 
     if(rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN) {
         return false;
@@ -355,7 +355,7 @@ int aodv_db_rt_getprevhop(uint8_t destination_host[ETH_ALEN], uint8_t originator
 
     aodv_rt_entry_t* rt_entry;
     aodv_rt_srclist_entry_t* srclist_entry;
-    HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
+    HASH_FIND(hh, rt.entries, destination_host, ETH_ALEN, rt_entry);
 
     if(rt_entry == NULL) {
         return false;
@@ -377,7 +377,7 @@ int aodv_db_rt_getprevhop(uint8_t destination_host[ETH_ALEN], uint8_t originator
 //         false if des is unknown
 int aodv_db_rt_get_destination_sequence_number(uint8_t dhost_ether[ETH_ALEN], uint32_t* destination_sequence_number_out) {
     aodv_rt_entry_t* rt_entry;
-    HASH_FIND(hh, rt.entrys, dhost_ether, ETH_ALEN, rt_entry);
+    HASH_FIND(hh, rt.entries, dhost_ether, ETH_ALEN, rt_entry);
 
     if(rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN) {
         *destination_sequence_number_out = 0;
@@ -390,7 +390,7 @@ int aodv_db_rt_get_destination_sequence_number(uint8_t dhost_ether[ETH_ALEN], ui
 
 int aodv_db_rt_get_hopcount(mac_addr destination_host, uint8_t* hop_count_out) {
     aodv_rt_entry_t* rt_entry;
-    HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
+    HASH_FIND(hh, rt.entries, destination_host, ETH_ALEN, rt_entry);
 
     if(rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN) {
         *hop_count_out = UINT8_MAX;
@@ -402,7 +402,7 @@ int aodv_db_rt_get_hopcount(mac_addr destination_host, uint8_t* hop_count_out) {
 
 int aodv_db_rt_get_metric(uint8_t destination_host[ETH_ALEN], metric_t* last_metric_out) {
     aodv_rt_entry_t* rt_entry;
-    HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
+    HASH_FIND(hh, rt.entries, destination_host, ETH_ALEN, rt_entry);
 
     if(rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN) {
         *last_metric_out = AODV_MAX_METRIC;
@@ -414,7 +414,7 @@ int aodv_db_rt_get_metric(uint8_t destination_host[ETH_ALEN], metric_t* last_met
 
 int aodv_db_rt_markrouteinv(uint8_t destination_host[ETH_ALEN], uint32_t destination_sequence_number) {
     aodv_rt_entry_t* rt_entry;
-    HASH_FIND(hh, rt.entrys, destination_host, ETH_ALEN, rt_entry);
+    HASH_FIND(hh, rt.entries, destination_host, ETH_ALEN, rt_entry);
 
     if(rt_entry == NULL) {
         return false;
@@ -529,7 +529,7 @@ int aodv_db_rt_get_warn_endpoints_from_neighbor_and_set_warn(uint8_t neighbor[ET
 
 int aodv_db_rt_get_warn_status(uint8_t dhost_ether[ETH_ALEN]) {
     aodv_rt_entry_t* rt_entry;
-    HASH_FIND(hh, rt.entrys, dhost_ether, ETH_ALEN, rt_entry);
+    HASH_FIND(hh, rt.entries, dhost_ether, ETH_ALEN, rt_entry);
 
     if(rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN) {
         return false;
@@ -543,7 +543,7 @@ int aodv_db_rt_get_active_routes(aodv_link_break_element_t** head) {
     *head = NULL;
     aodv_rt_entry_t* dest, *tmp;
 
-    HASH_ITER(hh, rt.entrys, dest, tmp) {
+    HASH_ITER(hh, rt.entries, dest, tmp) {
         if(dest->flags & AODV_FLAGS_ROUTE_LOCAL_USED) {
             aodv_link_break_element_t* curr_el = malloc(sizeof(aodv_link_break_element_t));
             memset(curr_el, 0x0, sizeof(aodv_link_break_element_t));
@@ -560,7 +560,7 @@ int aodv_db_rt_routing_reset(uint32_t* count_out) {
 
     aodv_rt_entry_t* dest = NULL;
     aodv_rt_entry_t* tmp = NULL;
-    HASH_ITER(hh, rt.entrys, dest, tmp) {
+    HASH_ITER(hh, rt.entries, dest, tmp) {
         dest->flags |= AODV_FLAGS_ROUTE_INVALID;
         dessert_debug("routing table reset: " MAC " is now invalid!", EXPLODE_ARRAY6(dest->destination_host));
         (*count_out)++;
@@ -573,7 +573,7 @@ int aodv_db_rt_cleanup(struct timeval* timestamp) {
 }
 
 int aodv_db_rt_report(char** str_out) {
-    aodv_rt_entry_t* current_entry = rt.entrys;
+    aodv_rt_entry_t* current_entry = rt.entries;
     char* output;
     char entry_str[REPORT_RT_STR_LEN  + 1];
 
@@ -584,7 +584,7 @@ int aodv_db_rt_report(char** str_out) {
         current_entry = current_entry->hh.next;
     }
 
-    current_entry = rt.entrys;
+    current_entry = rt.entries;
     output = malloc(sizeof(char) * REPORT_RT_STR_LEN * (4 + len) + 1);
 
     if(output == NULL) {

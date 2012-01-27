@@ -387,7 +387,7 @@ int aodv_handle_rerr(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
                 continue;
             }
 
-            // if found, compare with entrys in interface-list this RRER.
+            // if found, compare with entries in interface-list this RRER.
             // If equals then this this route is affected and must be invalidated!
             int iface_num;
 

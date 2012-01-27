@@ -37,7 +37,7 @@ typedef struct neighbor_entry {
 } neighbor_entry_t;
 
 typedef struct neighbor_table {
-    neighbor_entry_t*   entrys;
+    neighbor_entry_t*   entries;
     timeslot_t*         ts;
 } neighbor_table_t;
 
@@ -61,7 +61,7 @@ neighbor_entry_t* db_neighbor_entry_create(uint8_t ether_neighbor_addr[ETH_ALEN]
 void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void* object) {
     neighbor_entry_t* curr_entry = object;
     dessert_debug("%s <= x => " MAC, curr_entry->iface->if_name, EXPLODE_ARRAY6(curr_entry->ether_neighbor));
-    HASH_DEL(nt.entrys, curr_entry);
+    HASH_DEL(nt.entries, curr_entry);
 
     aodv_db_sc_addschedule(timestamp, curr_entry->ether_neighbor, AODV_SC_SEND_OUT_RERR, 0);
     aodv_db_sc_dropschedule(curr_entry->ether_neighbor, AODV_SC_UPDATE_RSSI);
@@ -74,7 +74,7 @@ int db_nt_reset_rssi(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* if
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
     memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
     memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
-    HASH_FIND(hh, nt.entrys, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
+    HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
 
     if(curr_entry == NULL) {
         return false;
@@ -92,7 +92,7 @@ int8_t db_nt_update_rssi(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
     memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
     memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
-    HASH_FIND(hh, nt.entrys, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
+    HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
 
     if(curr_entry == NULL) {
         return 0;
@@ -128,7 +128,7 @@ int db_nt_init() {
         return false;
     }
 
-    nt.entrys = NULL;
+    nt.entries = NULL;
     nt.ts = new_ts;
     return true;
 }
@@ -138,9 +138,9 @@ int aodv_db_nt_neighbor_destroy(uint32_t* count_out) {
 
     neighbor_entry_t* neigh = NULL;
     neighbor_entry_t* tmp = NULL;
-    HASH_ITER(hh, nt.entrys, neigh, tmp) {
+    HASH_ITER(hh, nt.entries, neigh, tmp) {
         aodv_db_sc_dropschedule(neigh->ether_neighbor, AODV_SC_UPDATE_RSSI);
-        HASH_DEL(nt.entrys, neigh);
+        HASH_DEL(nt.entries, neigh);
         free(neigh);
         (*count_out)++;
     }
@@ -162,7 +162,7 @@ int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_seq, 
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
     memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
     memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
-    HASH_FIND(hh, nt.entrys, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
+    HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
 
     if(curr_entry == NULL) {
         //this neigbor is new, so create an entry
@@ -172,7 +172,7 @@ int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_seq, 
             return false;
         }
 
-        HASH_ADD_KEYPTR(hh, nt.entrys, curr_entry->ether_neighbor, ETH_ALEN + sizeof(void*), curr_entry);
+        HASH_ADD_KEYPTR(hh, nt.entries, curr_entry->ether_neighbor, ETH_ALEN + sizeof(void*), curr_entry);
         dessert_debug("%s <=====> " MAC, iface->if_name, EXPLODE_ARRAY6(ether_neighbor_addr));
     }
 
@@ -193,7 +193,7 @@ int db_nt_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* 
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
     memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
     memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
-    HASH_FIND(hh, nt.entrys, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
+    HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
 
     if(curr_entry == NULL) {
         return false;

@@ -94,12 +94,12 @@ void pdr_nt_purge_nb(struct timeval* timestamp, void* src_object, void* del_obje
     dessert_info("Delete entry in pdr tracker for " MAC " due to no hello communication", EXPLODE_ARRAY6(nb_entry->ether_neighbor));
     pdr_nt_msg_destroy(nb_entry);
     timeslot_destroy(nb_entry->ts);
-    HASH_DEL(pdr_nt.entrys, nb_entry);
+    HASH_DEL(pdr_nt.entries, nb_entry);
     free(nb_entry);
 }
 
 int aodv_db_pdr_nt_init() {
-    pdr_nt.entrys = NULL;
+    pdr_nt.entries = NULL;
 
     if(hello_interval*tracking_factor >= PDR_MIN_TRACKING_INTERVAL) {
         pdr_nt.nb_expected_hellos = tracking_factor;
@@ -133,10 +133,10 @@ int pdr_nt_neighbor_destroy(uint32_t* count_out) {
 
     pdr_neighbor_entry_t* neigh = NULL;
     pdr_neighbor_entry_t* tmp = NULL;
-    HASH_ITER(hh, pdr_nt.entrys, neigh, tmp) {
+    HASH_ITER(hh, pdr_nt.entries, neigh, tmp) {
         pdr_nt_msg_destroy(neigh);
         timeslot_destroy(neigh->ts);
-        HASH_DEL(pdr_nt.entrys, neigh);
+        HASH_DEL(pdr_nt.entries, neigh);
         free(neigh);
         (*count_out)++;
     }
@@ -172,7 +172,7 @@ int aodv_db_pdr_nt_cap_hello(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hel
     teststamp.tv_sec = timestamp->tv_sec;
     teststamp.tv_usec = timestamp->tv_usec;
     pdr_neighbor_entry_t* curr_entry = NULL;
-    HASH_FIND(hh, pdr_nt.entrys, ether_neighbor_addr, ETH_ALEN, curr_entry);
+    HASH_FIND(hh, pdr_nt.entries, ether_neighbor_addr, ETH_ALEN, curr_entry);
 
     if(curr_entry == NULL) {
         //start new pdr tracker
@@ -198,7 +198,7 @@ int aodv_db_pdr_nt_cap_hello(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hel
             return false;
         }
 
-        HASH_ADD_KEYPTR(hh, pdr_nt.entrys, curr_entry->ether_neighbor, ETH_ALEN, curr_entry);
+        HASH_ADD_KEYPTR(hh, pdr_nt.entries, curr_entry->ether_neighbor, ETH_ALEN, curr_entry);
         dessert_info("New neighbor entry with %" PRIu16 " expected hellos in pdr tracker created for " MAC, curr_entry->expected_hellos, EXPLODE_ARRAY6(ether_neighbor_addr));
     }
     else if (curr_entry->hello_interv != hello_interv) {
@@ -240,7 +240,7 @@ int aodv_db_pdr_nt_cap_hello(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hel
 
 int aodv_db_pdr_nt_cap_hellorsp(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_interv, uint8_t hello_count, struct timeval* timestamp) {
     pdr_neighbor_entry_t* curr_entry = NULL;
-    HASH_FIND(hh, pdr_nt.entrys, ether_neighbor_addr, ETH_ALEN, curr_entry);
+    HASH_FIND(hh, pdr_nt.entries, ether_neighbor_addr, ETH_ALEN, curr_entry);
 
     if(curr_entry == NULL) {
         //start new pdr tracker for neighbor
@@ -266,7 +266,7 @@ int aodv_db_pdr_nt_cap_hellorsp(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t 
             return false;
         }
 
-        HASH_ADD_KEYPTR(hh, pdr_nt.entrys, curr_entry->ether_neighbor, ETH_ALEN, curr_entry);
+        HASH_ADD_KEYPTR(hh, pdr_nt.entries, curr_entry->ether_neighbor, ETH_ALEN, curr_entry);
         dessert_info("New neighbor entry with %" PRIu16 " expected hellos in pdr tracker created for " MAC, curr_entry->expected_hellos, EXPLODE_ARRAY6(ether_neighbor_addr));
     }
     else if (curr_entry->hello_interv != hello_interv) {
@@ -290,7 +290,7 @@ int aodv_db_pdr_nt_get_pdr(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* pdr_
     *pdr_out = 0;
 
     pdr_neighbor_entry_t* curr_entry = NULL;
-    HASH_FIND(hh, pdr_nt.entrys, ether_neighbor_addr, ETH_ALEN, curr_entry);
+    HASH_FIND(hh, pdr_nt.entries, ether_neighbor_addr, ETH_ALEN, curr_entry);
 
     if(curr_entry == NULL){
         return false;
@@ -313,7 +313,7 @@ int aodv_db_pdr_nt_get_etx_mul(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* 
     *etx_out = 0;
 
     pdr_neighbor_entry_t* curr_entry = NULL;
-    HASH_FIND(hh, pdr_nt.entrys, ether_neighbor_addr, ETH_ALEN, curr_entry);
+    HASH_FIND(hh, pdr_nt.entries, ether_neighbor_addr, ETH_ALEN, curr_entry);
 
     if(curr_entry == NULL){
         return false;
@@ -349,7 +349,7 @@ int aodv_db_pdr_nt_get_etx_add(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* 
     *etx_out = 0;
 
     pdr_neighbor_entry_t* curr_entry = NULL;
-    HASH_FIND(hh, pdr_nt.entrys, ether_neighbor_addr, ETH_ALEN, curr_entry);
+    HASH_FIND(hh, pdr_nt.entries, ether_neighbor_addr, ETH_ALEN, curr_entry);
 
     if(curr_entry == NULL){
         return false;
@@ -392,7 +392,7 @@ int aodv_db_pdr_nt_get_etx_add(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* 
 
 int aodv_db_pdr_nt_get_rcvdhellocount(uint8_t ether_neighbor_addr[ETH_ALEN], uint8_t* count_out, struct timeval* timestamp) {
     pdr_neighbor_entry_t* curr_entry = NULL;
-    HASH_FIND(hh, pdr_nt.entrys, ether_neighbor_addr, ETH_ALEN, curr_entry);
+    HASH_FIND(hh, pdr_nt.entries, ether_neighbor_addr, ETH_ALEN, curr_entry);
 
     if(curr_entry == NULL){
         return false;
@@ -408,7 +408,7 @@ int aodv_db_pdr_nt_get_rcvdhellocount(uint8_t ether_neighbor_addr[ETH_ALEN], uin
 }
 
 int aodv_db_pdr_nt_report(char** str_out) {
-    pdr_neighbor_entry_t* current_entry = pdr_nt.entrys;
+    pdr_neighbor_entry_t* current_entry = pdr_nt.entries;
     char* output;
     char entry_str[REPORT_RT_STR_LEN  + 1];
 
@@ -419,7 +419,7 @@ int aodv_db_pdr_nt_report(char** str_out) {
         current_entry = current_entry->hh.next;
     }
 
-    current_entry = pdr_nt.entrys;
+    current_entry = pdr_nt.entries;
     output = malloc(sizeof(char) * REPORT_RT_STR_LEN * (4 + len) + 1);
 
     if(output == NULL) {

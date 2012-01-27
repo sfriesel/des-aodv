@@ -328,13 +328,14 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     }
     else {   // RREQ for me
         pthread_rwlock_wrlock(&pp_rwlock);
-        uint32_t destination_sequence_number_copy = ++seq_num_global;
+        seq_num_global = max(seq_num_global, rreq_msg->destination_sequence_number);
+        uint32_t rrep_seq_num = seq_num_global;
         pthread_rwlock_unlock(&pp_rwlock);
 
         dessert_debug("incoming RREQ from " MAC " over " MAC " for me originator_sequence_number=%" PRIu32 " -> answer with RREP destination_sequence_number_copy=%" PRIu32 "",
-                      EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), rreq_msg->originator_sequence_number, destination_sequence_number_copy);
+                      EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), rreq_msg->originator_sequence_number, rrep_seq_num);
 
-        dessert_msg_t* rrep_msg = _create_rrep(dessert_l25_defsrc, l25h->ether_shost, msg->l2h.ether_shost, destination_sequence_number_copy, 0, 0, metric_startvalue);
+        dessert_msg_t* rrep_msg = _create_rrep(dessert_l25_defsrc, l25h->ether_shost, msg->l2h.ether_shost, rrep_seq_num, 0, 0, metric_startvalue);
         dessert_meshsend(rrep_msg, iface);
         dessert_msg_destroy(rrep_msg);
 

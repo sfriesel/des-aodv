@@ -29,7 +29,7 @@ For further information and questions please use the web site
 #include "../config.h"
 #include "../helper.h"
 
-uint32_t seq_num_global = 0;
+static uint32_t seq_num_global = 0;
 pthread_rwlock_t pp_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 
 // ---------------------------- help functions ---------------------------------------

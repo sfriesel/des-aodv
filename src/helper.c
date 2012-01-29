@@ -58,14 +58,6 @@ int hf_comp_metric(metric_t i, metric_t j) {
         return 1;
     }
 
-    /** OLD BEHAVIOR 
-    metric_t diff = i - j;
-
-    if(diff < (AODV_MAX_METRIC >> 1)) {
-        return 1;
-    }
-    */
-
     return -1;
 }
 

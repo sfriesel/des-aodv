@@ -36,33 +36,27 @@ int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_
 #ifndef ANDROID
         case AODV_METRIC_RSSI: {
             struct avg_node_result sample = dessert_rssi_avg(last_hop, iface);
-            uint8_t interval = hf_rssi2interval(sample.avg_rssi);
+            metric_t interval = hf_rssi2interval(sample.avg_rssi);
             dessert_trace("incomming rssi_metric=%" AODV_PRI_METRIC ", add %" PRIu8 " (rssi=%" PRId8 ") for the last hop " MAC, (*metric), interval, sample.avg_rssi, EXPLODE_ARRAY6(last_hop));
             (*metric) += interval;
             break;
         }
 #endif
         case AODV_METRIC_ETX_ADD: {
-            uint16_t link_etx_add = 0;
-            if(aodv_db_pdr_get_etx_add(last_hop, &link_etx_add, timestamp) == true) {
-                /**Detect Overflow*/
-                dessert_debug("Old metricval %" AODV_PRI_METRIC " ETX_ADD rcvd =%" PRIu16 " for this hop " MAC, (*metric), link_etx_add, EXPLODE_ARRAY6(last_hop));
-                if(((uint16_t)(65535 - link_etx_add)) >= (*metric)) {
-                    (*metric) += link_etx_add;
-                }
-                else {
-                    (*metric) = 65535;
-                }
+            metric_t link_etx_add = 0;
+            if(aodv_db_pdr_get_etx_add(last_hop, &link_etx_add, timestamp)) {
+                dessert_debug("Old metricval %" AODV_MAX_METRIC " ETX_ADD rcvd =%" PRIu16 " for this hop " MAC, (*metric), link_etx_add, EXPLODE_ARRAY6(last_hop));
             }
             else {
-                /**Detect Overflow*/
                 dessert_debug("Old metricval %" AODV_PRI_METRIC " ETX_ADD for hop " MAC " failed", (*metric), EXPLODE_ARRAY6(last_hop));
-                if(((uint16_t)(65535-2000)) >= (*metric)) {
-                    (*metric) += 2000;
-                }
-                else {
-                    (*metric) = 65535;
-                }
+                link_etx_add = 2000;
+            }
+            /**prevent overflow*/
+            if(AODV_MAX_METRIC - link_etx_add > *metric) {
+                *metric += link_etx_add;
+            }
+            else {
+                *metric = AODV_MAX_METRIC;
             }
             dessert_debug("New metric value =%" AODV_PRI_METRIC " for hop " MAC, (*metric), EXPLODE_ARRAY6(last_hop));
             break;

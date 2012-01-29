@@ -181,7 +181,7 @@ int aodv_sys_drop_multicast(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t
 
     struct ether_header* l25h = dessert_msg_getl25ether(msg);
 
-    if(memcmp(l25h->ether_dhost, ether_broadcast, ETHER_ADDR_LEN) == 0) {
+    if(mac_equal(l25h->ether_dhost, ether_broadcast)) {
         proc->lflags |= DESSERT_RX_FLAG_L25_BROADCAST;
     }
     else if(l25h->ether_dhost[0] & 0x01) {    /* broadcast also has this bit set */
@@ -202,7 +202,7 @@ int aodv_sys2rp(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, dess
     msg->ttl = UINT8_MAX;
     msg->u8 = 0; /*hop count */
 
-    if(memcmp(l25h->ether_dhost, ether_broadcast, ETH_ALEN) == 0) {
+    if(mac_equal(l25h->ether_dhost, ether_broadcast)) {
         pthread_rwlock_wrlock(&data_seq_lock);
         msg->u16 = ++data_seq_global;
         pthread_rwlock_unlock(&data_seq_lock);

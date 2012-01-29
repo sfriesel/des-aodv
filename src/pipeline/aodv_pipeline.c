@@ -243,7 +243,7 @@ int aodv_handle_hello(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc
     }
     else {
         //hello rep
-        if(memcmp(iface->hwaddr, msg->l2h.ether_dhost, ETH_ALEN) == 0) {
+        if(mac_equal(iface->hwaddr, msg->l2h.ether_dhost)) {
             aodv_db_pdr_cap_hellorsp(msg->l2h.ether_shost, hello_msg->hello_interval, hello_msg->hello_rcvd_count, &ts);
             // dessert_trace("got hello-rep from " MAC, EXPLODE_ARRAY6(msg->l2h.ether_dhost));
             aodv_db_cap2Dneigh(msg->l2h.ether_shost, msg->u16, iface, &ts);
@@ -385,7 +385,7 @@ int aodv_handle_rerr(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
             int iface_num;
 
             for(iface_num = 0; iface_num < rerr_msg->iface_addr_count; iface_num++) {
-                if(memcmp(rerr_msg->ifaces + iface_num * ETH_ALEN, dhost_next_hop, ETH_ALEN) == 0) {
+                if(mac_equal(rerr_msg->ifaces + iface_num * ETH_ALEN, dhost_next_hop)) {
                     rebroadcast_rerr |= aodv_db_markrouteinv(dhost_ether, destination_sequence_number);
                 }
             }
@@ -418,7 +418,7 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         return DESSERT_MSG_KEEP;
     }
 
-    if(memcmp(msg->l2h.ether_dhost, iface->hwaddr, ETH_ALEN) != 0) {
+    if(!mac_equal(msg->l2h.ether_dhost, iface->hwaddr)) {
         return DESSERT_MSG_DROP;
     }
 
@@ -454,7 +454,7 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         return DESSERT_MSG_DROP;
     }
 
-    if(memcmp(dessert_l25_defsrc, l25h->ether_dhost, ETH_ALEN) != 0) {
+    if(!mac_equal(dessert_l25_defsrc, l25h->ether_dhost)) {
         // RREP is not for me -> send RREP to RREQ originator
         uint8_t next_hop[ETH_ALEN];
         dessert_meshif_t* output_iface;

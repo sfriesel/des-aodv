@@ -269,8 +269,9 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     if(gossip_type == GOSSIP_NONE && msg->ttl == 0) {
         return DESSERT_MSG_DROP;
     }
-
-    msg->ttl--;
+    else if(msg->ttl) {
+        msg->ttl--;
+    }
     msg->u8++; /* hop count */
 
     struct timeval ts;

@@ -45,7 +45,7 @@ int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_
         case AODV_METRIC_ETX_ADD: {
             metric_t link_etx_add = 0;
             if(aodv_db_pdr_get_etx_add(last_hop, &link_etx_add, timestamp)) {
-                dessert_debug("Old metricval %" AODV_MAX_METRIC " ETX_ADD rcvd =%" PRIu16 " for this hop " MAC, (*metric), link_etx_add, EXPLODE_ARRAY6(last_hop));
+                dessert_debug("Old metricval %" AODV_PRI_METRIC " ETX_ADD rcvd =%" PRIu16 " for this hop " MAC, (*metric), link_etx_add, EXPLODE_ARRAY6(last_hop));
             }
             else {
                 dessert_debug("Old metricval %" AODV_PRI_METRIC " ETX_ADD for hop " MAC " failed", (*metric), EXPLODE_ARRAY6(last_hop));

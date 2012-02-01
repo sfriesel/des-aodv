@@ -208,7 +208,54 @@ int cli_send_rreq(struct cli_def* cli, char* command, char* argv[], int argc) {
 
 
 int cli_show_gossip_p(struct cli_def *cli, char *command, char *argv[], int argc) {
-    cli_print(cli, "GOSSIPP = %lf \n", gossip_p);
+    cli_print(cli, "GOSSIP_P = %lf \n", gossip_p);
+    return CLI_OK;
+}
+
+int cli_set_gossip(struct cli_def* cli, char* command, char* argv[], int argc) {
+
+    if(argc != 1) {
+        cli_print(cli, "usage of %s command [gossip]\n", command);
+        return CLI_ERROR_ARG;
+    }
+
+    char* gossip_string = argv[0];
+
+    int goff = strcmp(gossip_string, "GOSSIP_NONE");
+    if(goff == 0) {
+        gossip_type = GOSSIP_NONE;
+    }
+
+    int g0 = strcmp(gossip_string, "GOSSIP_0");
+    if(g0 == 0) {
+        gossip_type = GOSSIP_0;
+    }
+
+    int g1 = strcmp(gossip_string, "GOSSIP_1");
+    if(g1 == 0) {
+        gossip_type = GOSSIP_1;
+    }
+
+    int g3 = strcmp(gossip_string, "GOSSIP_3");
+    if(g3 == 0) {
+        gossip_type = GOSSIP_3;
+    }
+
+    int p0 = strcmp(gossip_string, "PISSOG_0");
+    if(p0 == 0) {
+        gossip_type = PISSOG_0;
+    }
+
+    int p3 = strcmp(gossip_string, "PISSOG_3");
+    if(p3 == 0) {
+        gossip_type = PISSOG_3;
+    }
+
+    uint32_t count_out = 0;
+    aodv_db_routing_reset(&count_out);
+
+    cli_print(cli, "gossip set to %s....resetting routing table: %" PRIu32 " entries invalidated!", gossip_string, count_out);
+    dessert_notice("gossip set to %s....resetting routing table: %" PRIu32 " entries invalidated!", gossip_string, count_out);
     return CLI_OK;
 }
 
@@ -392,6 +439,45 @@ int cli_show_metric(struct cli_def* cli, char* command, char* argv[], int argc) 
     cli_print(cli, "metric is set to %s", metric_string);
     return CLI_OK;
 }
+
+int cli_show_gossip(struct cli_def* cli, char* command, char* argv[], int argc) {
+
+    char* gossip_string = NULL;
+
+    switch(gossip_type) {
+        case GOSSIP_NONE: {
+            gossip_string = "GOSSIP_NONE";
+            break;
+        }
+        case GOSSIP_0: {
+            gossip_string = "GOSSIP_0";
+            break;
+        }
+        case GOSSIP_1: {
+            gossip_string = "GOSSIP_1";
+            break;
+        }
+        case GOSSIP_3: {
+            gossip_string = "GOSSIP_3";
+            break;
+        }
+        case PISSOG_0: {
+            gossip_string = "PISSOG_0";
+            break;
+        }
+        case PISSOG_3: {
+            gossip_string = "PISSOG_3";
+            break;
+        }
+        default: {
+            gossip_string = "UNKNOWN GOSSIP";
+        }
+    }
+
+    cli_print(cli, "gossip is set to %s", gossip_string);
+    return CLI_OK;
+}
+
 
 int cli_show_hello_size(struct cli_def* cli, char* command, char* argv[], int argc) {
     cli_print(cli, "HELLO size = %" PRIu16 " bytes\n", hello_size);

@@ -59,14 +59,17 @@ For further information and questions please use the web site
 #define HELLO_SIZE					128 /* bytes */
 #define RREQ_SIZE					128 /* bytes */
 
-#define GOSSIP_P						1 /* flooding */
+#define GOSSIP_P					1 /* flooding */
 #define DEST_ONLY					false /* only destination answer a RRequest */
 #define RING_SEARCH			 		true /* use expanding ring search */
 
 typedef enum aodv_gossip {
     GOSSIP_NONE,
     GOSSIP_0,
-    GOSSIP_1
+    GOSSIP_1,
+    GOSSIP_3,
+    PISSOG_0,
+    PISSOG_3
 } aodv_gossip_t;
 
 typedef enum aodv_metric {

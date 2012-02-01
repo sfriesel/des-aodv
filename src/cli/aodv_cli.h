@@ -35,6 +35,7 @@ int cli_set_gossip_p(struct cli_def* cli, char* command, char* argv[], int argc)
 int cli_set_dest_only(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_ring_search(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_metric(struct cli_def* cli, char* command, char* argv[], int argc);
+int cli_set_gossip(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_periodic_rreq_interval(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_set_preemptive_rreq_signal_strength_threshold(struct cli_def* cli, char* command, char* argv[], int argc);
 
@@ -42,6 +43,7 @@ int cli_show_gossip_p(struct cli_def* cli, char* command, char* argv[], int argc
 int cli_show_preemptive_rreq_signal_strength_threshold(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_show_periodic_rreq_interval(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_show_metric(struct cli_def* cli, char* command, char* argv[], int argc);
+int cli_show_gossip(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_show_hello_size(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_show_hello_interval(struct cli_def* cli, char* command, char* argv[], int argc);
 int cli_show_rreq_size(struct cli_def* cli, char* command, char* argv[], int argc);

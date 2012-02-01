@@ -103,6 +103,9 @@ int main(int argc, char** argv) {
     cli_register_command(dessert_cli, dessert_cli_set, "metric", cli_set_metric, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set metric");
     cli_register_command(dessert_cli, dessert_cli_show, "metric", cli_show_metric, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show metric");
 
+    cli_register_command(dessert_cli, dessert_cli_set, "gossip", cli_set_gossip, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set gossip");
+    cli_register_command(dessert_cli, dessert_cli_show, "gossip", cli_show_gossip, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show gossip");
+
     cli_register_command(dessert_cli, dessert_cli_set, "periodic_rreq_interval", cli_set_periodic_rreq_interval, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set periodic rreq interval");
     cli_register_command(dessert_cli, dessert_cli_show, "periodic_rreq_interval", cli_show_periodic_rreq_interval, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show periodic rreq interval");
 
@@ -111,6 +114,7 @@ int main(int argc, char** argv) {
 
     cli_register_command(dessert_cli, dessert_cli_set, "gossip_p", cli_set_gossip_p, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set p for gossip  p in [0.0,...,1.0]");
     cli_register_command(dessert_cli, dessert_cli_show, "gossip_p", cli_show_gossip_p, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show p for gossip p in [0.0,...,1.0]");
+
     cli_register_command(dessert_cli, dessert_cli_set, "dest_only", cli_set_dest_only, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set destonly mode");
     cli_register_command(dessert_cli, dessert_cli_set, "ring_search", cli_set_ring_search, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set ring_search  On/Off");
 

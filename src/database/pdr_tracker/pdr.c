@@ -24,7 +24,7 @@ For further information and questions please use the web site
 #include "pdr.h"
 #include "../../config.h"
 
-pdr_neighbor_entry_t* pdr_neighbor_entry_create(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_interv) {
+pdr_neighbor_entry_t* pdr_neighbor_entry_create(mac_addr ether_neighbor_addr, uint16_t hello_interv) {
     pdr_neighbor_entry_t* new_entry;
     new_entry = malloc(sizeof(pdr_neighbor_entry_t));
 
@@ -275,107 +275,71 @@ int pdr_nt_cleanup(pdr_neighbor_entry_t* given_entry, struct timeval* timestamp)
     return timeslot_purgeobjects(curr_entry->ts, timestamp);
 }
 
-int aodv_db_pdr_nt_get_pdr(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* pdr_out, struct timeval* timestamp) {
-    *pdr_out = 0;
-
+int aodv_db_pdr_nt_get_pdr(mac_addr ether_neighbor_addr, metric_t* pdr_out, struct timeval* timestamp) {
     pdr_neighbor_entry_t* curr_entry = NULL;
     HASH_FIND(hh, pdr_nt.entries, ether_neighbor_addr, ETH_ALEN, curr_entry);
 
     if(curr_entry == NULL){
         return false;
     }
-    
+
     pdr_nt_cleanup(curr_entry, timestamp);
 
     /** Encode pdr as uint16_t value*/
     if(curr_entry->rcvd_hello_count >= curr_entry->expected_hellos) {
-        *pdr_out = 10000;
+        *pdr_out = AODV_MAX_METRIC;
     }
     else {
-        *pdr_out = (uint16_t)(((double)curr_entry->rcvd_hello_count / (double) curr_entry->expected_hellos)*10000.0);
+        *pdr_out = (metric_t)((uintmax_t)AODV_MAX_METRIC * curr_entry->rcvd_hello_count / curr_entry->expected_hellos);
     }
-
     return true;
 }
 
-int aodv_db_pdr_nt_get_etx_mul(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* etx_out, struct timeval* timestamp) {
-    *etx_out = 0;
-
+int aodv_db_pdr_nt_get_etx_mul(mac_addr ether_neighbor_addr, metric_t* etx_out, struct timeval* timestamp) {
     pdr_neighbor_entry_t* curr_entry = NULL;
     HASH_FIND(hh, pdr_nt.entries, ether_neighbor_addr, ETH_ALEN, curr_entry);
 
     if(curr_entry == NULL){
         return false;
     }
-    
+
     pdr_nt_cleanup(curr_entry, timestamp);
 
-    /** Get pdr from neighbor to me*/
-    double my_pdr;
-    if(curr_entry->rcvd_hello_count >= curr_entry->expected_hellos) {
-        my_pdr = 1.0;
-    }
-    else {
-        my_pdr = (double) curr_entry->rcvd_hello_count / (double) curr_entry->expected_hellos;
-    }
+    /* clamp rcvd counts to prevent pdr's over 1 */
+    uintmax_t    rcvd_hellos  = min(curr_entry->rcvd_hello_count, curr_entry->expected_hellos);
+    uintmax_t nb_rcvd_hellos  = min(curr_entry->nb_rcvd_hello_count, pdr_nt.nb_expected_hellos);
 
-    /** Get pdr from neighbor to me*/
-    double nb_pdr;
-    if(curr_entry->nb_rcvd_hello_count >= pdr_nt.nb_expected_hellos) {
-        nb_pdr = 1.0;
-    }
-    else {
-        nb_pdr = (double) curr_entry->nb_rcvd_hello_count / (double) pdr_nt.nb_expected_hellos;
-    }
+    /* this is equivalent to round_trip_pdr = AODV_MAX_METRIC * pdr * nb_pdr, just reordered operations to allow integer arithmetic */
+    uintmax_t round_trip_pdr  = (uintmax_t) AODV_MAX_METRIC * rcvd_hellos * nb_rcvd_hellos;
+              round_trip_pdr /= (uintmax_t) curr_entry->expected_hellos * pdr_nt.nb_expected_hellos;
 
-    double result_pdr = (my_pdr * nb_pdr)*10000.0;
-
-    *etx_out = (uint16_t) result_pdr;
+    *etx_out = (metric_t) round_trip_pdr;
     return true;
 }
 
-int aodv_db_pdr_nt_get_etx_add(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* etx_out, struct timeval* timestamp) {
-    *etx_out = 0;
-
+int aodv_db_pdr_nt_get_etx_add(mac_addr ether_neighbor_addr, metric_t* etx_out, struct timeval* timestamp) {
     pdr_neighbor_entry_t* curr_entry = NULL;
     HASH_FIND(hh, pdr_nt.entries, ether_neighbor_addr, ETH_ALEN, curr_entry);
 
     if(curr_entry == NULL){
         return false;
     }
-    
+
     pdr_nt_cleanup(curr_entry, timestamp);
 
-    /** Get pdr from neighbor to me*/
-    double my_pdr;
-    if(curr_entry->rcvd_hello_count >= curr_entry->expected_hellos) {
-        my_pdr = 1.0;
-    }
-    else {
-        my_pdr = (double) curr_entry->rcvd_hello_count / (double) curr_entry->expected_hellos;
+    if(curr_entry->rcvd_hello_count == 0 || curr_entry->nb_rcvd_hello_count == 0) {
+        *etx_out = AODV_MAX_METRIC;
     }
 
-    /** Get pdr from neighbor to me*/
-    double nb_pdr;
-    if(curr_entry->nb_rcvd_hello_count >= pdr_nt.nb_expected_hellos) {
-        nb_pdr = 1.0;
-    }
-    else {
-        nb_pdr = (double) curr_entry->nb_rcvd_hello_count / (double) pdr_nt.nb_expected_hellos;
-    }
+    /* clamp rcvd counts to prevent pdr's over 1 */
+    uintmax_t    rcvd_hellos  = min(curr_entry->rcvd_hello_count, curr_entry->expected_hellos);
+    uintmax_t nb_rcvd_hellos  = min(curr_entry->nb_rcvd_hello_count, pdr_nt.nb_expected_hellos);
 
-    if(nb_pdr <=0.0 || my_pdr <= 0.0) {
-        *etx_out = 2000;
-    }
-    else {
-        double result_pdr = (1.0 / (my_pdr * nb_pdr)) * 100;
-        if(result_pdr > 2000.0) {
-            *etx_out = 2000;
-        }
-        else {
-            *etx_out = (uint16_t) result_pdr;
-        }
-    }
+    /* this is equivalent to etx = 256 / (pdr * nb_pdr), just reordered operations to allow integer arithmetic */
+    uintmax_t etx  = (uintmax_t) 0x100 * curr_entry->expected_hellos * pdr_nt.nb_expected_hellos;
+              etx /= (uintmax_t) rcvd_hellos * nb_rcvd_hellos;
+
+    *etx_out = (metric_t) min(etx, (uintmax_t)AODV_MAX_METRIC);
     return true;
 }
 

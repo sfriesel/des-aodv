@@ -294,7 +294,7 @@ int cli_set_metric(struct cli_def* cli, char* command, char* argv[], int argc) {
 
     if(etxmul == 0) {
         metric_type = AODV_METRIC_ETX_MUL;
-        metric_startvalue = 10000;
+        metric_startvalue = AODV_MAX_METRIC;
     }
 
     int rfc = strcmp(metric_string, "AODV_METRIC_RFC");
@@ -308,7 +308,7 @@ int cli_set_metric(struct cli_def* cli, char* command, char* argv[], int argc) {
 
     if(pdr == 0) {
         metric_type = AODV_METRIC_PDR;
-        metric_startvalue = 10000;
+        metric_startvalue = AODV_MAX_METRIC;
     }
 
     uint32_t count_out = 0;

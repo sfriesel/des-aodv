@@ -43,13 +43,12 @@ int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_
         }
 #endif
         case AODV_METRIC_ETX_ADD: {
-            metric_t link_etx_add = 0;
+            metric_t link_etx_add = AODV_MAX_METRIC;
             if(aodv_db_pdr_get_etx_add(last_hop, &link_etx_add, timestamp)) {
                 dessert_debug("Old metricval %" AODV_PRI_METRIC " ETX_ADD rcvd =%" PRIu16 " for this hop " MAC, (*metric), link_etx_add, EXPLODE_ARRAY6(last_hop));
             }
             else {
-                dessert_debug("Old metricval %" AODV_PRI_METRIC " ETX_ADD for hop " MAC " failed", (*metric), EXPLODE_ARRAY6(last_hop));
-                link_etx_add = 2000;
+                dessert_debug("Old metricval %" AODV_PRI_METRIC " ETX_ADD for hop " MAC " failed", *metric, EXPLODE_ARRAY6(last_hop));
             }
             /**prevent overflow*/
             if(AODV_MAX_METRIC - link_etx_add > *metric) {
@@ -58,15 +57,15 @@ int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_
             else {
                 *metric = AODV_MAX_METRIC;
             }
-            dessert_debug("New metric value =%" AODV_PRI_METRIC " for hop " MAC, (*metric), EXPLODE_ARRAY6(last_hop));
+            dessert_debug("New metric value =%" AODV_PRI_METRIC " for hop " MAC, *metric, EXPLODE_ARRAY6(last_hop));
             break;
         }
         case AODV_METRIC_ETX_MUL: {
-            uint16_t link_etx_mul = 0;
+            metric_t link_etx_mul = 0;
             if(aodv_db_pdr_get_etx_mul(last_hop, &link_etx_mul, timestamp) == true) {
                 dessert_debug("Old metricval %" AODV_PRI_METRIC " ETX_MUL rcvd =%" PRIu16 " for this hop " MAC, (*metric), link_etx_mul, EXPLODE_ARRAY6(last_hop));
-                uint32_t result = (*metric) * (uint32_t)link_etx_mul;
-                result = result / 10000;
+                uintmax_t result = (*metric) * (uintmax_t)link_etx_mul;
+                result /= (AODV_MAX_METRIC/32);
                 (*metric) = (metric_t) result;
             }
             else {
@@ -81,7 +80,7 @@ int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_
             if(aodv_db_pdr_get_pdr(last_hop, &link_pdr, timestamp) == true){
                 dessert_debug("Old metricval %" AODV_PRI_METRIC " PDR rcvd =%" PRIu16 " for this hop " MAC, (*metric), link_pdr, EXPLODE_ARRAY6(last_hop));
                 uint32_t result = (*metric) * (uint32_t)link_pdr;
-                result = result / 10000;
+                result = result / AODV_MAX_METRIC;
                 (*metric) = (metric_t) result;
             }
             else {

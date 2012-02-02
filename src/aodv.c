@@ -58,7 +58,7 @@ static void register_names() {
 }
 
 int main(int argc, char** argv) {
-    enum dessert_init_flags init_flags = DESSERT_OPT_DAEMONIZE;
+    uint16_t init_flags = DESSERT_OPT_DAEMONIZE;
     int used = 0;
     int size = 2;
     FILE **config_files = NULL;

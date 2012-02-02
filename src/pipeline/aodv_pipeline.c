@@ -76,8 +76,6 @@ dessert_msg_t* _create_rreq(uint8_t dhost_ether[ETH_ALEN], uint8_t ttl, metric_t
         rreq_msg->flags |= AODV_FLAGS_RREQ_D;
     }
 
-    dessert_debug("create rreq to " MAC ": o=%" PRIu32 " d=%" PRIu32 "", EXPLODE_ARRAY6(dhost_ether), rreq_msg->originator_sequence_number, rreq_msg->destination_sequence_number);
-
     dessert_msg_dummy_payload(msg, rreq_size);
 
     return msg;
@@ -479,7 +477,6 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     }
     else {
         // this RREP is for me! -> pop all packets from FIFO buffer and send to destination
-        dessert_debug("got RREP from " MAC " destination_sequence_number=%" PRIu32 " -> aodv_send_packets_from_buffer", EXPLODE_ARRAY6(l25h->ether_shost), rrep_msg->destination_sequence_number);
         /* no need to search for next hop. Next hop is RREP.prev_hop */
         aodv_send_packets_from_buffer(l25h->ether_shost, msg->l2h.ether_shost, iface);
     }

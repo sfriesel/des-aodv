@@ -30,6 +30,17 @@ For further information and questions please use the web site
 #include <linux/if_ether.h>
 #endif
 
+typedef struct fifo_list_el {
+    dessert_msg_t*          msg;
+    struct fifo_list_el*    next;
+} fifo_list_el_t;
+
+typedef struct fifo_list {
+    fifo_list_el_t* head;
+    fifo_list_el_t* tail;
+    uint32_t        size;
+} fifo_list_t;
+
 int pb_init();
 
 void pb_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct timeval* timestamp);
@@ -41,4 +52,8 @@ void pb_drop_packets(uint8_t dhost_ether[ETH_ALEN]);
 int pb_cleanup(struct timeval* timestamp);
 
 void pb_report(char** str_out);
+
+void fl_push_packet(fifo_list_t* fl, dessert_msg_t* msg);
+dessert_msg_t* fl_pop_packet(fifo_list_t* fl);
+
 #endif

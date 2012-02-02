@@ -25,17 +25,6 @@ For further information and questions please use the web site
 #include "../../config.h"
 #include "../timeslot.h"
 
-typedef struct fifo_list_el {
-    dessert_msg_t*          msg;
-    struct fifo_list_el*    next;
-} fifo_list_el_t;
-
-typedef struct fifo_list {
-    fifo_list_el_t* head;
-    fifo_list_el_t* tail;
-    uint32_t        size;
-} fifo_list_t;
-
 /**
  * Packet buffer element
  */

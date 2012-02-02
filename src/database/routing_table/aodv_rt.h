@@ -45,6 +45,7 @@ typedef struct aodv_rt_srclist_entry {
     metric_t			metric;
     uint8_t				hop_count;
     uint8_t				flags;
+    uint8_t				quantity;	// how often we see this unique rreq - metric hits are not count
     UT_hash_handle		hh;
 } aodv_rt_srclist_entry_t;
 
@@ -116,6 +117,7 @@ int aodv_db_rt_getprevhop(uint8_t destination_host[ETH_ALEN], uint8_t originator
 
 int aodv_db_rt_get_destination_sequence_number(uint8_t destination_host[ETH_ALEN], uint32_t* destination_sequence_number_out);
 
+int aodv_db_rt_get_quantity(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN], uint32_t* quantity_out);
 int aodv_db_rt_get_hopcount(mac_addr destination_host, uint8_t* hop_count_out);
 int aodv_db_rt_get_metric(uint8_t destination_host[ETH_ALEN], metric_t* last_metric_out);
 

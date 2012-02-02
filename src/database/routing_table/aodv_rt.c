@@ -197,9 +197,11 @@ int aodv_db_rt_capt_rreq(mac_addr destination_host,
 
         if(same_seq_num && metric_hit) {
             *result_out = AODV_CAPT_RREQ_METRIC_HIT;
+            /* don't change quantity, because it's not a new one. */
         }
         else {
             *result_out = AODV_CAPT_RREQ_NEW;
+            srclist_entry->quantity = 1;
         }
 
         mac_copy(srclist_entry->originator_host_prev_hop, prev_hop);
@@ -209,10 +211,13 @@ int aodv_db_rt_capt_rreq(mac_addr destination_host,
         srclist_entry->hop_count = hop_count;
         srclist_entry->flags &= ~AODV_FLAGS_ROUTE_NEW;
     }
+
     else {
+        srclist_entry->quantity += 1;
         *result_out = AODV_CAPT_RREQ_OLD;
     }
     return true;
+
 }
 
 // returns true if rep is newer
@@ -395,6 +400,23 @@ int aodv_db_rt_get_hopcount(mac_addr destination_host, uint8_t* hop_count_out) {
         return false;
     }
     *hop_count_out =  rt_entry->hop_count;
+    return true;
+}
+
+int aodv_db_rt_get_quantity(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN], uint32_t* quantity_out) {
+    aodv_rt_entry_t* rt_entry;
+    HASH_FIND(hh, rt.entries, dhost_ether, ETH_ALEN, rt_entry);
+    if(rt_entry == NULL) {
+        return false;
+    }
+
+    aodv_rt_srclist_entry_t* src_entry;
+    HASH_FIND(hh, rt_entry->src_list, shost_ether, ETH_ALEN, src_entry);
+    if(src_entry == NULL) {
+        return false;
+    }
+
+    *quantity_out = src_entry->quantity;
     return true;
 }
 

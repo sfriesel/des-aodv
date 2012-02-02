@@ -167,7 +167,7 @@ void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_
     }
 
     /* repeat_time corresponds to NET_TRAVERSAL_TIME if ring_search is off */
-    uint32_t repeat_time = 2 * NODE_TRAVERSAL_TIME * msg->ttl;
+    uint32_t repeat_time = 2 * NODE_TRAVERSAL_TIME * min(NET_DIAMETER, msg->ttl);
     dessert_trace("add task to repeat RREQ");
     if(ring_search) {
         msg->ttl += TTL_INCREMENT;

@@ -65,19 +65,26 @@ void aodv_db_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, stru
 
 dessert_msg_t* aodv_db_pop_packet(uint8_t dhost_ether[ETH_ALEN]);
 
+typedef enum aodv_capt_rreq_result {
+    AODV_CAPT_RREQ_OLD,
+    AODV_CAPT_RREQ_NEW,
+    AODV_CAPT_RREQ_METRIC_HIT
+} aodv_capt_rreq_result_t;
+
 /**
  * Captures seq_num of the source. Also add to source list for
  * this destination. All messages to source (example: RREP) must be sent
  * over shost_prev_hop (nodes output interface: output_iface).
  */
-int aodv_db_capt_rreq(uint8_t destination_host[ETH_ALEN],
-                      uint8_t originator_host[ETH_ALEN],
-                      uint8_t originator_host_prev_hop[ETH_ALEN],
-                      dessert_meshif_t* output_iface,
+int aodv_db_capt_rreq(mac_addr destination_host,
+                      mac_addr originator_host,
+                      mac_addr prev_hop,
+                      dessert_meshif_t* iface,
                       uint32_t originator_sequence_number,
                       metric_t metric,
                       uint8_t hop_count,
-                      struct timeval* timestamp);
+                      struct timeval* timestamp,
+                      aodv_capt_rreq_result_t* result_out);
 
 int aodv_db_capt_rrep(uint8_t destination_host[ETH_ALEN],
                       uint8_t destination_host_next_hop[ETH_ALEN],

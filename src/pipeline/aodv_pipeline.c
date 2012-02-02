@@ -279,23 +279,30 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         aodv_send_packets_from_buffer(l25h->ether_shost, msg->l2h.ether_shost, iface);
     }
 
-    int keep = aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->originator_sequence_number, msg->u16, msg->u8, &ts);
+    aodv_capt_rreq_result_t capt_result;
+    aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->originator_sequence_number, msg->u16, msg->u8, &ts, &capt_result);
 
-    if(!keep) {
+    if(capt_result == AODV_CAPT_RREQ_OLD) {
         comment = "discarded";
         goto drop;
     }
 
-
     uint16_t unknown_seq_num_flag = rreq_msg->flags & AODV_FLAGS_RREQ_U;
     if(proc->lflags & DESSERT_RX_FLAG_L25_DST) {
-        uint32_t rrep_seq_num = seq_num_global;
-        if(!unknown_seq_num_flag) {
-            pthread_rwlock_wrlock(&pp_rwlock);
-            seq_num_global = max(seq_num_global, rreq_msg->destination_sequence_number);
-            rrep_seq_num = seq_num_global;
-            pthread_rwlock_unlock(&pp_rwlock);
+        pthread_rwlock_wrlock(&pp_rwlock);
+        uint32_t rrep_seq_num;
+        /* increase our sequence number on metric hit, so that the updated
+         * RREP doesn't get discarded as old */
+        if(capt_result == AODV_CAPT_RREQ_METRIC_HIT) {
+            seq_num_global++;
         }
+        /* set our sequence number to the maximum of the current value and
+         * the destination sequence number in the RREQ (RFC 6.6.1) */
+        if(!unknown_seq_num_flag && hf_comp_u32(rreq_msg->destination_sequence_number, seq_num_global) > 0) {
+            seq_num_global = rreq_msg->destination_sequence_number;
+        }
+        rrep_seq_num = seq_num_global;
+        pthread_rwlock_unlock(&pp_rwlock);
 
         dessert_msg_t* rrep_msg = _create_rrep(dessert_l25_defsrc, l25h->ether_shost, msg->l2h.ether_shost, rrep_seq_num, 0, 0, metric_startvalue);
         dessert_meshsend(rrep_msg, iface);

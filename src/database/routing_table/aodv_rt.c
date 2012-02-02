@@ -150,16 +150,16 @@ int nht_entry_create(nht_entry_t** entry_out, uint8_t destination_host_next_hop[
     return true;
 }
 
-//returns true if input entry is used (newer)
-//        false if input entry is unused
-int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
-                         uint8_t originator_host[ETH_ALEN],
-                         uint8_t originator_host_prev_hop[ETH_ALEN],
-                         dessert_meshif_t* output_iface,
+// result of capture returned in result_out
+int aodv_db_rt_capt_rreq(mac_addr destination_host,
+                         mac_addr originator_host,
+                         mac_addr prev_hop,
+                         dessert_meshif_t* iface,
                          uint32_t originator_sequence_number,
                          metric_t metric,
                          uint8_t hop_count,
-                         struct timeval* timestamp) {
+                         struct timeval* timestamp,
+                         aodv_capt_rreq_result_t* result_out) {
 
     aodv_rt_entry_t* rt_entry;
     aodv_rt_srclist_entry_t* srclist_entry;
@@ -179,42 +179,40 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
     // find srclist_entry with shost_ether address
     HASH_FIND(hh, rt_entry->src_list, originator_host, ETH_ALEN, srclist_entry);
 
-    if(srclist_entry == NULL) {
-        // if not found -> create new source entry of source list
-        if(!rt_srclist_entry_create(&srclist_entry, originator_host, originator_host_prev_hop, output_iface)) {
+    if(!srclist_entry) {
+        // if not found -> create new source entry in source list
+        if(!rt_srclist_entry_create(&srclist_entry, originator_host, prev_hop, iface)) {
             return false;
         }
 
         HASH_ADD_KEYPTR(hh, rt_entry->src_list, srclist_entry->originator_host, ETH_ALEN, srclist_entry);
     }
 
-    int a = hf_comp_u32(srclist_entry->originator_sequence_number, originator_sequence_number);
-    int b = hf_comp_metric(srclist_entry->metric, metric); // METRIC
+    int seq_num_cmp = hf_comp_u32(srclist_entry->originator_sequence_number, originator_sequence_number);
+    bool newer = seq_num_cmp < 0;
+    bool same_seq_num = (seq_num_cmp == 0);
+    bool metric_hit = hf_comp_metric(srclist_entry->metric, metric) < 0;
 
-    if(a < 0 || (a == 0 && b > 0)) {
+    if(newer || (same_seq_num && metric_hit)) {
 
-        if(a == 0 && b > 0) {
-            //dessert_info("Rcvd RREQ with %" AODV_PRI_METRIC " SEQ known, but process because old metric %" AODV_PRI_METRIC " ", metric, srclist_entry->metric);
-            dessert_debug("METRIC HIT: originator_sequence_number=%" PRIu32 ":%" PRIu32 " - metric=%" AODV_PRI_METRIC ":%" AODV_PRI_METRIC "", srclist_entry->originator_sequence_number, originator_sequence_number, srclist_entry->metric, metric);
+        if(same_seq_num && metric_hit) {
+            *result_out = AODV_CAPT_RREQ_METRIC_HIT;
+        }
+        else {
+            *result_out = AODV_CAPT_RREQ_NEW;
         }
 
-        dessert_debug("get rreq from " MAC ": originator_sequence_number=%" PRIu32 ":%" PRIu32 " hop_count=%" PRIu8 "",
-                      EXPLODE_ARRAY6(originator_host), srclist_entry->originator_sequence_number, originator_sequence_number, hop_count);
-
-        // overwrite several fields of source entry if source seq_num is newer
-        memcpy(srclist_entry->originator_host_prev_hop, originator_host_prev_hop, ETH_ALEN);
-        srclist_entry->output_iface = output_iface;
+        mac_copy(srclist_entry->originator_host_prev_hop, prev_hop);
+        srclist_entry->output_iface = iface;
         srclist_entry->originator_sequence_number = originator_sequence_number;
         srclist_entry->metric = metric;
         srclist_entry->hop_count = hop_count;
         srclist_entry->flags &= ~AODV_FLAGS_ROUTE_NEW;
-
-        return true;
     }
-
-    dessert_debug("get OLD rreq from " MAC ": originator_sequence_number=%" PRIu32 ":%" PRIu32 " hop_count=%" PRIu8 "",
-                  EXPLODE_ARRAY6(originator_host), srclist_entry->originator_sequence_number, originator_sequence_number, hop_count);
-    return false;
+    else {
+        *result_out = AODV_CAPT_RREQ_OLD;
+    }
+    return true;
 }
 
 // returns true if rep is newer

@@ -33,17 +33,20 @@ For further information and questions please use the web site
 #include <stdint.h>
 #include "config.h"
 
-/******************************************************************************/
 /**
- * Compares two integers
- * returns 0 if i = j
- * return 1 if i > j (cirlce diff < (MAXUINT32 / 2))
- * return -1 if i < j (circle diff > (MAXUINT32 / 2))
+ * Compares two integers taking overflow into account
+ * returns 0 if i == j
+ * returns a positive integer if i is "ahead" of j
+ * returns a negative integer if i is "behind" j
  */
 int hf_comp_u32(uint32_t i, uint32_t j);
 
-/******************************************************************************/
-
+/**
+ * Compares two metric values according to the current metric_type
+ * returns 0 if i == j
+ * returns a positive integer if i is better than j
+ * returns a negative integer if i is worse than j
+ */
 int hf_comp_metric(metric_t i, metric_t j);
 
 /******************************************************************************/

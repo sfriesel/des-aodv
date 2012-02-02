@@ -43,22 +43,14 @@ int hf_comp_u32(uint32_t i, uint32_t j) {
 /******************************************************************************/
 
 int hf_comp_metric(metric_t i, metric_t j) {
-    if(i == j) {
-        return 0;
+    switch(metric_type) {
+    case AODV_METRIC_ETX_MUL:
+    case AODV_METRIC_PDR:
+        return i - j; //in these metrics more is better
+        break;
+    default:
+        return j - i; //in these metrics more is worse
     }
-
-    if (metric_type == AODV_METRIC_ETX_MUL || metric_type == AODV_METRIC_PDR) {
-        if(i > j) {
-            return -1;
-        }
-        return 1;
-    }
-
-    if(i > j) {
-        return 1;
-    }
-
-    return -1;
 }
 
 /******************************************************************************/

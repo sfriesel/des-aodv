@@ -29,6 +29,7 @@ For further information and questions please use the web site
 #include <uthash.h>
 #include "../../pipeline/aodv_pipeline.h"
 #include "../timeslot.h"
+#include "../aodv_database.h"
 #include "../../config.h"
 #include "../../helper.h"
 
@@ -87,14 +88,15 @@ typedef struct nht_entry {
 
 int aodv_db_rt_init();
 
-int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
-                         uint8_t originator_host[ETH_ALEN],
-                         uint8_t originator_host_prev_hop[ETH_ALEN],
+int aodv_db_rt_capt_rreq(mac_addr destination_host,
+                         mac_addr originator_host,
+                         mac_addr originator_host_prev_hop,
                          dessert_meshif_t* output_iface,
                          uint32_t originator_sequence_number,
                          metric_t metric,
                          uint8_t hop_count,
-                         struct timeval* timestamp);
+                         struct timeval* timestamp,
+                         aodv_capt_rreq_result_t* result_out);
 
 int aodv_db_rt_capt_rrep(uint8_t destination_host[ETH_ALEN],
                          uint8_t destination_host_next_hop[ETH_ALEN],

@@ -25,6 +25,8 @@ For further information and questions please use the web site
 #ifndef ANDROID
 #include <printf.h>
 #endif
+#include <unistd.h>
+#include <libgen.h>
 
 #include "config.h"
 #include "cli/aodv_cli.h"
@@ -56,33 +58,71 @@ static void register_names() {
 }
 
 int main(int argc, char** argv) {
-    /* initialize daemon with correct parameters */
+    enum dessert_init_flags init_flags = DESSERT_OPT_DAEMONIZE;
+    int used = 0;
+    int size = 2;
+    FILE **config_files = NULL;
+    char **config_names = malloc(sizeof(char *) * size);
+    char path[100];
+    uint16_t logcfg_flags = 0;
 
-    FILE* cfg = NULL;
-
-    if((argc >= 2) && (strcmp(argv[1], "-n") == 0)) {
-        dessert_notice("starting AODV in non daemonize mode");
-        char cfg_file_name[] = "./des-aodv.cli";
-        cfg = fopen(cfg_file_name, "r");
-
-        if(cfg == NULL) {
-            printf("Config file '%s' not found. Exit ...\n", cfg_file_name);
-            return EXIT_FAILURE;
+    int c;
+    while((c = getopt (argc, argv, "nc:")) != -1) {
+        switch(c) {
+            case 'n':
+                init_flags = DESSERT_OPT_NODAEMONIZE;
+                logcfg_flags |= DESSERT_LOG_STDERR;
+                break;
+            case 'c':
+                if(used == size) {
+                    config_names = realloc(config_names, size *= 2);
+                }
+                config_names[used++] = optarg;
+                break;
+            default:
+                exit(EXIT_FAILURE);
+                break;
         }
+    }
+    //no options given -- assume old style invocation
+    if(optind == 1) {
+        if(argc > optind) {
+            config_names[used++] = argv[1];
+        }
+        else {
+            snprintf(path, sizeof(path), "/etc/%s.conf", basename(argv[0]));
+            config_names[used++] = path;
+        }
+    }
+    else if(used == 0) {
+        config_names[used++] = "./des-aodv.cli";
+    }
 
-        dessert_init("AODV", 0x03, DESSERT_OPT_NODAEMONIZE);
+    //open config files before (possibly) daemonizing
+    config_files = malloc(sizeof(FILE *) * used);
+    int i;
+    for(i = 0; i < used; ++i) {
+        config_files[i] = fopen(config_names[i], "r");
+        if(!config_files[i]) {
+            dessert_err("could not open config file %s\n", config_names[i]);
+            exit(EXIT_FAILURE);
+        }
+    }
+    free(config_names);
+
+    if(init_flags & DESSERT_OPT_DAEMONIZE) {
+        dessert_notice("starting AODV in daemonize mode");
     }
     else {
-        dessert_notice("starting AODV in daemonize mode");
-        cfg = dessert_cli_get_cfg(argc, argv);
-        dessert_init("AODV", 0x03, DESSERT_OPT_DAEMONIZE);
+        dessert_notice("starting AODV in non daemonize mode");
     }
+    dessert_init("AODV", 0x03, init_flags);
 
     /* routing table initialization */
     aodv_db_init();
 
     /* initalize logging */
-    dessert_logcfg(DESSERT_LOG_STDERR);
+    dessert_logcfg(logcfg_flags);
 
     /* cli initialization */
     cli_register_command(dessert_cli, dessert_cli_cfg_iface, "sys", dessert_cli_cmd_addsysif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize sys interface");
@@ -163,7 +203,11 @@ int main(int argc, char** argv) {
     dessert_periodic_add(aodv_periodic_scexecute, NULL, NULL, &schedule_check_interval);
 
     /* running cli & daemon */
-    cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
+    for(i = 0; i < used; ++i) {
+        cli_file(dessert_cli, config_files[i], PRIVILEGE_PRIVILEGED, MODE_CONFIG);
+        fclose(config_files[i]);
+    }
+    free(config_files);
     register_names();
     dessert_cli_run();
     dessert_run();

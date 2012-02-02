@@ -164,10 +164,10 @@ int aodv_db_rt_capt_rreq(uint8_t destination_host[ETH_ALEN],
     aodv_rt_entry_t* rt_entry;
     aodv_rt_srclist_entry_t* srclist_entry;
 
-    // find rreqt_entry with dhost_ether address
+    // find rt_entry with dhost_ether address
     HASH_FIND(hh, rt.entries, destination_host, ETH_ALEN, rt_entry);
 
-    if(rt_entry == NULL) {
+    if(!rt_entry) {
         // if not found -> create routing entry
         if(!rt_entry_create(&rt_entry, destination_host, timestamp)) {
             return false;

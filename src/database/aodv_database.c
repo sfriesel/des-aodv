@@ -153,7 +153,7 @@ dessert_msg_t* aodv_db_pop_packet(uint8_t dhost_ether[ETH_ALEN]) {
 
 /**
  * Captures seq_num of the source. Also add to source list for
- * this destination. All messages to source (example: RREP) must be send
+ * this destination. All messages to source (example: RREP) must be sent
  * over shost_prev_hop (nodes output interface: output_iface).
  */
 int aodv_db_capt_rreq(uint8_t destination_host[ETH_ALEN], uint8_t originator_host[ETH_ALEN], uint8_t originator_host_prev_hop[ETH_ALEN], dessert_meshif_t* output_iface, uint32_t originator_sequence_number, metric_t metric, uint8_t hop_count, struct timeval* timestamp) {

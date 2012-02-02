@@ -203,17 +203,6 @@ int aodv_db_pdr_nt_cap_hello(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hel
     }
     else if (curr_entry->hello_interv != hello_interv) {
         dessert_debug("Neighbor " MAC " switched his hello interval from %" PRIu16 " ms to %" PRIu16 " ms",EXPLODE_ARRAY6(ether_neighbor_addr), curr_entry->hello_interv, hello_interv);
-        /*
-        if (hf_comp_u16_wo_overflow(curr_entry->hello_interv, hello_interv) == 1) {
-            //old hello interval > new hello interval
-            uint16_t difference = curr_entry->hello_interv - hello_interv;
-            TODO: how to cleanup timeslot
-        }
-        else {
-            //old hello interval < new hello interval
-            
-        }
-        */
         pdr_neighbor_entry_update(curr_entry, hello_interv);
     }
 

@@ -37,8 +37,8 @@ int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_
         case AODV_METRIC_RSSI: {
             struct avg_node_result sample = dessert_rssi_avg(last_hop, iface);
             metric_t interval = hf_rssi2interval(sample.avg_rssi);
-            dessert_trace("incomming rssi_metric=%" AODV_PRI_METRIC ", add %" PRIu8 " (rssi=%" PRId8 ") for the last hop " MAC, (*metric), interval, sample.avg_rssi, EXPLODE_ARRAY6(last_hop));
-            (*metric) += interval;
+            dessert_trace("incoming rssi_metric=%" AODV_PRI_METRIC ", add %" PRIu8 " (rssi=%" PRId8 ") for the last hop " MAC, (*metric), interval, sample.avg_rssi, EXPLODE_ARRAY6(last_hop));
+            *metric += interval;
             break;
         }
 #endif

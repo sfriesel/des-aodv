@@ -270,12 +270,6 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     aodv_metric_do(&(msg->u16), msg->l2h.ether_shost, iface, &ts);
 
     struct ether_header* l25h = dessert_msg_getl25ether(msg);
-    /* Process RREQ also as RREP */
-    int updated_route = aodv_db_capt_rrep(l25h->ether_shost, msg->l2h.ether_shost, iface, 0 /* force */, msg->u16, msg->u8, &ts);
-    if(updated_route) {
-        // no need to search for next hop. Next hop is RREQ.msg->l2h.ether_shost
-        aodv_send_packets_from_buffer(l25h->ether_shost, msg->l2h.ether_shost, iface);
-    }
 
     aodv_capt_rreq_result_t capt_result;
     aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->originator_sequence_number, msg->u16, msg->u8, &ts, &capt_result);
@@ -283,6 +277,13 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     if(capt_result == AODV_CAPT_RREQ_OLD) {
         comment = "discarded";
         goto drop;
+    }
+
+    /* Process RREQ also as RREP */
+    int updated_route = aodv_db_capt_rrep(l25h->ether_shost, msg->l2h.ether_shost, iface, 0 /* force */, msg->u16, msg->u8, &ts);
+    if(updated_route) {
+        // no need to search for next hop. Next hop is RREQ.msg->l2h.ether_shost
+        aodv_send_packets_from_buffer(l25h->ether_shost, msg->l2h.ether_shost, iface);
     }
 
     uint16_t unknown_seq_num_flag = rreq_msg->flags & AODV_FLAGS_RREQ_U;

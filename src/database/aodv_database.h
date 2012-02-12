@@ -44,26 +44,26 @@ int aodv_db_pdr_neighbor_reset(uint32_t* count_out);
 
 int aodv_db_pdr_upd_expected(uint16_t new_interval);
 
-int aodv_db_pdr_cap_hello(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_seq, uint16_t hello_interv, struct timeval* timestamp);
+int aodv_db_pdr_cap_hello(mac_addr ether_neighbor_addr, uint16_t hello_seq, uint16_t hello_interv, struct timeval* timestamp);
 
-int aodv_db_pdr_cap_hellorsp(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_interv, uint8_t hello_count, struct timeval* timestamp);
+int aodv_db_pdr_cap_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_interv, uint8_t hello_count, struct timeval* timestamp);
 
-int aodv_db_pdr_get_pdr(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* pdr_out, struct timeval* timestamp);
+int aodv_db_pdr_get_pdr(mac_addr ether_neighbor_addr, uint16_t* pdr_out, struct timeval* timestamp);
 
-int aodv_db_pdr_get_etx_mul(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* etx_out, struct timeval* timestamp);
+int aodv_db_pdr_get_etx_mul(mac_addr ether_neighbor_addr, uint16_t* etx_out, struct timeval* timestamp);
 
-int aodv_db_pdr_get_etx_add(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* etx_out, struct timeval* timestamp);
+int aodv_db_pdr_get_etx_add(mac_addr ether_neighbor_addr, uint16_t* etx_out, struct timeval* timestamp);
 
-int aodv_db_pdr_get_rcvdhellocount(uint8_t ether_neighbor_addr[ETH_ALEN], uint8_t* count_out, struct timeval* timestamp);
+int aodv_db_pdr_get_rcvdhellocount(mac_addr ether_neighbor_addr, uint8_t* count_out, struct timeval* timestamp);
 
 /**END: Functions for pdr tracking*/
 
 /** cleanup (purge) old entries from all database tables except from pdr_tracker */
 int aodv_db_cleanup(struct timeval* timestamp);
 
-void aodv_db_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct timeval* timestamp);
+void aodv_db_push_packet(mac_addr dhost_ether, dessert_msg_t* msg, struct timeval* timestamp);
 
-dessert_msg_t* aodv_db_pop_packet(uint8_t dhost_ether[ETH_ALEN]);
+dessert_msg_t* aodv_db_pop_packet(mac_addr dhost_ether);
 
 typedef enum aodv_capt_rreq_result {
     AODV_CAPT_RREQ_OLD,
@@ -86,38 +86,38 @@ int aodv_db_capt_rreq(mac_addr destination_host,
                       struct timeval* timestamp,
                       aodv_capt_rreq_result_t* result_out);
 
-int aodv_db_capt_rrep(uint8_t destination_host[ETH_ALEN],
-                      uint8_t destination_host_next_hop[ETH_ALEN],
+int aodv_db_capt_rrep(mac_addr destination_host,
+                      mac_addr destination_host_next_hop,
                       dessert_meshif_t* output_iface,
                       uint32_t destination_sequence_number,
                       metric_t metric,
                       uint8_t hop_count,
                       struct timeval* timestamp);
 
-int aodv_db_getroute2dest(uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop_out[ETH_ALEN],
+int aodv_db_getroute2dest(mac_addr dhost_ether, mac_addr dhost_next_hop_out,
                           dessert_meshif_t** output_iface_out, struct timeval* timestamp, uint8_t flags);
 
-int aodv_db_getnexthop(uint8_t dhost_ether[ETH_ALEN], uint8_t dhost_next_hop_out[ETH_ALEN]);
+int aodv_db_getnexthop(mac_addr dhost_ether, mac_addr dhost_next_hop_out);
 
 /**
  * gets prev_hop address and output_iface towards source with shost_ether address
  * that has produced a RREQ to destination with dhost_ether address
  */
-int aodv_db_getprevhop(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN],
-                       uint8_t shost_next_hop_out[ETH_ALEN], dessert_meshif_t** output_iface_out);
+int aodv_db_getprevhop(mac_addr dhost_ether, mac_addr shost_ether,
+                       mac_addr shost_next_hop_out, dessert_meshif_t** output_iface_out);
 
-int aodv_db_get_destination_sequence_number(uint8_t dhost_ether[ETH_ALEN], uint32_t* destination_sequence_number_out);
+int aodv_db_get_destination_sequence_number(mac_addr dhost_ether, uint32_t* destination_sequence_number_out);
 
 int aodv_db_get_hopcount(mac_addr dhost_ether, uint8_t* hop_count_out);
-int aodv_db_get_metric(uint8_t dhost_ether[ETH_ALEN], metric_t* last_metric_out);
+int aodv_db_get_metric(mac_addr dhost_ether, metric_t* last_metric_out);
 
-int aodv_db_markrouteinv(uint8_t dhost_ether[ETH_ALEN], uint32_t destination_sequence_number);
-int aodv_db_remove_nexthop(uint8_t next_hop[ETH_ALEN]);
-int aodv_db_inv_over_nexthop(uint8_t next_hop[ETH_ALEN]);
-int aodv_db_get_destlist(uint8_t dhost_next_hop[ETH_ALEN], aodv_link_break_element_t** destlist);
+int aodv_db_markrouteinv(mac_addr dhost_ether, uint32_t destination_sequence_number);
+int aodv_db_remove_nexthop(mac_addr next_hop);
+int aodv_db_inv_over_nexthop(mac_addr next_hop);
+int aodv_db_get_destlist(mac_addr dhost_next_hop, aodv_link_break_element_t** destlist);
 
-int aodv_db_get_warn_endpoints_from_neighbor_and_set_warn(uint8_t neighbor[ETH_ALEN], aodv_link_break_element_t** head);
-int aodv_db_get_warn_status(uint8_t dhost_ether[ETH_ALEN]);
+int aodv_db_get_warn_endpoints_from_neighbor_and_set_warn(mac_addr neighbor, aodv_link_break_element_t** head);
+int aodv_db_get_warn_status(mac_addr dhost_ether);
 
 int aodv_db_get_active_routes(aodv_link_break_element_t** head);
 
@@ -127,24 +127,24 @@ int aodv_db_routing_reset(uint32_t* count_out);
  * Take a record that the given neighbor seems to be
  * the 1 hop bidirectional neighbor
  */
-int aodv_db_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp);
+int aodv_db_cap2Dneigh(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp);
 
 /**
  * Check whether given neighbor is 1 hop bidirectional neighbor
  */
-int aodv_db_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
+int aodv_db_check2Dneigh(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp);
 
-int aodv_db_reset_rssi(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
+int aodv_db_reset_rssi(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp);
 
-int8_t aodv_db_update_rssi(uint8_t ether_neighbor[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp);
+int8_t aodv_db_update_rssi(mac_addr ether_neighbor, dessert_meshif_t* iface, struct timeval* timestamp);
 
-int aodv_db_addschedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, void* param);
+int aodv_db_addschedule(struct timeval* execute_ts, mac_addr ether_addr, uint8_t type, void* param);
 
-int aodv_db_popschedule(struct timeval* timestamp, uint8_t ether_addr_out[ETH_ALEN], uint8_t* type, void* param);
+int aodv_db_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, uint8_t* type, void* param);
 
-int aodv_db_schedule_exists(uint8_t ether_addr[ETH_ALEN], uint8_t type);
+int aodv_db_schedule_exists(mac_addr ether_addr, uint8_t type);
 
-int aodv_db_dropschedule(uint8_t ether_addr[ETH_ALEN], uint8_t type);
+int aodv_db_dropschedule(mac_addr ether_addr, uint8_t type);
 
 void aodv_db_putrreq(struct timeval* timestamp);
 
@@ -154,7 +154,7 @@ void aodv_db_putrerr(struct timeval* timestamp);
 
 void aodv_db_getrerrcount(struct timeval* timestamp, uint32_t* count_out);
 
-int aodv_db_capt_data_seq(uint8_t src_addr[ETH_ALEN], uint16_t data_seq_num, uint8_t hop_count, struct timeval* timestamp);
+int aodv_db_capt_data_seq(mac_addr src_addr, uint16_t data_seq_num, uint8_t hop_count, struct timeval* timestamp);
 
 // ----------------------------------- reporting -------------------------------------------------------------------------
 

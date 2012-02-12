@@ -124,7 +124,7 @@ dessert_msg_t* fl_pop_packet(fifo_list_t* fl) {
     return msg;
 }
 
-void pb_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct timeval* timestamp) {
+void pb_push_packet(mac_addr dhost_ether, dessert_msg_t* msg, struct timeval* timestamp) {
     pb_cleanup(timestamp);
     pb_el_t* pb_el;
     HASH_FIND(hh, pbt.entries, dhost_ether, ETH_ALEN, pb_el);
@@ -147,7 +147,7 @@ void pb_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct ti
     timeslot_addobject(pbt.ts, timestamp, pb_el);
 }
 
-dessert_msg_t* pb_pop_packet(uint8_t dhost_ether[ETH_ALEN]) {
+dessert_msg_t* pb_pop_packet(mac_addr dhost_ether) {
     pb_el_t* pb_el;
     HASH_FIND(hh, pbt.entries, dhost_ether, ETH_ALEN, pb_el);
 

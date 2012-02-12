@@ -99,35 +99,35 @@ int aodv_db_rt_capt_rreq(mac_addr destination_host,
                          struct timeval* timestamp,
                          aodv_capt_rreq_result_t* result_out);
 
-int aodv_db_rt_capt_rrep(uint8_t destination_host[ETH_ALEN],
-                         uint8_t destination_host_next_hop[ETH_ALEN],
+int aodv_db_rt_capt_rrep(mac_addr destination_host,
+                         mac_addr destination_host_next_hop,
                          dessert_meshif_t* output_iface,
                          uint32_t destination_sequence_number,
                          metric_t metric,
                          uint8_t hop_count,
                          struct timeval* timestamp);
 
-int aodv_db_rt_getroute2dest(uint8_t destination_host[ETH_ALEN], uint8_t destination_host_next_hop_out[ETH_ALEN],
+int aodv_db_rt_getroute2dest(mac_addr destination_host, mac_addr destination_host_next_hop_out,
                              dessert_meshif_t** output_iface_out, struct timeval* timestamp, uint8_t flags);
 
-int aodv_db_rt_getnexthop(uint8_t destination_host[ETH_ALEN], uint8_t destination_host_next_hop_out[ETH_ALEN]);
+int aodv_db_rt_getnexthop(mac_addr destination_host, mac_addr destination_host_next_hop_out);
 
-int aodv_db_rt_getprevhop(uint8_t destination_host[ETH_ALEN], uint8_t originator_host[ETH_ALEN],
-                          uint8_t originator_host_prev_hop_out[ETH_ALEN], dessert_meshif_t** output_iface_out);
+int aodv_db_rt_getprevhop(mac_addr destination_host, mac_addr originator_host,
+                          mac_addr originator_host_prev_hop_out, dessert_meshif_t** output_iface_out);
 
-int aodv_db_rt_get_destination_sequence_number(uint8_t destination_host[ETH_ALEN], uint32_t* destination_sequence_number_out);
+int aodv_db_rt_get_destination_sequence_number(mac_addr destination_host, uint32_t* destination_sequence_number_out);
 
-int aodv_db_rt_get_quantity(uint8_t dhost_ether[ETH_ALEN], uint8_t shost_ether[ETH_ALEN], uint32_t* quantity_out);
+int aodv_db_rt_get_quantity(mac_addr dhost_ether, mac_addr shost_ether, uint32_t* quantity_out);
 int aodv_db_rt_get_hopcount(mac_addr destination_host, uint8_t* hop_count_out);
-int aodv_db_rt_get_metric(uint8_t destination_host[ETH_ALEN], metric_t* last_metric_out);
+int aodv_db_rt_get_metric(mac_addr destination_host, metric_t* last_metric_out);
 
-int aodv_db_rt_markrouteinv(uint8_t destination_host[ETH_ALEN], uint32_t destination_sequence_number);
-int aodv_db_rt_remove_nexthop(uint8_t next_hop[ETH_ALEN]);
-int aodv_db_rt_inv_over_nexthop(uint8_t next_hop[ETH_ALEN]);
-int aodv_db_rt_get_destlist(uint8_t dhost_next_hop[ETH_ALEN], aodv_link_break_element_t** destlist);
+int aodv_db_rt_markrouteinv(mac_addr destination_host, uint32_t destination_sequence_number);
+int aodv_db_rt_remove_nexthop(mac_addr next_hop);
+int aodv_db_rt_inv_over_nexthop(mac_addr next_hop);
+int aodv_db_rt_get_destlist(mac_addr dhost_next_hop, aodv_link_break_element_t** destlist);
 
-int aodv_db_rt_get_warn_endpoints_from_neighbor_and_set_warn(uint8_t neighbor[ETH_ALEN], aodv_link_break_element_t** head);
-int aodv_db_rt_get_warn_status(uint8_t dhost_ether[ETH_ALEN]);
+int aodv_db_rt_get_warn_endpoints_from_neighbor_and_set_warn(mac_addr neighbor, aodv_link_break_element_t** head);
+int aodv_db_rt_get_warn_status(mac_addr dhost_ether);
 
 int aodv_db_rt_get_active_routes(aodv_link_break_element_t** head);
 

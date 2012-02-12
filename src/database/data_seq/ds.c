@@ -36,7 +36,7 @@ typedef struct aodv_ds {
 
 data_seq_t ds;
 
-data_packet_id_t* ds_entry_create(uint8_t src_addr[ETH_ALEN], uint16_t seq_num) {
+data_packet_id_t* ds_entry_create(mac_addr src_addr, uint16_t seq_num) {
     data_packet_id_t* new_entry;
     new_entry = malloc(sizeof(data_packet_id_t));
 
@@ -75,7 +75,7 @@ int db_ds_init() {
     return true;
 }
 
-int aodv_db_ds_capt_data_seq(uint8_t src_addr[ETH_ALEN], uint16_t data_seq_num, uint8_t hop_count, struct timeval* timestamp) {
+int aodv_db_ds_capt_data_seq(mac_addr src_addr, uint16_t data_seq_num, uint8_t hop_count, struct timeval* timestamp) {
 
     data_packet_id_t* curr_entry = NULL;
     HASH_FIND(hh, ds.entries, src_addr, ETH_ALEN, curr_entry);

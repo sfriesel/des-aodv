@@ -34,7 +34,7 @@ pthread_rwlock_t pp_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 
 // ---------------------------- help functions ---------------------------------------
 
-dessert_msg_t* _create_rreq(uint8_t dhost_ether[ETH_ALEN], uint8_t ttl, metric_t initial_metric) {
+dessert_msg_t* _create_rreq(mac_addr dhost_ether, uint8_t ttl, metric_t initial_metric) {
     dessert_msg_t* msg;
     dessert_ext_t* ext;
     dessert_msg_new(&msg);
@@ -81,7 +81,7 @@ dessert_msg_t* _create_rreq(uint8_t dhost_ether[ETH_ALEN], uint8_t ttl, metric_t
     return msg;
 }
 
-dessert_msg_t* _create_rrep(uint8_t route_dest[ETH_ALEN], uint8_t route_source[ETH_ALEN], uint8_t rrep_next_hop[ETH_ALEN], uint32_t destination_sequence_number, uint8_t flags, uint8_t hop_count, metric_t initial_metric) {
+dessert_msg_t* _create_rrep(mac_addr route_dest, mac_addr route_source, mac_addr rrep_next_hop, uint32_t destination_sequence_number, uint8_t flags, uint8_t hop_count, metric_t initial_metric) {
     dessert_msg_t* msg;
     dessert_ext_t* ext;
     dessert_msg_new(&msg);
@@ -376,11 +376,11 @@ int aodv_handle_rerr(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
             iter < (struct aodv_mac_seq*) rerrdl_ext->data + rerrdl_ext->len;
             ++iter) {
 
-            uint8_t dhost_ether[ETH_ALEN];
+            mac_addr dhost_ether;
             memcpy(dhost_ether, iter->host, ETH_ALEN);
             uint32_t destination_sequence_number = iter->sequence_number;
 
-            uint8_t dhost_next_hop[ETH_ALEN];
+            mac_addr dhost_next_hop;
 
             if(!aodv_db_getnexthop(dhost_ether, dhost_next_hop)) {
                 continue;
@@ -462,7 +462,7 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
 
     if(!mac_equal(dessert_l25_defsrc, l25h->ether_dhost)) {
         // RREP is not for me -> send RREP to RREQ originator
-        uint8_t next_hop[ETH_ALEN];
+        mac_addr next_hop;
         dessert_meshif_t* output_iface;
 
         int a = aodv_db_getprevhop(l25h->ether_shost, l25h->ether_dhost, next_hop, &output_iface);

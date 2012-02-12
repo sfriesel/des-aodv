@@ -43,7 +43,7 @@ typedef struct neighbor_table {
 
 neighbor_table_t nt;
 
-neighbor_entry_t* db_neighbor_entry_create(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface) {
+neighbor_entry_t* db_neighbor_entry_create(mac_addr ether_neighbor_addr, dessert_meshif_t* iface) {
     neighbor_entry_t* new_entry;
     new_entry = malloc(sizeof(neighbor_entry_t));
 
@@ -69,7 +69,7 @@ void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void*
 }
 
 #ifndef ANDROID
-int db_nt_reset_rssi(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {
+int db_nt_reset_rssi(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp) {
     neighbor_entry_t* curr_entry = NULL;
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
     memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
@@ -86,7 +86,7 @@ int db_nt_reset_rssi(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* if
     return true;
 }
 
-int8_t db_nt_update_rssi(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {
+int8_t db_nt_update_rssi(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp) {
 
     neighbor_entry_t* curr_entry = NULL;
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
@@ -157,7 +157,7 @@ int aodv_db_nt_neighbor_reset(uint32_t* count_out) {
     return result;
 }
 
-int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp) {
+int db_nt_cap2Dneigh(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp) {
     neighbor_entry_t* curr_entry = NULL;
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
     memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
@@ -187,7 +187,7 @@ int db_nt_cap2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_seq, 
     return true;
 }
 
-int db_nt_check2Dneigh(uint8_t ether_neighbor_addr[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {
+int db_nt_check2Dneigh(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp) {
     timeslot_purgeobjects(nt.ts, timestamp);
     neighbor_entry_t* curr_entry;
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];

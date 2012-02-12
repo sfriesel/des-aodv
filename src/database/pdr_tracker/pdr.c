@@ -167,7 +167,7 @@ int aodv_db_pdr_nt_cleanup(struct timeval* timestamp) {
     return timeslot_purgeobjects(pdr_nt.ts, timestamp);
 }
 
-int aodv_db_pdr_nt_cap_hello(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_seq, uint16_t hello_interv, struct timeval* timestamp) {
+int aodv_db_pdr_nt_cap_hello(mac_addr ether_neighbor_addr, uint16_t hello_seq, uint16_t hello_interv, struct timeval* timestamp) {
     struct timeval teststamp;
     teststamp.tv_sec = timestamp->tv_sec;
     teststamp.tv_usec = timestamp->tv_usec;
@@ -227,7 +227,7 @@ int aodv_db_pdr_nt_cap_hello(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hel
     return true;
 }
 
-int aodv_db_pdr_nt_cap_hellorsp(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_interv, uint8_t hello_count, struct timeval* timestamp) {
+int aodv_db_pdr_nt_cap_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_interv, uint8_t hello_count, struct timeval* timestamp) {
     pdr_neighbor_entry_t* curr_entry = NULL;
     HASH_FIND(hh, pdr_nt.entries, ether_neighbor_addr, ETH_ALEN, curr_entry);
 
@@ -343,7 +343,7 @@ int aodv_db_pdr_nt_get_etx_add(mac_addr ether_neighbor_addr, metric_t* etx_out, 
     return true;
 }
 
-int aodv_db_pdr_nt_get_rcvdhellocount(uint8_t ether_neighbor_addr[ETH_ALEN], uint8_t* count_out, struct timeval* timestamp) {
+int aodv_db_pdr_nt_get_rcvdhellocount(mac_addr ether_neighbor_addr, uint8_t* count_out, struct timeval* timestamp) {
     pdr_neighbor_entry_t* curr_entry = NULL;
     HASH_FIND(hh, pdr_nt.entries, ether_neighbor_addr, ETH_ALEN, curr_entry);
 

@@ -34,7 +34,7 @@ For further information and questions please use the web site
 /** initialize neighbor table */
 int db_ds_init();
 
-int aodv_db_ds_capt_data_seq(uint8_t src_addr[ETH_ALEN], uint16_t data_seq_num, uint8_t hop_count, struct timeval* timestamp);
+int aodv_db_ds_capt_data_seq(mac_addr src_addr, uint16_t data_seq_num, uint8_t hop_count, struct timeval* timestamp);
 
 int db_ds_cleanup(struct timeval* timestamp);
 

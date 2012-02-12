@@ -32,7 +32,7 @@ For further information and questions please use the web site
 uint16_t data_seq_global = 0;
 pthread_rwlock_t data_seq_lock = PTHREAD_RWLOCK_INITIALIZER;
 
-void aodv_send_packets_from_buffer(uint8_t ether_dhost[ETH_ALEN], uint8_t next_hop[ETH_ALEN], dessert_meshif_t* iface) {
+void aodv_send_packets_from_buffer(mac_addr ether_dhost, mac_addr next_hop, dessert_meshif_t* iface) {
     // drop RREQ schedule, since we already know the route to destination
     aodv_db_dropschedule(ether_dhost, AODV_SC_REPEAT_RREQ);
 
@@ -127,7 +127,7 @@ int aodv_forward(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, des
     }
 
     dessert_meshif_t* output_iface;
-    uint8_t next_hop[ETH_ALEN];
+    mac_addr next_hop;
 
     if(aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &timestamp, AODV_FLAGS_UNUSED)) {
         memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
@@ -210,7 +210,7 @@ int aodv_sys2rp(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, dess
         dessert_meshsend(msg, NULL);
     }
     else {
-        uint8_t dhost_next_hop[ETH_ALEN];
+        mac_addr dhost_next_hop;
         dessert_meshif_t* output_iface;
         struct timeval ts;
         gettimeofday(&ts, NULL);

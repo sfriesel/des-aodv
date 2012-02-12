@@ -43,11 +43,11 @@ typedef struct fifo_list {
 
 int pb_init();
 
-void pb_push_packet(uint8_t dhost_ether[ETH_ALEN], dessert_msg_t* msg, struct timeval* timestamp);
+void pb_push_packet(mac_addr dhost_ether, dessert_msg_t* msg, struct timeval* timestamp);
 
-dessert_msg_t* pb_pop_packet(uint8_t dhost_ether[ETH_ALEN]);
+dessert_msg_t* pb_pop_packet(mac_addr dhost_ether);
 
-void pb_drop_packets(uint8_t dhost_ether[ETH_ALEN]);
+void pb_drop_packets(mac_addr dhost_ether);
 
 int pb_cleanup(struct timeval* timestamp);
 

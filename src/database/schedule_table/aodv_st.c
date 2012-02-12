@@ -43,7 +43,7 @@ schedule_t* first_schedule = NULL;
 
 schedule_t* hash_table = NULL;
 
-schedule_t* create_schedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, void* param) {
+schedule_t* create_schedule(struct timeval* execute_ts, mac_addr ether_addr, uint8_t type, void* param) {
     schedule_t* s = malloc(sizeof(schedule_t));
 
     if(s == NULL) {
@@ -59,7 +59,7 @@ schedule_t* create_schedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_A
     return s;
 }
 
-int aodv_db_sc_addschedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_ALEN], uint8_t type, void* param) {
+int aodv_db_sc_addschedule(struct timeval* execute_ts, mac_addr ether_addr, uint8_t type, void* param) {
     aodv_db_sc_dropschedule(ether_addr, type);
 
     schedule_t* next_el = first_schedule;
@@ -108,7 +108,7 @@ int aodv_db_sc_addschedule(struct timeval* execute_ts, uint8_t ether_addr[ETH_AL
     return true;
 }
 
-int aodv_db_sc_popschedule(struct timeval* timestamp, uint8_t ether_addr_out[ETH_ALEN], uint8_t* type, void** param) {
+int aodv_db_sc_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, uint8_t* type, void** param) {
     if(first_schedule != NULL && hf_compare_tv(&first_schedule->execute_ts, timestamp) <= 0) {
         schedule_t* sc = first_schedule;
         first_schedule = first_schedule->next;
@@ -128,7 +128,7 @@ int aodv_db_sc_popschedule(struct timeval* timestamp, uint8_t ether_addr_out[ETH
     return false;
 }
 
-int aodv_db_sc_schedule_exists(uint8_t ether_addr[ETH_ALEN], uint8_t type) {
+int aodv_db_sc_schedule_exists(mac_addr ether_addr, uint8_t type) {
     schedule_t* schedule;
     uint8_t key[ETH_ALEN + sizeof(uint8_t)];
     memcpy(key, ether_addr, ETH_ALEN);
@@ -143,7 +143,7 @@ int aodv_db_sc_schedule_exists(uint8_t ether_addr[ETH_ALEN], uint8_t type) {
     }
 }
 
-int aodv_db_sc_dropschedule(uint8_t ether_addr[ETH_ALEN], uint8_t type) {
+int aodv_db_sc_dropschedule(mac_addr ether_addr, uint8_t type) {
     schedule_t* schedule;
     uint8_t key[ETH_ALEN + sizeof(uint8_t)];
     memcpy(key, ether_addr, ETH_ALEN);

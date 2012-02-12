@@ -85,10 +85,10 @@ int aodv_db_pdr_nt_neighbor_reset(uint32_t* count_out);
 
 
 /**Captures a hello req from neighbor*/
-int aodv_db_pdr_nt_cap_hello(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_seq, uint16_t hello_interval, struct timeval* timestamp);
+int aodv_db_pdr_nt_cap_hello(mac_addr ether_neighbor_addr, uint16_t hello_seq, uint16_t hello_interval, struct timeval* timestamp);
 
 /**Captures a hello resp from neighbor*/
-int aodv_db_pdr_nt_cap_hellorsp(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t hello_interval, uint8_t hello_count, struct timeval* timestamp);
+int aodv_db_pdr_nt_cap_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_interval, uint8_t hello_count, struct timeval* timestamp);
 
 /**Purges all msg objects with expired lifetime*/
 int pdr_nt_cleanup(pdr_neighbor_entry_t* given_entry, struct timeval* timestamp);
@@ -97,16 +97,16 @@ int pdr_nt_cleanup(pdr_neighbor_entry_t* given_entry, struct timeval* timestamp)
 int aodv_db_pdr_nt_cleanup(struct timeval* timestamp);
 
 /**Returns the pdr for the link encoded as uint16_t*/
-int aodv_db_pdr_nt_get_pdr(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* pdr_out, struct timeval* timestamp);
+int aodv_db_pdr_nt_get_pdr(mac_addr ether_neighbor_addr, uint16_t* pdr_out, struct timeval* timestamp);
 
 /**Returns the etx value for the link encoded as uint16_t*/
-int aodv_db_pdr_nt_get_etx_mul(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* etx_out, struct timeval* timestamp);
+int aodv_db_pdr_nt_get_etx_mul(mac_addr ether_neighbor_addr, uint16_t* etx_out, struct timeval* timestamp);
 
 /**Returns the etx value for the link encoded as uint16_t*/
-int aodv_db_pdr_nt_get_etx_add(uint8_t ether_neighbor_addr[ETH_ALEN], uint16_t* etx_out, struct timeval* timestamp);
+int aodv_db_pdr_nt_get_etx_add(mac_addr ether_neighbor_addr, uint16_t* etx_out, struct timeval* timestamp);
 
 /**Returns the number of rcvd hellos from the given adress*/
-int aodv_db_pdr_nt_get_rcvdhellocount(uint8_t ether_neighbor_addr[ETH_ALEN], uint8_t* count_out, struct timeval* timestamp);
+int aodv_db_pdr_nt_get_rcvdhellocount(mac_addr ether_neighbor_addr, uint8_t* count_out, struct timeval* timestamp);
 
 /**Creates a visual representation of the pdr neighbor table*/
 int aodv_db_pdr_nt_report(char** str_out);

@@ -26,7 +26,7 @@ For further information and questions please use the web site
 #include "../database/aodv_database.h"
 #include "aodv_pipeline.h"
 
-int aodv_metric_do(metric_t* metric, uint8_t last_hop[ETH_ALEN], dessert_meshif_t* iface, struct timeval* timestamp) {
+int aodv_metric_do(metric_t* metric, mac_addr last_hop, dessert_meshif_t* iface, struct timeval* timestamp) {
 
     switch(metric_type) {
         case AODV_METRIC_HOP_COUNT: {

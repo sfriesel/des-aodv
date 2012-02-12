@@ -141,14 +141,14 @@ extern uint16_t 					metric_startvalue;
 extern int8_t						signal_strength_threshold;
 
 typedef struct aodv_link_break_element {
-    uint8_t host[ETH_ALEN];
+    mac_addr host;
     uint32_t sequence_number;
     struct aodv_link_break_element* next;
     struct aodv_link_break_element* prev;
 } aodv_link_break_element_t;
 
 typedef struct aodv_mac_seq {
-    uint8_t host[ETH_ALEN];
+    mac_addr host;
     uint32_t sequence_number;
 } __attribute__((__packed__)) aodv_mac_seq_t;
 

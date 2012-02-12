@@ -30,7 +30,7 @@ For further information and questions please use the web site
 #include "../helper.h"
 
 static uint32_t seq_num_global = 0;
-pthread_rwlock_t pp_rwlock = PTHREAD_RWLOCK_INITIALIZER;
+static pthread_rwlock_t seq_num_lock = PTHREAD_RWLOCK_INITIALIZER;
 
 // ---------------------------- help functions ---------------------------------------
 
@@ -53,9 +53,9 @@ dessert_msg_t* _create_rreq(mac_addr dhost_ether, uint8_t ttl, metric_t initial_
     struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) ext->data;
     msg->u16 = initial_metric;
     rreq_msg->flags = 0;
-    pthread_rwlock_wrlock(&pp_rwlock);
+    pthread_rwlock_wrlock(&seq_num_lock);
     rreq_msg->originator_sequence_number = ++seq_num_global;
-    pthread_rwlock_unlock(&pp_rwlock);
+    pthread_rwlock_unlock(&seq_num_lock);
 
     //this is for local repair, we know that the latest rrep we saw was last_destination_sequence_number
     uint32_t last_destination_sequence_number;
@@ -142,9 +142,9 @@ void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_
     dessert_ext_t* ext;
     dessert_msg_getext(msg, &ext, RREQ_EXT_TYPE, 0);
     struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) ext->data;
-    pthread_rwlock_wrlock(&pp_rwlock);
+    pthread_rwlock_wrlock(&seq_num_lock);
     rreq_msg->originator_sequence_number = ++seq_num_global;
-    pthread_rwlock_unlock(&pp_rwlock);
+    pthread_rwlock_unlock(&seq_num_lock);
 
     dessert_debug("RREQ send for " MAC " ttl=%" PRIu8 " id=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), msg->ttl, rreq_msg->originator_sequence_number);
     dessert_meshsend(msg, NULL);
@@ -288,7 +288,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
 
     uint16_t unknown_seq_num_flag = rreq_msg->flags & AODV_FLAGS_RREQ_U;
     if(proc->lflags & DESSERT_RX_FLAG_L25_DST) {
-        pthread_rwlock_wrlock(&pp_rwlock);
+        pthread_rwlock_wrlock(&seq_num_lock);
         uint32_t rrep_seq_num;
         /* increase our sequence number on metric hit, so that the updated
          * RREP doesn't get discarded as old */
@@ -301,7 +301,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
             seq_num_global = rreq_msg->destination_sequence_number;
         }
         rrep_seq_num = seq_num_global;
-        pthread_rwlock_unlock(&pp_rwlock);
+        pthread_rwlock_unlock(&seq_num_lock);
 
         dessert_msg_t* rrep_msg = _create_rrep(dessert_l25_defsrc, l25h->ether_shost, msg->l2h.ether_shost, rrep_seq_num, 0, 0, metric_startvalue);
         dessert_meshsend(rrep_msg, iface);

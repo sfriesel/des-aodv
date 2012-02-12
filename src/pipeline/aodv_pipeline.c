@@ -232,9 +232,8 @@ static void aodv_send_rreq_real(mac_addr dhost_ether, aodv_rreq_series_t *series
         series->msg = msg;
         series->retries = 0;
     }
-    series->retries++;
 
-    if(series->retries > RREQ_RETRIES) {
+    if(series->retries >= RREQ_RETRIES) {
         /* RREQ has been tried for the max. number of times -- give up */
         dessert_msg_destroy(series->msg);
         free(series);
@@ -246,10 +245,11 @@ static void aodv_send_rreq_real(mac_addr dhost_ether, aodv_rreq_series_t *series
     uintmax_t ring_traversal_time = 2 * NODE_TRAVERSAL_TIME * min(NET_DIAMETER, msg->ttl);
     struct timeval repeat_time  = hf_tv_add_ms(ts, ring_traversal_time);
 
-    if(ring_search) {
+    series->retries++;
+    if(ring_search && msg->ttl <= TTL_THRESHOLD) {
         msg->ttl += TTL_INCREMENT;
         if(msg->ttl > TTL_THRESHOLD) {
-            msg->ttl = NET_DIAMETER;
+            msg->ttl = TTL_MAX;
         }
     }
 

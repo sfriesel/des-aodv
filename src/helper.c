@@ -55,44 +55,6 @@ int hf_comp_metric(metric_t i, metric_t j) {
 
 /******************************************************************************/
 
-int hf_compare_tv(struct timeval* tv1, struct timeval* tv2) {
-    if((tv1->tv_sec == tv2->tv_sec) && (tv1->tv_usec == tv2->tv_usec)) {
-        return 0;
-    }
-
-    if(tv1->tv_sec > tv2->tv_sec) {
-        return 1;
-    }
-
-    if(tv2->tv_sec > tv1->tv_sec) {
-        return -1;
-    }
-
-    if(tv1->tv_usec > tv2->tv_usec) {
-        return 1;
-    }
-    else {
-        return -1;
-    }
-}
-
-int hf_add_tv(struct timeval* tv1, struct timeval* tv2, struct timeval* sum) {
-    sum->tv_sec = tv1->tv_sec + tv2->tv_sec;
-    __suseconds_t usec_sum = tv1->tv_usec + tv2->tv_usec;
-
-    if(usec_sum >= 1000000) {
-        sum->tv_sec += 1;
-        sum->tv_usec = usec_sum - 1000000;
-    }
-    else {
-        sum->tv_usec = usec_sum;
-    }
-
-    return true;
-}
-
-/******************************************************************************/
-
 /* rssi is typicaly in [-128, 0] */
 uint8_t hf_rssi2interval(int8_t rssi) {
 

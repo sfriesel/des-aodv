@@ -34,7 +34,7 @@ For further information and questions please use the web site
 #include "config.h"
 
 /**
- * Compares two integers taking overflow into account
+ * Compares two unsigned integers taking overflow into account
  * returns 0 if i == j
  * returns a positive integer if i is "ahead" of j
  * returns a negative integer if i is "behind" j
@@ -49,20 +49,23 @@ int hf_comp_u32(uint32_t i, uint32_t j);
  */
 int hf_comp_metric(metric_t i, metric_t j);
 
-/******************************************************************************/
+static inline struct timeval hf_tv_add_ms(const struct timeval tv, uintmax_t ms) __attribute__ ((__unused__));
+static inline struct timeval hf_tv_add_ms(const struct timeval tv, uintmax_t ms) {
+    struct timeval result = tv;
+    dessert_timevaladd(&result, ms / 1000, (ms % 1000) * 1000);
+    return result;
+}
 
-/**
- * Compares two timevals.
- * Returns 0 if tv1 = tv2
- * Return 1 if  tv1 > tv2
- * Return -1 if tv1 < tv2
- */
-int hf_compare_tv(struct timeval* tv1, struct timeval* tv2);
-
-/**
- * Return summ of two timevals
- */
-int hf_add_tv(struct timeval* tv1, struct timeval* tv2, struct timeval* sum);
+static inline uint64_t hf_mac_addr_to_uint64(const mac_addr addr) __attribute__ ((__unused__));
+static inline uint64_t hf_mac_addr_to_uint64(const mac_addr addr) {
+    uint64_t result = addr[5];
+    int i;
+    for(i = 4; i >= 0; --i) {
+        result <<= 8;
+        result += addr[i];
+    }
+    return result;
+}
 
 /******************************************************************************/
 

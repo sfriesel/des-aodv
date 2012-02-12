@@ -163,10 +163,12 @@ void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_
         free(retry);
         return;
     }
-
-    /* repeat_time corresponds to NET_TRAVERSAL_TIME if ring_search is off */
-    uint32_t repeat_time = 2 * NODE_TRAVERSAL_TIME * min(NET_DIAMETER, msg->ttl);
     dessert_trace("add task to repeat RREQ");
+
+    /* RING_TRAVERSAL_TIME equals NET_TRAVERSAL_TIME if ring_search is off */
+    uintmax_t ring_traversal_time = 2 * NODE_TRAVERSAL_TIME * min(NET_DIAMETER, msg->ttl);
+    struct timeval repeat_time  = hf_tv_add_ms(*ts, ring_traversal_time);
+
     if(ring_search) {
         msg->ttl += TTL_INCREMENT;
         if(msg->ttl > TTL_THRESHOLD) {
@@ -174,10 +176,8 @@ void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_
         }
     }
 
-    struct timeval rreq_repeat_time = { repeat_time / 1000, (repeat_time % 1000) * 1000 };
-    hf_add_tv(ts, &rreq_repeat_time, &rreq_repeat_time);
 
-    aodv_db_addschedule(&rreq_repeat_time, dhost_ether, AODV_SC_REPEAT_RREQ, retry);
+    aodv_db_addschedule(&repeat_time, dhost_ether, AODV_SC_REPEAT_RREQ, retry);
 }
 
 // ---------------------------- pipeline callbacks ---------------------------------------------

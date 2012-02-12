@@ -117,7 +117,7 @@ int timeslot_purgeobjects(timeslot_t* ts, struct timeval* curr_time) {
 int timeslot_addobject(timeslot_t* ts, struct timeval* timestamp, void* object) {
     timeslot_element_t* new_el;
     struct timeval purge_time;
-    hf_add_tv(ts->purge_timeout, timestamp, &purge_time);
+    dessert_timevaladd2(&purge_time, ts->purge_timeout, timestamp);
 
     if(create_new_ts_element(&new_el, &purge_time, object) == false) {
         return false;
@@ -183,7 +183,7 @@ int timeslot_addobject(timeslot_t* ts, struct timeval* timestamp, void* object) 
 int timeslot_addobject_varpurge(timeslot_t* ts, struct timeval* timestamp, void* object, struct timeval* not_def_lifetime) {
     timeslot_element_t* new_el;
     struct timeval purge_time;
-    hf_add_tv(not_def_lifetime, timestamp, &purge_time);
+    dessert_timevaladd2(&purge_time, not_def_lifetime, timestamp);
 
     if(create_new_ts_element(&new_el, &purge_time, object) == false) {
         return false;

@@ -216,12 +216,13 @@ static void aodv_send_rreq_real(mac_addr dhost_ether, aodv_rreq_series_t *series
 
     dessert_ext_t* ext;
     dessert_msg_getext(msg, &ext, RREQ_EXT_TYPE, 0);
-    struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) ext->data;
+    struct aodv_msg_rreq* rreq = (struct aodv_msg_rreq*) ext->data;
+
     pthread_rwlock_wrlock(&seq_num_lock);
-    rreq_msg->originator_sequence_number = ++seq_num_global;
+    rreq->originator_sequence_number = ++seq_num_global;
     pthread_rwlock_unlock(&seq_num_lock);
 
-    dessert_debug("RREQ send for " MAC " ttl=%" PRIu8 " id=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), msg->ttl, rreq_msg->originator_sequence_number);
+    dessert_debug("RREQ send for " MAC " ttl=%" PRIu8 " id=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), msg->ttl, rreq->originator_sequence_number);
     dessert_meshsend(msg, NULL);
     gettimeofday(&ts, NULL);
     aodv_db_putrreq(&ts);

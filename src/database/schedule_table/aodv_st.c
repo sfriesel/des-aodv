@@ -50,8 +50,7 @@ schedule_t* create_schedule(struct timeval* execute_ts, mac_addr ether_addr, uin
         return NULL;
     }
 
-    s->execute_ts.tv_sec = execute_ts->tv_sec;
-    s->execute_ts.tv_usec = execute_ts->tv_usec;
+    s->execute_ts = *execute_ts;
     mac_copy(s->ether_addr, ether_addr);
     s->schedule_id = type;
     s->schedule_param = param;

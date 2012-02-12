@@ -180,7 +180,7 @@ dessert_msg_t* _create_rrep(mac_addr route_dest, mac_addr route_source, mac_addr
     return msg;
 }
 
-static void aodv_send_rreq_real(mac_addr dhost_ether, aodv_rreq_series_t *series) {
+static void aodv_send_rreq_real(aodv_rreq_series_t *series) {
     struct timeval ts;
     gettimeofday(&ts, NULL);
     // if we sent too many RREQs in the last second, try again later
@@ -190,30 +190,11 @@ static void aodv_send_rreq_real(mac_addr dhost_ether, aodv_rreq_series_t *series
     if(rreq_count > RREQ_RATELIMIT) {
         dessert_trace("we have reached RREQ_RATELIMIT");
         struct timeval postpone = hf_tv_add_ms(ts, 20);
-        aodv_db_addschedule(&postpone, dhost_ether, AODV_SC_REPEAT_RREQ, series);
+        aodv_pipeline_reschedule_series(postpone, series);
         return;
     }
 
-    dessert_msg_t* msg;
-    if(!series) {
-        if(aodv_db_schedule_exists(dhost_ether, AODV_SC_REPEAT_RREQ)) {
-            dessert_trace("there is a rreq_schedule to this dest we dont start a new series");
-            return;
-        }
-
-        uint8_t ttl = ring_search ? TTL_START : TTL_MAX;
-        msg = _create_rreq(dhost_ether, ttl, metric_startvalue);
-    }
-    else {
-        msg = series->msg;
-    }
-
-    if(ring_search && msg->ttl > TTL_THRESHOLD) {
-        dessert_debug("RREQ to " MAC ": TTL_THRESHOLD is reached - send RREQ with TTL_MAX=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), TTL_MAX);
-        //RFC: NET_DIAMETER, but we don't need ttl for loop detection
-        msg->ttl = TTL_MAX;
-    }
-
+    dessert_msg_t *msg = series->msg;
     dessert_ext_t* ext;
     dessert_msg_getext(msg, &ext, RREQ_EXT_TYPE, 0);
     struct aodv_msg_rreq* rreq = (struct aodv_msg_rreq*) ext->data;
@@ -222,21 +203,15 @@ static void aodv_send_rreq_real(mac_addr dhost_ether, aodv_rreq_series_t *series
     rreq->originator_sequence_number = ++seq_num_global;
     pthread_rwlock_unlock(&seq_num_lock);
 
-    dessert_debug("RREQ send for " MAC " ttl=%" PRIu8 " id=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), msg->ttl, rreq->originator_sequence_number);
+    struct ether_header* l25h = dessert_msg_getl25ether(series->msg);
+    dessert_debug("sending RREQ to " MAC " ttl=%ju id=%ju", EXPLODE_ARRAY6(l25h->ether_dhost), (uintmax_t)msg->ttl, (uintmax_t)rreq->originator_sequence_number);
     dessert_meshsend(msg, NULL);
     gettimeofday(&ts, NULL);
     aodv_db_putrreq(&ts);
 
-    if(!series) {
-        series = malloc(sizeof(*series));
-        series->msg = msg;
-        series->retries = 0;
-    }
-
     if(series->retries >= RREQ_RETRIES) {
         /* RREQ has been tried for the max. number of times -- give up */
-        dessert_msg_destroy(series->msg);
-        free(series);
+        aodv_pipeline_delete_series(series);
         return;
     }
     dessert_trace("add task to repeat RREQ");
@@ -252,17 +227,25 @@ static void aodv_send_rreq_real(mac_addr dhost_ether, aodv_rreq_series_t *series
             msg->ttl = TTL_MAX;
         }
     }
-
-
-    aodv_db_addschedule(&repeat_time, dhost_ether, AODV_SC_REPEAT_RREQ, series);
+    aodv_pipeline_reschedule_series(repeat_time, series);
 }
 
 void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts) {
-    aodv_send_rreq_real(dhost_ether, NULL);
+    // RFC uses NET_DIAMETER as maximum ttl value, but we don't need ttl for loop detection
+    uint8_t ttl = ring_search ? TTL_START : TTL_MAX;
+    dessert_msg_t* msg = _create_rreq(dhost_ether, ttl, metric_startvalue);
+
+    aodv_rreq_series_t* series = aodv_pipeline_new_series(msg);
+    if(!series) {
+        dessert_trace("There is a rreq schedule to this dest. We dont start a new series.");
+        return;
+    }
+    aodv_send_rreq_real(series);
 }
 
 void aodv_send_rreq_repeat(struct timeval* ts, aodv_rreq_series_t* series) {
-    aodv_send_rreq_real(dessert_msg_getl25ether(series->msg)->ether_dhost, series);
+    assert(series);
+    aodv_send_rreq_real(series);
 }
 
 // ---------------------------- pipeline callbacks ---------------------------------------------

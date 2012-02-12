@@ -108,7 +108,7 @@ dessert_msg_t* _create_rrep(mac_addr route_dest, mac_addr route_source, mac_addr
     return msg;
 }
 
-void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_rreq* retry, metric_t initial_metric) {
+void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_rreq* retry) {
     // reschedule if we sent more than RREQ_LIMIT RREQ messages in the last second
     uint32_t rreq_count;
     aodv_db_getrreqcount(ts, &rreq_count);
@@ -127,7 +127,7 @@ void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_
         }
 
         uint8_t ttl = ring_search ? TTL_START : TTL_MAX;
-        msg = _create_rreq(dhost_ether, ttl, initial_metric);
+        msg = _create_rreq(dhost_ether, ttl, metric_startvalue);
     }
     else {
         msg = retry->msg;

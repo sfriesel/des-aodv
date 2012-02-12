@@ -180,6 +180,6 @@ int aodv_gossip_0();
 
 // ------------------------------ helper ------------------------------------------------------
 
-void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_rreq* rreq_msg, metric_t initial_metric);
+void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_rreq* rreq_msg);
 
 #endif

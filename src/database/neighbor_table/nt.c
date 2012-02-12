@@ -51,7 +51,7 @@ neighbor_entry_t* db_neighbor_entry_create(mac_addr ether_neighbor_addr, dessert
         return NULL;
     }
 
-    memcpy(new_entry->ether_neighbor, ether_neighbor_addr, ETH_ALEN);
+    mac_copy(new_entry->ether_neighbor, ether_neighbor_addr);
     new_entry->iface = iface;
     new_entry->last_hello_seq = 0; /* initial */
     new_entry->max_rssi = AODV_SIGNAL_STRENGTH_INIT;
@@ -72,7 +72,7 @@ void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void*
 int db_nt_reset_rssi(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp) {
     neighbor_entry_t* curr_entry = NULL;
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
-    memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
+    mac_copy(addr_sum, ether_neighbor_addr);
     memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
     HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
 
@@ -90,7 +90,7 @@ int8_t db_nt_update_rssi(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, 
 
     neighbor_entry_t* curr_entry = NULL;
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
-    memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
+    mac_copy(addr_sum, ether_neighbor_addr);
     memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
     HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
 
@@ -160,7 +160,7 @@ int aodv_db_nt_neighbor_reset(uint32_t* count_out) {
 int db_nt_cap2Dneigh(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp) {
     neighbor_entry_t* curr_entry = NULL;
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
-    memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
+    mac_copy(addr_sum, ether_neighbor_addr);
     memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
     HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
 
@@ -191,7 +191,7 @@ int db_nt_check2Dneigh(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, st
     timeslot_purgeobjects(nt.ts, timestamp);
     neighbor_entry_t* curr_entry;
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
-    memcpy(addr_sum, ether_neighbor_addr, ETH_ALEN);
+    mac_copy(addr_sum, ether_neighbor_addr);
     memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
     HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
 

@@ -52,7 +52,7 @@ schedule_t* create_schedule(struct timeval* execute_ts, mac_addr ether_addr, uin
 
     s->execute_ts.tv_sec = execute_ts->tv_sec;
     s->execute_ts.tv_usec = execute_ts->tv_usec;
-    memcpy(s->ether_addr, ether_addr, ETH_ALEN);
+    mac_copy(s->ether_addr, ether_addr);
     s->schedule_id = type;
     s->schedule_param = param;
     s->next = s->prev = NULL;
@@ -117,7 +117,7 @@ int aodv_db_sc_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, u
             first_schedule->prev = NULL;
         }
 
-        memcpy(ether_addr_out, sc->ether_addr, ETH_ALEN);
+        mac_copy(ether_addr_out, sc->ether_addr);
         *type = sc->schedule_id;
         *param = sc->schedule_param;
         HASH_DEL(hash_table, sc);
@@ -131,7 +131,7 @@ int aodv_db_sc_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, u
 int aodv_db_sc_schedule_exists(mac_addr ether_addr, uint8_t type) {
     schedule_t* schedule;
     uint8_t key[ETH_ALEN + sizeof(uint8_t)];
-    memcpy(key, ether_addr, ETH_ALEN);
+    mac_copy(key, ether_addr);
     memcpy(key + ETH_ALEN, &type, sizeof(uint8_t));
     HASH_FIND(hh, hash_table, key, ETH_ALEN + sizeof(uint8_t), schedule);
 
@@ -146,7 +146,7 @@ int aodv_db_sc_schedule_exists(mac_addr ether_addr, uint8_t type) {
 int aodv_db_sc_dropschedule(mac_addr ether_addr, uint8_t type) {
     schedule_t* schedule;
     uint8_t key[ETH_ALEN + sizeof(uint8_t)];
-    memcpy(key, ether_addr, ETH_ALEN);
+    mac_copy(key, ether_addr);
     memcpy(key + ETH_ALEN, &type, sizeof(uint8_t));
     HASH_FIND(hh, hash_table, key, ETH_ALEN + sizeof(uint8_t), schedule);
 

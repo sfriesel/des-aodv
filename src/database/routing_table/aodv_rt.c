@@ -86,8 +86,8 @@ int rt_srclist_entry_create(aodv_rt_srclist_entry_t** srclist_entry_out,
     }
 
     memset(srclist_entry, 0x0, sizeof(aodv_rt_srclist_entry_t));
-    memcpy(srclist_entry->originator_host, originator_host, ETH_ALEN);
-    memcpy(srclist_entry->originator_host_prev_hop, originator_host_prev_hop, ETH_ALEN);
+    mac_copy(srclist_entry->originator_host, originator_host);
+    mac_copy(srclist_entry->originator_host_prev_hop, originator_host_prev_hop);
     srclist_entry->output_iface = output_iface;
     srclist_entry->originator_sequence_number = 0; //initial
     srclist_entry->metric = AODV_MAX_METRIC; //initial
@@ -107,7 +107,7 @@ int rt_entry_create(aodv_rt_entry_t** rreqt_entry_out, mac_addr destination_host
     }
 
     memset(rt_entry, 0x0, sizeof(aodv_rt_entry_t));
-    memcpy(rt_entry->destination_host, destination_host, ETH_ALEN);
+    mac_copy(rt_entry->destination_host, destination_host);
     rt_entry->flags = AODV_FLAGS_NEXT_HOP_UNKNOWN | AODV_FLAGS_ROUTE_INVALID;
     rt_entry->src_list = NULL;
     rt_entry->destination_sequence_number = 0; //we know nothing about the destination
@@ -128,7 +128,7 @@ int nht_destlist_entry_create(nht_destlist_entry_t** entry_out, mac_addr destina
     }
 
     memset(entry, 0x0, sizeof(nht_destlist_entry_t));
-    memcpy(entry->destination_host, destination_host, ETH_ALEN);
+    mac_copy(entry->destination_host, destination_host);
     entry->rt_entry = rt_entry;
 
     *entry_out = entry;
@@ -143,7 +143,7 @@ int nht_entry_create(nht_entry_t** entry_out, mac_addr destination_host_next_hop
     }
 
     memset(entry, 0x0, sizeof(nht_entry_t));
-    memcpy(entry->destination_host_next_hop, destination_host_next_hop, ETH_ALEN);
+    mac_copy(entry->destination_host_next_hop, destination_host_next_hop);
     entry->dest_list = NULL;
 
     *entry_out = entry;
@@ -282,7 +282,7 @@ int aodv_db_rt_capt_rrep(mac_addr destination_host,
         }
 
         // set next hop and etc. towards this destination
-        memcpy(rt_entry->destination_host_next_hop, destination_host_next_hop, ETH_ALEN);
+        mac_copy(rt_entry->destination_host_next_hop, destination_host_next_hop);
         rt_entry->output_iface = output_iface;
         rt_entry->destination_sequence_number = destination_sequence_number;
         rt_entry->metric = metric;
@@ -335,7 +335,7 @@ int aodv_db_rt_getroute2dest(mac_addr destination_host, mac_addr destination_hos
 
     rt_entry->flags |= flags;
 
-    memcpy(destination_host_next_hop_out, rt_entry->destination_host_next_hop, ETH_ALEN);
+    mac_copy(destination_host_next_hop_out, rt_entry->destination_host_next_hop);
     *output_iface_out = rt_entry->output_iface;
     timeslot_addobject(rt.ts, timestamp, rt_entry);
     return true;
@@ -349,7 +349,7 @@ int aodv_db_rt_getnexthop(mac_addr destination_host, mac_addr destination_host_n
         return false;
     }
 
-    memcpy(destination_host_next_hop_out, rt_entry->destination_host_next_hop, ETH_ALEN);
+    mac_copy(destination_host_next_hop_out, rt_entry->destination_host_next_hop);
     return true;
 }
 
@@ -370,7 +370,7 @@ int aodv_db_rt_getprevhop(mac_addr destination_host, mac_addr originator_host,
         return false;
     }
 
-    memcpy(originator_host_prev_hop_out, srclist_entry->originator_host_prev_hop, ETH_ALEN);
+    mac_copy(originator_host_prev_hop_out, srclist_entry->originator_host_prev_hop);
     *output_iface_out = srclist_entry->output_iface;
 
     return true;
@@ -463,7 +463,7 @@ int aodv_db_rt_get_destlist(mac_addr dhost_next_hop, aodv_link_break_element_t**
 
     HASH_ITER(hh, nht_entry->dest_list, dest, tmp) {
         aodv_link_break_element_t* el = malloc(sizeof(aodv_link_break_element_t));
-        memcpy(el->host, dest->rt_entry->destination_host, ETH_ALEN);
+        mac_copy(el->host, dest->rt_entry->destination_host);
         el->sequence_number = dest->rt_entry->destination_sequence_number;
         dessert_debug("createERR: " MAC " seq=%" PRIu32 "", EXPLODE_ARRAY6(el->host), el->sequence_number);
         DL_APPEND(*destlist, el);
@@ -539,7 +539,7 @@ int aodv_db_rt_get_warn_endpoints_from_neighbor_and_set_warn(mac_addr neighbor, 
 
         dessert_debug("dest->rt_entry->flags = %" PRIu8 "->%p", dest->rt_entry->flags, dest->rt_entry);
         aodv_link_break_element_t* curr_el = malloc(sizeof(aodv_link_break_element_t));
-        memcpy(curr_el->host, dest->rt_entry->destination_host, ETH_ALEN);
+        mac_copy(curr_el->host, dest->rt_entry->destination_host);
         curr_el->sequence_number = dest->rt_entry->destination_sequence_number;
         DL_APPEND(*head, curr_el);
         dest->rt_entry->flags |= AODV_FLAGS_ROUTE_WARN;
@@ -567,7 +567,7 @@ int aodv_db_rt_get_active_routes(aodv_link_break_element_t** head) {
         if(dest->flags & AODV_FLAGS_ROUTE_LOCAL_USED) {
             aodv_link_break_element_t* curr_el = malloc(sizeof(aodv_link_break_element_t));
             memset(curr_el, 0x0, sizeof(aodv_link_break_element_t));
-            memcpy(curr_el->host, dest->destination_host, ETH_ALEN);
+            mac_copy(curr_el->host, dest->destination_host);
             DL_APPEND(*head, curr_el);
         }
     }

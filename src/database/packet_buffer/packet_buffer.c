@@ -137,7 +137,7 @@ void pb_push_packet(mac_addr dhost_ether, dessert_msg_t* msg, struct timeval* ti
             return;
         }
 
-        memcpy(pb_el->dhost_ether, dhost_ether, ETH_ALEN);
+        mac_copy(pb_el->dhost_ether, dhost_ether);
         pb_el->fl.head = pb_el->fl.tail = NULL;
         pb_el->fl.size = 0;
         HASH_ADD_KEYPTR(hh, pbt.entries, pb_el->dhost_ether, ETH_ALEN, pb_el);

@@ -103,8 +103,8 @@ dessert_msg_t* aodv_create_rerr(aodv_link_break_element_t** destlist) {
     // add l25h header
     dessert_msg_addext(msg, &ext, DESSERT_EXT_ETH, ETHER_HDR_LEN);
     struct ether_header* rreq_l25h = (struct ether_header*) ext->data;
-    memcpy(rreq_l25h->ether_shost, dessert_l25_defsrc, ETH_ALEN);
-    memcpy(rreq_l25h->ether_dhost, ether_broadcast, ETH_ALEN);
+    mac_copy(rreq_l25h->ether_shost, dessert_l25_defsrc);
+    mac_copy(rreq_l25h->ether_dhost, ether_broadcast);
 
     // add RERR ext
     dessert_msg_addext(msg, &ext, RERR_EXT_TYPE, sizeof(struct aodv_msg_rerr));
@@ -121,7 +121,7 @@ dessert_msg_t* aodv_create_rerr(aodv_link_break_element_t** destlist) {
         break;
     }
 
-    memcpy(ifaceaddr_pointer, iface->hwaddr, ETH_ALEN);
+    mac_copy(ifaceaddr_pointer, iface->hwaddr);
     ifaceaddr_pointer += ETH_ALEN;
     ifaces_count++;
     MESHIFLIST_ITERATOR_STOP;
@@ -147,7 +147,7 @@ dessert_msg_t* aodv_create_rerr(aodv_link_break_element_t** destlist) {
 
         for(iter = start; iter < start + dl_len; ++iter) {
             aodv_link_break_element_t* el = *destlist;
-            memcpy(iter->host, el->host, ETH_ALEN);
+            mac_copy(iter->host, el->host);
             iter->sequence_number = el->sequence_number;
             dessert_debug("create rerr to: " MAC " seq=%" PRIu32 "", EXPLODE_ARRAY6(iter->host), iter->sequence_number);
             DL_DELETE(*destlist, el);

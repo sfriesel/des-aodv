@@ -45,8 +45,8 @@ dessert_msg_t* _create_rreq(mac_addr dhost_ether, uint8_t ttl, metric_t initial_
     // add l25h header
     dessert_msg_addext(msg, &ext, DESSERT_EXT_ETH, ETHER_HDR_LEN);
     struct ether_header* rreq_l25h = (struct ether_header*) ext->data;
-    memcpy(rreq_l25h->ether_shost, dessert_l25_defsrc, ETH_ALEN);
-    memcpy(rreq_l25h->ether_dhost, dhost_ether, ETH_ALEN);
+    mac_copy(rreq_l25h->ether_shost, dessert_l25_defsrc);
+    mac_copy(rreq_l25h->ether_dhost, dhost_ether);
 
     // add RREQ ext
     dessert_msg_addext(msg, &ext, RREQ_EXT_TYPE, sizeof(struct aodv_msg_rreq));
@@ -92,11 +92,11 @@ dessert_msg_t* _create_rrep(mac_addr route_dest, mac_addr route_source, mac_addr
     // add l25h header
     dessert_msg_addext(msg, &ext, DESSERT_EXT_ETH, ETHER_HDR_LEN);
     struct ether_header* rreq_l25h = (struct ether_header*) ext->data;
-    memcpy(rreq_l25h->ether_shost, route_dest, ETH_ALEN);
-    memcpy(rreq_l25h->ether_dhost, route_source, ETH_ALEN);
+    mac_copy(rreq_l25h->ether_shost, route_dest);
+    mac_copy(rreq_l25h->ether_dhost, route_source);
 
     // set next hop
-    memcpy(msg->l2h.ether_dhost, rrep_next_hop, ETH_ALEN);
+    mac_copy(msg->l2h.ether_dhost, rrep_next_hop);
 
     // and add RREP ext
     dessert_msg_addext(msg, &ext, RREP_EXT_TYPE, sizeof(struct aodv_msg_rrep));
@@ -235,7 +235,7 @@ int aodv_handle_hello(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc
             hello_msg->hello_rcvd_count = rcvd_hellos;
         }
         hello_msg->hello_interval = hello_interval; 
-        memcpy(msg->l2h.ether_dhost, msg->l2h.ether_shost, ETH_ALEN);
+        mac_copy(msg->l2h.ether_dhost, msg->l2h.ether_shost);
         dessert_meshsend(msg, iface);
         // dessert_trace("got hello-req from " MAC, EXPLODE_ARRAY6(msg->l2h.ether_shost));
     }
@@ -377,7 +377,7 @@ int aodv_handle_rerr(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
             ++iter) {
 
             mac_addr dhost_ether;
-            memcpy(dhost_ether, iter->host, ETH_ALEN);
+            mac_copy(dhost_ether, iter->host);
             uint32_t destination_sequence_number = iter->sequence_number;
 
             mac_addr dhost_next_hop;
@@ -405,7 +405,7 @@ int aodv_handle_rerr(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         void* iface_addr_pointer = rerr_msg->ifaces;
 
         while(iface != NULL && rerr_msg->iface_addr_count < MAX_MESH_IFACES_COUNT) {
-            memcpy(iface_addr_pointer, iface->hwaddr, ETH_ALEN);
+            mac_copy(iface_addr_pointer, iface->hwaddr);
             iface_addr_pointer += ETH_ALEN;
             iface = iface->next;
             rerr_msg->iface_addr_count++;
@@ -469,7 +469,7 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
 
         if(a == true) {
             dessert_debug("re-send RREP to " MAC, EXPLODE_ARRAY6(l25h->ether_dhost));
-            memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
+            mac_copy(msg->l2h.ether_dhost, next_hop);
             dessert_meshsend(msg, output_iface);
         }
         else {

@@ -50,7 +50,7 @@ void aodv_send_packets_from_buffer(mac_addr ether_dhost, mac_addr next_hop, dess
         buffered_msg->u16 = data_seq_copy;
 
         /*  no need to search for next hop. Next hop is the last_hop that send RREP */
-        memcpy(buffered_msg->l2h.ether_dhost, next_hop, ETH_ALEN);
+        mac_copy(buffered_msg->l2h.ether_dhost, next_hop);
         dessert_meshsend(buffered_msg, iface);
 
         dessert_trace("data packet - id=%" PRIu16 " - to mesh - to " MAC " route is known - send over " MAC, data_seq_copy, EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(next_hop));
@@ -130,7 +130,7 @@ int aodv_forward(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, des
     mac_addr next_hop;
 
     if(aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &timestamp, AODV_FLAGS_UNUSED)) {
-        memcpy(msg->l2h.ether_dhost, next_hop, ETH_ALEN);
+        mac_copy(msg->l2h.ether_dhost, next_hop);
 
         dessert_meshsend(msg, output_iface);
         dessert_trace(MAC " over " MAC " ----ME----> " MAC " to " MAC,
@@ -151,7 +151,7 @@ int aodv_forward(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, des
         aodv_link_break_element_t* head = NULL;
         aodv_link_break_element_t* entry = malloc(sizeof(aodv_link_break_element_t));
         memset(entry, 0x0, sizeof(aodv_link_break_element_t));
-        memcpy(entry->host, l25h->ether_dhost, ETH_ALEN);
+        mac_copy(entry->host, l25h->ether_dhost);
         entry->sequence_number = UINT32_MAX;
         DL_APPEND(head, entry);
         dessert_msg_t* rerr_msg = aodv_create_rerr(&head);
@@ -221,7 +221,7 @@ int aodv_sys2rp(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, dess
             msg->u16 = ++data_seq_global;
             pthread_rwlock_unlock(&data_seq_lock);
 
-            memcpy(msg->l2h.ether_dhost, dhost_next_hop, ETH_ALEN);
+            mac_copy(msg->l2h.ether_dhost, dhost_next_hop);
             dessert_meshsend(msg, output_iface);
 
             dessert_trace("send data packet to mesh - to " MAC " over " MAC " id=%" PRIu16 " route is known", EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(dhost_next_hop), msg->u16);

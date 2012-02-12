@@ -45,7 +45,7 @@ data_packet_id_t* ds_entry_create(mac_addr src_addr, uint16_t seq_num) {
         return NULL;
     }
 
-    memcpy(new_entry->src_addr, src_addr, ETH_ALEN);
+    mac_copy(new_entry->src_addr, src_addr);
     new_entry->seq_num = seq_num;
 
     return new_entry;

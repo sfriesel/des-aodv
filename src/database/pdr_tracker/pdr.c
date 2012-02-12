@@ -32,7 +32,7 @@ pdr_neighbor_entry_t* pdr_neighbor_entry_create(mac_addr ether_neighbor_addr, ui
         return NULL;
     }
 
-    memcpy(new_entry->ether_neighbor, ether_neighbor_addr, ETH_ALEN);
+    mac_copy(new_entry->ether_neighbor, ether_neighbor_addr);
     new_entry->rcvd_hello_count = 0;
     new_entry->nb_rcvd_hello_count = 0;
     new_entry->hello_interv = hello_interv;

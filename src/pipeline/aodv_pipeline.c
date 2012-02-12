@@ -108,7 +108,7 @@ dessert_msg_t* _create_rrep(mac_addr route_dest, mac_addr route_source, mac_addr
     return msg;
 }
 
-void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_rreq* retry) {
+static void aodv_send_rreq_real(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_rreq* retry) {
     // reschedule if we sent more than RREQ_LIMIT RREQ messages in the last second
     uint32_t rreq_count;
     aodv_db_getrreqcount(ts, &rreq_count);
@@ -178,6 +178,14 @@ void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_
 
 
     aodv_db_addschedule(&repeat_time, dhost_ether, AODV_SC_REPEAT_RREQ, retry);
+}
+
+void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts) {
+    aodv_send_rreq_real(dhost_ether, ts, NULL);
+}
+
+void aodv_send_rreq_repeat(struct timeval* ts, struct aodv_retry_rreq* retry) {
+    aodv_send_rreq_real(dessert_msg_getl25ether(retry->msg)->ether_dhost, ts, retry);
 }
 
 // ---------------------------- pipeline callbacks ---------------------------------------------

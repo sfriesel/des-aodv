@@ -201,7 +201,7 @@ int cli_send_rreq(struct cli_def* cli, char* command, char* argv[], int argc) {
 
     gettimeofday(&ts, NULL);
 
-    aodv_send_rreq(host, &ts, NULL);
+    aodv_send_rreq(host, &ts);
 
     return CLI_OK;
 }

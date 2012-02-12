@@ -70,7 +70,7 @@ dessert_per_result_t aodv_periodic_send_rreq(void* data, struct timeval* schedul
     aodv_link_break_element_t* dest, *tmp;
     DL_FOREACH_SAFE(head, dest, tmp) {
         dessert_debug("periodic send rreq to: " MAC " - interval=%" PRIu16 " ms", EXPLODE_ARRAY6(dest->host), rreq_interval);
-        aodv_send_rreq(dest->host, &timestamp, NULL);
+        aodv_send_rreq(dest->host, &timestamp);
         free(dest);
     }
     return DESSERT_PER_KEEP;
@@ -172,7 +172,7 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
 
     switch(schedule_type) {
         case AODV_SC_REPEAT_RREQ: {
-            aodv_send_rreq(ether_addr, &timestamp, (struct aodv_retry_rreq*)schedule_param);
+            aodv_send_rreq_repeat(&timestamp, (struct aodv_retry_rreq*)schedule_param);
             break;
         }
         case AODV_SC_SEND_OUT_RERR: {
@@ -216,7 +216,7 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
                 dessert_debug("AODV_SC_SEND_OUT_RWARN: " MAC " -> " MAC,
                               EXPLODE_ARRAY6(ether_addr),
                               EXPLODE_ARRAY6(dest->host));
-                aodv_send_rreq(dest->host, &timestamp, NULL);
+                aodv_send_rreq(dest->host, &timestamp);
             }
             break;
         }

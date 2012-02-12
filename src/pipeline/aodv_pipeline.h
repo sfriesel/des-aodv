@@ -109,6 +109,8 @@ struct aodv_msg_hello {
     uint16_t		hello_interval;
 } __attribute__((__packed__));
 
+typedef struct aodv_rreq_series aodv_rreq_series_t;
+
 struct aodv_retry_rreq {
     /** the rreq message to retry */
     dessert_msg_t* msg;

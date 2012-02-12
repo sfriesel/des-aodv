@@ -32,6 +32,15 @@ For further information and questions please use the web site
 static uint32_t seq_num_global = 0;
 static pthread_rwlock_t seq_num_lock = PTHREAD_RWLOCK_INITIALIZER;
 
+/* tracks a running series of RREQs to msg->dhost_ether */
+struct aodv_rreq_series {
+    dessert_msg_t *msg;
+    int retries;
+    uint64_t key;
+    /* the series is not in the series_list anymore. Implies the series should be terminated at the next possibility */
+    bool stop;
+    struct aodv_rreq_series *prev, *next;
+};
 // ---------------------------- help functions ---------------------------------------
 
 dessert_msg_t* _create_rreq(mac_addr dhost_ether, uint8_t ttl, metric_t initial_metric) {

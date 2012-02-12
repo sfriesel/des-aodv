@@ -86,7 +86,7 @@ int timeslot_destroy(timeslot_t* ts) {
 int timeslot_purgeobjects(timeslot_t* ts, struct timeval* curr_time) {
     timeslot_element_t* search_el = ts->tail;
 
-    while(search_el != NULL && hf_compare_tv(search_el->purge_time, curr_time) <= 0) {
+    while(search_el != NULL && dessert_timevalcmp(search_el->purge_time, curr_time) <= 0) {
         HASH_DEL(ts->elements_hash, search_el);
 
         if(search_el == ts->head) {
@@ -138,12 +138,12 @@ int timeslot_addobject(timeslot_t* ts, struct timeval* timestamp, void* object) 
     // insert new element into appropriate place
     timeslot_element_t* search_el = ts->head;
 
-    while(search_el->prev != NULL && (hf_compare_tv(&purge_time, search_el->purge_time) < 0)) {
+    while(search_el->prev != NULL && (dessert_timevalcmp(&purge_time, search_el->purge_time) < 0)) {
         // we search for an smaller element
         search_el = search_el->prev;
     }
 
-    if(hf_compare_tv(&purge_time, search_el->purge_time) >= 0) {
+    if(dessert_timevalcmp(&purge_time, search_el->purge_time) >= 0) {
         // insert new element after search element
         new_el->prev = search_el;
         new_el->next = search_el->next;
@@ -204,12 +204,12 @@ int timeslot_addobject_varpurge(timeslot_t* ts, struct timeval* timestamp, void*
     // insert new element into appropriate place
     timeslot_element_t* search_el = ts->head;
 
-    while(search_el->prev != NULL && (hf_compare_tv(&purge_time, search_el->purge_time) < 0)) {
+    while(search_el->prev != NULL && (dessert_timevalcmp(&purge_time, search_el->purge_time) < 0)) {
         // we search for an smaller element
         search_el = search_el->prev;
     }
 
-    if(hf_compare_tv(&purge_time, search_el->purge_time) >= 0) {
+    if(dessert_timevalcmp(&purge_time, search_el->purge_time) >= 0) {
         // insert new element after search element
         new_el->prev = search_el;
         new_el->next = search_el->next;

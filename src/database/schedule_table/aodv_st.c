@@ -71,7 +71,7 @@ int aodv_db_sc_addschedule(struct timeval* execute_ts, mac_addr ether_addr, uint
     HASH_ADD_KEYPTR(hh, hash_table, el->ether_addr, ETH_ALEN + sizeof(uint8_t), el);
 
     // search for appropriate place to insert new element
-    while(next_el != NULL && next_el->next != NULL && hf_compare_tv(execute_ts, &next_el->execute_ts) > 0) {
+    while(next_el != NULL && next_el->next != NULL && dessert_timevalcmp(execute_ts, &next_el->execute_ts) > 0) {
         if(next_el->next != NULL) {
             next_el = next_el->next;
         }
@@ -81,7 +81,7 @@ int aodv_db_sc_addschedule(struct timeval* execute_ts, mac_addr ether_addr, uint
         first_schedule = el;
     }
     else {
-        if(hf_compare_tv(&next_el->execute_ts, execute_ts) > 0) {
+        if(dessert_timevalcmp(&next_el->execute_ts, execute_ts) > 0) {
             if(next_el->prev != NULL) {
                 next_el->prev->next = el;
                 el->prev = next_el->prev;
@@ -108,7 +108,7 @@ int aodv_db_sc_addschedule(struct timeval* execute_ts, mac_addr ether_addr, uint
 }
 
 int aodv_db_sc_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, uint8_t* type, void** param) {
-    if(first_schedule != NULL && hf_compare_tv(&first_schedule->execute_ts, timestamp) <= 0) {
+    if(first_schedule != NULL && dessert_timevalcmp(&first_schedule->execute_ts, timestamp) <= 0) {
         schedule_t* sc = first_schedule;
         first_schedule = first_schedule->next;
 

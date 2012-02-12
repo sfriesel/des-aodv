@@ -117,19 +117,19 @@ dessert_msg_t* _create_rrep(mac_addr route_dest, mac_addr route_source, mac_addr
     return msg;
 }
 
-static void aodv_send_rreq_real(mac_addr dhost_ether, struct timeval* ts, struct aodv_retry_rreq* retry) {
+static void aodv_send_rreq_real(mac_addr dhost_ether, struct timeval* ts, aodv_rreq_series_t *series) {
     // reschedule if we sent more than RREQ_LIMIT RREQ messages in the last second
     uint32_t rreq_count;
     aodv_db_getrreqcount(ts, &rreq_count);
 
     if(rreq_count > RREQ_RATELIMIT) {
         dessert_trace("we have reached RREQ_RATELIMIT");
-        aodv_db_addschedule(ts, dhost_ether, AODV_SC_REPEAT_RREQ, retry);
+        aodv_db_addschedule(ts, dhost_ether, AODV_SC_REPEAT_RREQ, series);
         return;
     }
 
     dessert_msg_t* msg;
-    if(!retry) {
+    if(!series) {
         if(aodv_db_schedule_exists(dhost_ether, AODV_SC_REPEAT_RREQ)) {
             dessert_trace("there is a rreq_schedule to this dest we dont start a new series");
             return;
@@ -139,7 +139,7 @@ static void aodv_send_rreq_real(mac_addr dhost_ether, struct timeval* ts, struct
         msg = _create_rreq(dhost_ether, ttl, metric_startvalue);
     }
     else {
-        msg = retry->msg;
+        msg = series->msg;
     }
 
     if(ring_search && msg->ttl > TTL_THRESHOLD) {
@@ -159,17 +159,17 @@ static void aodv_send_rreq_real(mac_addr dhost_ether, struct timeval* ts, struct
     dessert_meshsend(msg, NULL);
     aodv_db_putrreq(ts);
 
-    if(!retry) {
-        retry = malloc(sizeof(*retry));
-        retry->msg = msg;
-        retry->count = 0;
+    if(!series) {
+        series = malloc(sizeof(*series));
+        series->msg = msg;
+        series->retries = 0;
     }
-    retry->count++;
+    series->retries++;
 
-    if(retry->count > RREQ_RETRIES) {
+    if(series->retries > RREQ_RETRIES) {
         /* RREQ has been tried for the max. number of times -- give up */
-        dessert_msg_destroy(retry->msg);
-        free(retry);
+        dessert_msg_destroy(series->msg);
+        free(series);
         return;
     }
     dessert_trace("add task to repeat RREQ");
@@ -186,15 +186,15 @@ static void aodv_send_rreq_real(mac_addr dhost_ether, struct timeval* ts, struct
     }
 
 
-    aodv_db_addschedule(&repeat_time, dhost_ether, AODV_SC_REPEAT_RREQ, retry);
+    aodv_db_addschedule(&repeat_time, dhost_ether, AODV_SC_REPEAT_RREQ, series);
 }
 
 void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts) {
     aodv_send_rreq_real(dhost_ether, ts, NULL);
 }
 
-void aodv_send_rreq_repeat(struct timeval* ts, struct aodv_retry_rreq* retry) {
-    aodv_send_rreq_real(dessert_msg_getl25ether(retry->msg)->ether_dhost, ts, retry);
+void aodv_send_rreq_repeat(struct timeval* ts, aodv_rreq_series_t* series) {
+    aodv_send_rreq_real(dessert_msg_getl25ether(series->msg)->ether_dhost, ts, series);
 }
 
 // ---------------------------- pipeline callbacks ---------------------------------------------

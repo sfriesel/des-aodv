@@ -111,13 +111,6 @@ struct aodv_msg_hello {
 
 typedef struct aodv_rreq_series aodv_rreq_series_t;
 
-struct aodv_retry_rreq {
-    /** the rreq message to retry */
-    dessert_msg_t* msg;
-    /** the number of retries done already */
-    int           count;
-};
-
 // ------------- pipeline -----------------------------------------------------
 int aodv_handle_hello(dessert_msg_t* msg, uint32_t len,
                       dessert_msg_proc_t* proc, dessert_meshif_t* iface, dessert_frameid_t id);
@@ -183,6 +176,6 @@ int aodv_gossip_0();
 // ------------------------------ helper ------------------------------------------------------
 
 void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts);
-void aodv_send_rreq_repeat(struct timeval* ts, struct aodv_retry_rreq* rreq_msg);
+void aodv_send_rreq_repeat(struct timeval* ts, aodv_rreq_series_t* series);
 
 #endif

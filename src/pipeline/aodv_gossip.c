@@ -77,7 +77,7 @@ int aodv_gossip(dessert_msg_t* msg){
 				/* look once in some usec */
 				struct timeval schedule;
 				gettimeofday(&schedule, NULL);
-				TIMEVAL_ADD(&schedule, 0, 3 * NODE_TRAVERSAL_TIME);
+				dessert_timevaladd(&schedule, 0, 3 * NODE_TRAVERSAL_TIME);
 				dessert_periodic_add(aodv_gossip_3, NULL, &schedule, NULL);
 				dessert_debug("ok");
 				return false;

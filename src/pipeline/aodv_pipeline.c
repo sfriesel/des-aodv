@@ -180,14 +180,17 @@ dessert_msg_t* _create_rrep(mac_addr route_dest, mac_addr route_source, mac_addr
     return msg;
 }
 
-static void aodv_send_rreq_real(mac_addr dhost_ether, struct timeval* ts, aodv_rreq_series_t *series) {
-    // reschedule if we sent more than RREQ_LIMIT RREQ messages in the last second
+static void aodv_send_rreq_real(mac_addr dhost_ether, aodv_rreq_series_t *series) {
+    struct timeval ts;
+    gettimeofday(&ts, NULL);
+    // if we sent too many RREQs in the last second, try again later
     uint32_t rreq_count;
-    aodv_db_getrreqcount(ts, &rreq_count);
+    aodv_db_getrreqcount(&ts, &rreq_count);
 
     if(rreq_count > RREQ_RATELIMIT) {
         dessert_trace("we have reached RREQ_RATELIMIT");
-        aodv_db_addschedule(ts, dhost_ether, AODV_SC_REPEAT_RREQ, series);
+        struct timeval postpone = hf_tv_add_ms(ts, 20);
+        aodv_db_addschedule(&postpone, dhost_ether, AODV_SC_REPEAT_RREQ, series);
         return;
     }
 
@@ -220,7 +223,8 @@ static void aodv_send_rreq_real(mac_addr dhost_ether, struct timeval* ts, aodv_r
 
     dessert_debug("RREQ send for " MAC " ttl=%" PRIu8 " id=%" PRIu8 "", EXPLODE_ARRAY6(dhost_ether), msg->ttl, rreq_msg->originator_sequence_number);
     dessert_meshsend(msg, NULL);
-    aodv_db_putrreq(ts);
+    gettimeofday(&ts, NULL);
+    aodv_db_putrreq(&ts);
 
     if(!series) {
         series = malloc(sizeof(*series));
@@ -239,7 +243,7 @@ static void aodv_send_rreq_real(mac_addr dhost_ether, struct timeval* ts, aodv_r
 
     /* RING_TRAVERSAL_TIME equals NET_TRAVERSAL_TIME if ring_search is off */
     uintmax_t ring_traversal_time = 2 * NODE_TRAVERSAL_TIME * min(NET_DIAMETER, msg->ttl);
-    struct timeval repeat_time  = hf_tv_add_ms(*ts, ring_traversal_time);
+    struct timeval repeat_time  = hf_tv_add_ms(ts, ring_traversal_time);
 
     if(ring_search) {
         msg->ttl += TTL_INCREMENT;
@@ -253,11 +257,11 @@ static void aodv_send_rreq_real(mac_addr dhost_ether, struct timeval* ts, aodv_r
 }
 
 void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts) {
-    aodv_send_rreq_real(dhost_ether, ts, NULL);
+    aodv_send_rreq_real(dhost_ether, NULL);
 }
 
 void aodv_send_rreq_repeat(struct timeval* ts, aodv_rreq_series_t* series) {
-    aodv_send_rreq_real(dessert_msg_getl25ether(series->msg)->ether_dhost, ts, series);
+    aodv_send_rreq_real(dessert_msg_getl25ether(series->msg)->ether_dhost, series);
 }
 
 // ---------------------------- pipeline callbacks ---------------------------------------------

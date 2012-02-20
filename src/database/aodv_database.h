@@ -72,9 +72,8 @@ typedef enum aodv_capt_rreq_result {
 } aodv_capt_rreq_result_t;
 
 /**
- * Captures seq_num of the source. Also add to source list for
- * this destination. All messages to source (example: RREP) must be sent
- * over shost_prev_hop (nodes output interface: output_iface).
+ * Captures seq_num of the source. Also add prev_hop to precursor list of
+ * this destination.
  */
 int aodv_db_capt_rreq(mac_addr destination_host,
                       mac_addr originator_host,

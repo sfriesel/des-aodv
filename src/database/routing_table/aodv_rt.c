@@ -150,7 +150,10 @@ int nht_entry_create(nht_entry_t** entry_out, mac_addr destination_host_next_hop
     return true;
 }
 
-// result of capture returned in result_out
+/** update db according to data in rreq
+ *  @return false if an error occured, true otherwise
+ *  @param result_out result of capture
+ */
 int aodv_db_rt_capt_rreq(mac_addr destination_host,
                          mac_addr originator_host,
                          mac_addr prev_hop,
@@ -220,8 +223,9 @@ int aodv_db_rt_capt_rreq(mac_addr destination_host,
 
 }
 
-// returns true if rep is newer
-//         false if rep is discarded
+/** update db according to data in rrep
+ *  @return false if an error occured or rrep was not used, true otherwise
+ */
 int aodv_db_rt_capt_rrep(mac_addr destination_host,
                          mac_addr destination_host_next_hop,
                          dessert_meshif_t* output_iface,

@@ -46,8 +46,7 @@ pdr_neighbor_entry_t* pdr_neighbor_entry_create(mac_addr ether_neighbor_addr, ui
     }
 
     uint32_t purge_ms = (uint32_t) hello_interv * tracking_factor * PDR_TRACKING_PURGE_FACTOR;
-    new_entry->purge_tv.tv_sec = purge_ms / 1000;
-    new_entry->purge_tv.tv_usec = (purge_ms % 1000) * 1000;
+    dessert_ms2timeval(purge_ms, &new_entry->purge_tv);
 
     return new_entry;
 }
@@ -75,8 +74,7 @@ void pdr_neighbor_entry_update(pdr_neighbor_entry_t* update_entry, uint16_t new_
     }
 
     uint32_t purge_ms = (uint32_t) new_interval * tracking_factor * PDR_TRACKING_PURGE_FACTOR;
-    update_entry->purge_tv.tv_sec = purge_ms / 1000;
-    update_entry->purge_tv.tv_usec = (purge_ms % 1000) * 1000;
+    dessert_ms2timeval(purge_ms, &update_entry->purge_tv);
 }
 
 void pdr_nt_purge_hello_msg(struct timeval* timestamp, void* src_object, void* object) {
@@ -111,9 +109,8 @@ int aodv_db_pdr_nt_init() {
     //creating default purge timeout, should normally not be used when adding an entry
     //but needed for initialization
     uint32_t def_purge_ms = (uint32_t) hello_interval * tracking_factor * PDR_TRACKING_PURGE_FACTOR;
-    struct timeval  def_purge_tv;
-    def_purge_tv.tv_sec = def_purge_ms / 1000;
-    def_purge_tv.tv_usec = (def_purge_ms % 1000) * 1000;
+    struct timeval def_purge_tv;
+    dessert_ms2timeval(def_purge_ms, &def_purge_tv);
 
     return timeslot_create(&pdr_nt.ts, &def_purge_tv, &pdr_nt, pdr_nt_purge_nb);
 }
@@ -186,12 +183,10 @@ int aodv_db_pdr_nt_cap_hello(mac_addr ether_neighbor_addr, uint16_t hello_seq, u
         struct timeval pdr_watch_interval;
         if (hello_interv*tracking_factor >= PDR_MIN_TRACKING_INTERVAL) {
             uint32_t tracking_interval = hello_interv * tracking_factor;
-            pdr_watch_interval.tv_sec = tracking_interval / 1000;
-            pdr_watch_interval.tv_usec = (tracking_interval % 1000) * 1000;
+            dessert_ms2timeval(tracking_interval, &pdr_watch_interval);
         }
         else {
-            pdr_watch_interval.tv_sec = PDR_MIN_TRACKING_INTERVAL / 1000;
-            pdr_watch_interval.tv_usec = (PDR_MIN_TRACKING_INTERVAL % 1000) * 1000;
+            dessert_ms2timeval(PDR_MIN_TRACKING_INTERVAL, &pdr_watch_interval);
         }
 
         if(timeslot_create(&(curr_entry->ts), &pdr_watch_interval, curr_entry, pdr_nt_purge_hello_msg) != true) {
@@ -243,12 +238,10 @@ int aodv_db_pdr_nt_cap_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_int
         struct timeval pdr_watch_interval;
         if (hello_interv*tracking_factor >= PDR_MIN_TRACKING_INTERVAL) {
             uint32_t tracking_interval = hello_interv * tracking_factor;
-            pdr_watch_interval.tv_sec = tracking_interval / 1000;
-            pdr_watch_interval.tv_usec = (tracking_interval % 1000) * 1000;
+            dessert_ms2timeval(tracking_interval, &pdr_watch_interval);
         }
         else {
-            pdr_watch_interval.tv_sec = PDR_MIN_TRACKING_INTERVAL / 1000;
-            pdr_watch_interval.tv_usec = (PDR_MIN_TRACKING_INTERVAL % 1000) * 1000;
+            dessert_ms2timeval(PDR_MIN_TRACKING_INTERVAL, &pdr_watch_interval);
         }
 
         if(timeslot_create(&(curr_entry->ts), &pdr_watch_interval, curr_entry, pdr_nt_purge_hello_msg) != true) {

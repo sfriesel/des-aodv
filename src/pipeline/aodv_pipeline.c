@@ -33,6 +33,10 @@ static uint32_t seq_num_global = 0;
 static pthread_rwlock_t seq_num_lock = PTHREAD_RWLOCK_INITIALIZER;
 
 /* tracks a running series of RREQs to msg->dhost_ether */
+/* Nachbedingung: die Serie wird nicht mehr referenziert. Es kann sofort eine neue Serie zum ziel gestartet werden. */
+//Invariante: Es gibt nur zwei mögliche Zustände für eine Serie: geschedulet oder in Verarbeitung durch send_rreq, dass noch MINDESTENS EINMAL die markierung prüft
+//Invariante: a series is either owned by a invocation of send_rreq, delete_series, reschedule_series or of the schedule table
+//Invariante: a schedule is only added by a valid series and dropped or popped before the series is deleted
 struct aodv_rreq_series {
     dessert_msg_t *msg;
     int retries;
@@ -89,10 +93,6 @@ static void aodv_pipeline_delete_series_unlocked(aodv_rreq_series_t *series) {
     }
 }
 
-/* Nachbedingung: die Serie wird nicht mehr referenziert. Es kann sofort eine neue Serie zum ziel gestartet werden. */
-//Invariante: Es gibt nur zwei mögliche Zustände für eine Serie: geschedulet oder in Verarbeitung durch send_rreq, dass noch MINDESTENS EINMAL die markierung prüft
-//Invariante: a series is either owned by a invocation of send_rreq, delete_series, reschedule_series or of the schedule table
-//Invariante: a schedule is only added by a valid series and dropped or popped before the series is deleted
 static inline void aodv_pipeline_delete_series(aodv_rreq_series_t *series) {
     pthread_rwlock_wrlock(&series_list_lock);
     aodv_pipeline_delete_series_unlocked(series);

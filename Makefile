@@ -22,7 +22,7 @@ FILE_ETC = etc/$(DAEMONNAME).conf
 FILE_INIT = etc/$(DAEMONNAME).init
 
 LIBS = -ldessert -lpthread -lcli
-CFLAGS += -ggdb -Wall -DTARGET_$(UNAME) -D_GNU_SOURCE
+CFLAGS += -std=c99 -D_GNU_SOURCE
 
 all: build
 

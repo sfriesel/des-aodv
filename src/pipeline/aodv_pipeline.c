@@ -500,49 +500,39 @@ int aodv_handle_rerr(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
 
 int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, dessert_meshif_t* iface, dessert_frameid_t id) {
     dessert_ext_t* rrep_ext;
-
-    if(dessert_msg_getext(msg, &rrep_ext, RREP_EXT_TYPE, 0) == 0) {
+    char* comment;
+    if(!dessert_msg_getext(msg, &rrep_ext, RREP_EXT_TYPE, 0)) {
         return DESSERT_MSG_KEEP;
     }
 
-    if(!mac_equal(msg->l2h.ether_dhost, iface->hwaddr)) {
+    if(!(proc->lflags & DESSERT_RX_FLAG_L2_DST)) {
         return DESSERT_MSG_DROP;
     }
-
-    struct ether_header* l25h = dessert_msg_getl25ether(msg);
-
-    dessert_debug("incoming RREP from " MAC " over " MAC " to " MAC " ttl=%ju", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), (uintmax_t)msg->ttl);
-
-
-    if(msg->ttl <= 0) {
-        dessert_debug("got RREP from " MAC " but TTL is <= 0", EXPLODE_ARRAY6(l25h->ether_dhost));
-        return DESSERT_MSG_DROP;
-    }
-
-    msg->ttl--;
-    msg->u8++; /* hop count */
 
     struct aodv_msg_rrep* rrep_msg = (struct aodv_msg_rrep*) rrep_ext->data;
 
+    if(msg->ttl) {
+        msg->ttl--;
+    }
+    msg->u8++; /* hop count */
+
     struct timeval ts;
-
     gettimeofday(&ts, NULL);
-
-    /********** METRIC *************/
     aodv_metric_do(&(msg->u16), msg->l2h.ether_shost, iface, &ts);
-    /********** METRIC *************/
 
-    int x = aodv_db_capt_rrep(l25h->ether_shost, msg->l2h.ether_shost, iface, rrep_msg->destination_sequence_number, msg->u16, msg->u8, &ts);
+    struct ether_header* l25h = dessert_msg_getl25ether(msg);
 
-    if(x != true) {
+    int rrep_used = aodv_db_capt_rrep(l25h->ether_shost, msg->l2h.ether_shost, iface, rrep_msg->destination_sequence_number, msg->u16, msg->u8, &ts);
+    if(!rrep_used) {
         // capture and re-send only if route is unknown OR
         // sequence number is greater then that in database OR
-        // if seq_nums are equals and known metric is greater than that in RREP -- METRIC
-        return DESSERT_MSG_DROP;
+        // if seq_nums are equal and known metric is worse than RREP's
+        comment = "discarded";
+        goto drop;
     }
 
-    if(!mac_equal(dessert_l25_defsrc, l25h->ether_dhost)) {
-        // RREP is not for me -> send RREP to RREQ originator
+    if(!(proc->lflags & DESSERT_RX_FLAG_L25_DST)) {
+        // forward RREP to RREQ originator
         mac_addr next_hop;
         dessert_meshif_t* output_iface;
 
@@ -552,17 +542,21 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
             aodv_db_add_precursor(l25h->ether_shost, next_hop, output_iface);
             mac_copy(msg->l2h.ether_dhost, next_hop);
             dessert_meshsend(msg, output_iface);
+            comment = "forwarded";
         }
         else {
-            dessert_debug("drop RREP to " MAC " we don't know the route back?!?!", EXPLODE_ARRAY6(l25h->ether_dhost));
+            comment = "dropped (no reverse route)";
         }
     }
     else {
-        // this RREP is for me! -> pop all packets from FIFO buffer and send to destination
-        /* no need to search for next hop. Next hop is RREP.prev_hop */
+        comment = "for me";
+        /* Pop all packets from FIFO buffer and send to destination
+         * no need to search for next hop. Next hop is RREP.prev_hop */
+
         aodv_send_packets_from_buffer(l25h->ether_shost, msg->l2h.ether_shost, iface);
     }
-
+drop:
+    dessert_debug("incoming RREP from " MAC " over " MAC " to " MAC " ttl=%ju hops=%ju | %s", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), (uintmax_t)msg->ttl, (uintmax_t)msg->u8, comment);
     return DESSERT_MSG_DROP;
 }
 

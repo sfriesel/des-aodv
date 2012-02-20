@@ -112,18 +112,15 @@ dessert_msg_t* aodv_create_rerr(aodv_link_break_element_t** destlist) {
     rerr_msg->flags = AODV_FLAGS_RERR_N;
 
     // write addresses of all my mesh interfaces
-    void* ifaceaddr_pointer = rerr_msg->ifaces;
+    mac_addr *ifaceaddr_pointer = rerr_msg->ifaces;
     uint8_t ifaces_count = 0;
     dessert_meshif_t* iface;
     MESHIFLIST_ITERATOR_START(iface)
+        assert(ifaces_count < MAX_MESH_IFACES_COUNT);
 
-    if(ifaces_count >= MAX_MESH_IFACES_COUNT) {
-        break;
-    }
-
-    mac_copy(ifaceaddr_pointer, iface->hwaddr);
-    ifaceaddr_pointer += ETH_ALEN;
-    ifaces_count++;
+        mac_copy(*ifaceaddr_pointer, iface->hwaddr);
+        ifaceaddr_pointer++;
+        ifaces_count++;
     MESHIFLIST_ITERATOR_STOP;
 
     rerr_msg->iface_addr_count = ifaces_count;

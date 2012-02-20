@@ -402,8 +402,8 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         bool local_repair = !dest_only_flag && we_have_seq_num;
         if(we_have_seq_num && !unknown_seq_num_flag) {
             uint32_t rreq_dest_seq_num = rreq_msg->destination_sequence_number;
-            // but don't repair if rreq has newer or equal dest_seq_num
-            if(hf_comp_u32(rreq_dest_seq_num, our_dest_seq_num) >= 0) {
+            // but don't repair if rreq has newer dest_seq_num
+            if(hf_comp_u32(rreq_dest_seq_num, our_dest_seq_num) > 0) {
                 local_repair = false;
             }
         }

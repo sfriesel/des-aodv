@@ -447,8 +447,6 @@ int aodv_handle_rerr(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
 
     struct aodv_msg_rerr* rerr_msg = (struct aodv_msg_rerr*) rerr_ext->data;
 
-    dessert_debug("got RERR: flags=%" PRIu8 "",  rerr_msg->flags);
-
     int rerrdl_num = 0;
 
     int rebroadcast_rerr = false;
@@ -456,29 +454,26 @@ int aodv_handle_rerr(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     dessert_ext_t* rerrdl_ext;
 
     while(dessert_msg_getext(msg, &rerrdl_ext, RERRDL_EXT_TYPE, rerrdl_num++) > 0) {
-        struct aodv_mac_seq* iter;
+        struct aodv_mac_seq* destination_list = (void*)rerrdl_ext->data;
+        int destination_count = (rerrdl_ext->len - 2) / (int)sizeof(struct aodv_mac_seq);
 
-        for(iter = (struct aodv_mac_seq*) rerrdl_ext->data;
-            iter < (struct aodv_mac_seq*) rerrdl_ext->data + rerrdl_ext->len;
-            ++iter) {
+        for(int i = 0; i < destination_count; ++i) {
+            struct aodv_mac_seq* dest = &destination_list[i];
+            mac_addr next_hop;
 
-            mac_addr dhost_ether;
-            mac_copy(dhost_ether, iter->host);
-            uint32_t destination_sequence_number = iter->sequence_number;
-
-            mac_addr dhost_next_hop;
-
-            if(!aodv_db_getnexthop(dhost_ether, dhost_next_hop)) {
+            if(!aodv_db_getnexthop(dest->host, next_hop)) {
                 continue;
             }
 
-            // if found, compare with entries in interface-list this RRER.
-            // If equals then this this route is affected and must be invalidated!
-            int iface_num;
-
-            for(iface_num = 0; iface_num < rerr_msg->iface_addr_count; iface_num++) {
-                if(mac_equal(rerr_msg->ifaces + iface_num * ETH_ALEN, dhost_next_hop)) {
-                    rebroadcast_rerr |= aodv_db_markrouteinv(dhost_ether, destination_sequence_number);
+            /* If our next_hop to dest is a interface of the neighbor that generated the RERR,
+             * this route is affected and must be invalidated!*/
+            for(int j = 0; j < rerr_msg->iface_addr_count; ++j) {
+                if(mac_equal(rerr_msg->ifaces[j], next_hop)) {
+                    bool inv_route = aodv_db_markrouteinv(dest->host, dest->sequence_number);
+                    if(inv_route) {
+                        dessert_debug("invalidated route to " MAC " (RERR)", EXPLODE_ARRAY6(dest->host));
+                        rebroadcast_rerr = true;
+                    }
                 }
             }
         }

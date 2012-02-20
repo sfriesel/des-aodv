@@ -98,7 +98,7 @@ struct aodv_msg_rerr {
     /** The number of interfaces of the RERR last hop */
     uint8_t 		iface_addr_count;
     /** all of mesh interfaces of current host listed i this message */
-    uint8_t		ifaces[ETH_ALEN* MAX_MESH_IFACES_COUNT];
+    mac_addr ifaces[MAX_MESH_IFACES_COUNT];
 } __attribute__((__packed__));
 
 /** HELLO - Hello Message */

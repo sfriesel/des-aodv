@@ -175,6 +175,7 @@ int aodv_gossip_0();
 
 // ------------------------------ helper ------------------------------------------------------
 
+void aodv_pipeline_delete_series_ether(mac_addr addr);
 void aodv_send_rreq(mac_addr dhost_ether, struct timeval* ts);
 void aodv_send_rreq_repeat(struct timeval* ts, aodv_rreq_series_t* series);
 

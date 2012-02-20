@@ -45,24 +45,28 @@ static aodv_rreq_series_t *series_list = NULL;
 /* synchronizes access to the attributes key, stop, prev and next in all elements of the list. *msg and retries can be changed by the owner of the respective series (except the destination address in *msg, which is cached in key and interacts with the schedule table) */
 static pthread_rwlock_t series_list_lock = PTHREAD_RWLOCK_INITIALIZER;
 
+static aodv_rreq_series_t *aodv_pipeline_find_series_unlocked(mac_addr addr) {
+    aodv_rreq_series_t *el;
+    uint64_t addr_as_uint = hf_mac_addr_to_uint64(addr);
+    DL_SEARCH_SCALAR(series_list, el, key, addr_as_uint);
+    return el;
+}
+
 /** creates a series if one is not already running
  *  takes ownership of msg
  *  @return the newly created series (destroy with aodv_pipeline_delete_series) or NULL if a series for the msg's destination is running already
  */
 static aodv_rreq_series_t *aodv_pipeline_new_series(dessert_msg_t *msg) {
     struct ether_header* l25h = dessert_msg_getl25ether(msg);
-    aodv_rreq_series_t *el;
-    uint64_t addr = hf_mac_addr_to_uint64(l25h->ether_dhost);
     pthread_rwlock_wrlock(&series_list_lock);
-    DL_SEARCH_SCALAR(series_list, el, key, addr);
-    if(el) {
-        //there already is a series
+    aodv_rreq_series_t *pre_existing = aodv_pipeline_find_series_unlocked(l25h->ether_dhost);
+    if(pre_existing) {
         return NULL;
     }
     //we can safely start a new series
     aodv_rreq_series_t *series = malloc(sizeof(*series));
     series->msg = msg;
-    series->key = addr;
+    series->key = hf_mac_addr_to_uint64(l25h->ether_dhost);
     series->retries = 0;
     series->stop = false;
     DL_APPEND(series_list, series);
@@ -70,12 +74,8 @@ static aodv_rreq_series_t *aodv_pipeline_new_series(dessert_msg_t *msg) {
     return series;
 }
 
-/* Nachbedingung: die Serie wird nicht mehr referenziert. Es kann sofort eine neue Serie zum ziel gestartet werden. */
-//Invariante: Es gibt nur zwei mögliche Zustände für eine Serie: geschedulet oder in Verarbeitung durch send_rreq, dass noch MINDESTENS EINMAL die markierung prüft
-//Invariante: a series is either owned by a invocation of send_rreq, delete_series, reschedule_series or of the schedule table
-//Invariante: a schedule is only added by a valid series and dropped or popped before the series is deleted
-void aodv_pipeline_delete_series(aodv_rreq_series_t *series) {
-    pthread_rwlock_wrlock(&series_list_lock);
+// Don't call this directly, but one of the two (locking) versions below
+static void aodv_pipeline_delete_series_unlocked(aodv_rreq_series_t *series) {
     if(!series->stop) {
         DL_DELETE(series_list, series);
         series->stop = true; //mark for deletion by the owner
@@ -86,6 +86,24 @@ void aodv_pipeline_delete_series(aodv_rreq_series_t *series) {
             dessert_msg_destroy(series->msg);
             free(series);
         }
+    }
+}
+
+/* Nachbedingung: die Serie wird nicht mehr referenziert. Es kann sofort eine neue Serie zum ziel gestartet werden. */
+//Invariante: Es gibt nur zwei mögliche Zustände für eine Serie: geschedulet oder in Verarbeitung durch send_rreq, dass noch MINDESTENS EINMAL die markierung prüft
+//Invariante: a series is either owned by a invocation of send_rreq, delete_series, reschedule_series or of the schedule table
+//Invariante: a schedule is only added by a valid series and dropped or popped before the series is deleted
+static inline void aodv_pipeline_delete_series(aodv_rreq_series_t *series) {
+    pthread_rwlock_wrlock(&series_list_lock);
+    aodv_pipeline_delete_series_unlocked(series);
+    pthread_rwlock_unlock(&series_list_lock);
+}
+
+void aodv_pipeline_delete_series_ether(mac_addr addr) {
+    pthread_rwlock_wrlock(&series_list_lock);
+    aodv_rreq_series_t *series = aodv_pipeline_find_series_unlocked(addr);
+    if(series) {
+        aodv_pipeline_delete_series_unlocked(series);
     }
     pthread_rwlock_unlock(&series_list_lock);
 }

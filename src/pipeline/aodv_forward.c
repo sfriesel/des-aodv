@@ -34,7 +34,7 @@ pthread_rwlock_t data_seq_lock = PTHREAD_RWLOCK_INITIALIZER;
 
 void aodv_send_packets_from_buffer(mac_addr ether_dhost, mac_addr next_hop, dessert_meshif_t* iface) {
     // drop RREQ schedule, since we already know the route to destination
-    aodv_db_dropschedule(ether_dhost, AODV_SC_REPEAT_RREQ);
+    aodv_pipeline_delete_series_ether(ether_dhost);
 
     dessert_debug("new route to " MAC " over " MAC " found -> send out packet from buffer", EXPLODE_ARRAY6(ether_dhost), EXPLODE_ARRAY6(next_hop));
 

@@ -81,7 +81,7 @@ int timeslot_destroy(timeslot_t* ts) {
 
     free(ts);
     return true;
-};
+}
 
 int timeslot_purgeobjects(timeslot_t* ts, struct timeval* curr_time) {
     timeslot_element_t* search_el = ts->tail;

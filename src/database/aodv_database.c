@@ -184,18 +184,6 @@ int aodv_db_getnexthop(mac_addr dhost_ether, mac_addr dhost_next_hop_out) {
     return result;
 }
 
-/**
- * gets prev_hop address and output_iface towards source with shost_ether address
- * that has produces an RREQ to destination with dhost_ether address
- * (DB - read)
- */
-int aodv_db_getprevhop(mac_addr dhost_ether, mac_addr shost_ether, mac_addr shost_next_hop_out, dessert_meshif_t** output_iface_out) {
-    aodv_db_rlock();
-    int result =  aodv_db_rt_getprevhop(dhost_ether, shost_ether, shost_next_hop_out, output_iface_out);
-    aodv_db_unlock();
-    return result;
-}
-
 int aodv_db_get_destination_sequence_number(mac_addr dhost_ether, uint32_t* destination_sequence_number_out) {
     aodv_db_rlock();
     int result = aodv_db_rt_get_destination_sequence_number(dhost_ether, destination_sequence_number_out);
@@ -220,6 +208,13 @@ int aodv_db_get_metric(mac_addr dhost_ether, metric_t* last_metric_out) {
 int aodv_db_markrouteinv(mac_addr dhost_ether, uint32_t destination_sequence_number) {
     aodv_db_wlock();
     int result =  aodv_db_rt_markrouteinv(dhost_ether, destination_sequence_number);
+    aodv_db_unlock();
+    return result;
+}
+
+int aodv_db_add_precursor(mac_addr destination, mac_addr precursor, dessert_meshif_t *iface) {
+    aodv_db_wlock();
+    int result =  aodv_db_rt_add_precursor(destination, precursor, iface);
     aodv_db_unlock();
     return result;
 }

@@ -37,23 +37,17 @@ For further information and questions please use the web site
 #include <linux/if_ether.h>
 #endif
 
-typedef struct aodv_rt_srclist_entry {
-    uint8_t				originator_host[ETH_ALEN]; // ID
-    uint8_t				originator_host_prev_hop[ETH_ALEN];
-    dessert_meshif_t*	output_iface;
-    uint32_t			originator_sequence_number;
-    metric_t			metric;
-    uint8_t				hop_count;
-    uint8_t				flags;
-    uint8_t				quantity;	// how often we see this unique rreq - metric hits are not count
-    UT_hash_handle		hh;
-} aodv_rt_srclist_entry_t;
+typedef struct aodv_rt_precursor_list_entry {
+    mac_addr            addr; // ID
+    dessert_meshif_t*   iface;
+    UT_hash_handle      hh;
+} aodv_rt_precursor_list_entry_t;
 
 typedef struct aodv_rt_entry {
-    uint8_t				destination_host[ETH_ALEN]; // ID
-    uint8_t				destination_host_next_hop[ETH_ALEN];
+    mac_addr            addr; // ID
+    mac_addr            next_hop;
     dessert_meshif_t*	output_iface;
-    uint32_t			destination_sequence_number;
+    uint32_t            sequence_number;
     metric_t			metric;
     uint8_t				hop_count;
     /**
@@ -62,7 +56,7 @@ typedef struct aodv_rt_entry {
      * U - next hop Unknown flag;
      */
     uint8_t				flags;
-    aodv_rt_srclist_entry_t* src_list;
+    aodv_rt_precursor_list_entry_t* precursor_list;
     UT_hash_handle		hh;
 } aodv_rt_entry_t;
 
@@ -125,6 +119,7 @@ int aodv_db_rt_markrouteinv(mac_addr destination_host, uint32_t destination_sequ
 int aodv_db_rt_remove_nexthop(mac_addr next_hop);
 int aodv_db_rt_inv_over_nexthop(mac_addr next_hop);
 int aodv_db_rt_get_destlist(mac_addr dhost_next_hop, aodv_link_break_element_t** destlist);
+int aodv_db_rt_add_precursor(mac_addr destination, mac_addr precursor, dessert_meshif_t *iface);
 
 int aodv_db_rt_get_warn_endpoints_from_neighbor_and_set_warn(mac_addr neighbor, aodv_link_break_element_t** head);
 int aodv_db_rt_get_warn_status(mac_addr dhost_ether);

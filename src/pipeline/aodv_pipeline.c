@@ -546,10 +546,10 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         mac_addr next_hop;
         dessert_meshif_t* output_iface;
 
-        int a = aodv_db_getprevhop(l25h->ether_shost, l25h->ether_dhost, next_hop, &output_iface);
+        int reverse_route_found = aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &ts, AODV_FLAGS_UNUSED);
 
-        if(a == true) {
-            dessert_debug("re-send RREP to " MAC, EXPLODE_ARRAY6(l25h->ether_dhost));
+        if(reverse_route_found) {
+            aodv_db_add_precursor(l25h->ether_shost, next_hop, output_iface);
             mac_copy(msg->l2h.ether_dhost, next_hop);
             dessert_meshsend(msg, output_iface);
         }

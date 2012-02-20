@@ -98,13 +98,6 @@ int aodv_db_getroute2dest(mac_addr dhost_ether, mac_addr dhost_next_hop_out,
 
 int aodv_db_getnexthop(mac_addr dhost_ether, mac_addr dhost_next_hop_out);
 
-/**
- * gets prev_hop address and output_iface towards source with shost_ether address
- * that has produced a RREQ to destination with dhost_ether address
- */
-int aodv_db_getprevhop(mac_addr dhost_ether, mac_addr shost_ether,
-                       mac_addr shost_next_hop_out, dessert_meshif_t** output_iface_out);
-
 int aodv_db_get_destination_sequence_number(mac_addr dhost_ether, uint32_t* destination_sequence_number_out);
 
 int aodv_db_get_hopcount(mac_addr dhost_ether, uint8_t* hop_count_out);
@@ -114,6 +107,7 @@ int aodv_db_markrouteinv(mac_addr dhost_ether, uint32_t destination_sequence_num
 int aodv_db_remove_nexthop(mac_addr next_hop);
 int aodv_db_inv_over_nexthop(mac_addr next_hop);
 int aodv_db_get_destlist(mac_addr dhost_next_hop, aodv_link_break_element_t** destlist);
+int aodv_db_add_precursor(mac_addr destination, mac_addr precursor, dessert_meshif_t *iface);
 
 int aodv_db_get_warn_endpoints_from_neighbor_and_set_warn(mac_addr neighbor, aodv_link_break_element_t** head);
 int aodv_db_get_warn_status(mac_addr dhost_ether);

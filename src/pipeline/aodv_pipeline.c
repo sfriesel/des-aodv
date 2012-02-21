@@ -143,9 +143,6 @@ dessert_msg_t* _create_rreq(mac_addr dhost_ether, uint8_t ttl, metric_t initial_
     struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) ext->data;
     msg->u16 = initial_metric;
     rreq_msg->flags = 0;
-    pthread_rwlock_wrlock(&seq_num_lock);
-    rreq_msg->originator_sequence_number = ++seq_num_global;
-    pthread_rwlock_unlock(&seq_num_lock);
 
     //this is for local repair, we know that the latest rrep we saw was last_destination_sequence_number
     uint32_t last_destination_sequence_number;

@@ -357,6 +357,8 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     aodv_capt_rreq_result_t capt_result;
     aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->originator_sequence_number, msg->u16, msg->u8, &ts, &capt_result);
 
+    aodv_gossip_capt_rreq(msg);
+
     if(capt_result == AODV_CAPT_RREQ_OLD) {
         comment = "discarded";
         goto drop;

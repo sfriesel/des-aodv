@@ -32,7 +32,7 @@ uint16_t seq_num_hello = 0;
 pthread_rwlock_t hello_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 
 dessert_per_result_t aodv_periodic_send_hello(void* data, struct timeval* scheduled, struct timeval* interval) {
-
+    dessert_trace("sending hello-req");
     dessert_msg_t* msg;
     dessert_msg_new(&msg);
     msg->ttl = 2;

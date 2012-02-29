@@ -107,6 +107,9 @@ void aodv_pipeline_delete_series_ether(mac_addr addr) {
     if(series) {
         aodv_pipeline_delete_series_unlocked(series);
     }
+    else {
+        dessert_trace("tried to delete non-existing RREQ series to " MAC, EXPLODE_ARRAY6(addr));
+    }
     pthread_rwlock_unlock(&series_list_lock);
 }
 

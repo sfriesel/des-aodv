@@ -91,9 +91,8 @@ int aodv_forward_broadcast(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t*
 
 int aodv_forward_multicast(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, dessert_meshif_t* iface, dessert_frameid_t id) {
     if(proc->lflags & DESSERT_RX_FLAG_L25_MULTICAST) {
-        // dessert_meshsend(msg, NULL); //forward to mesh
-        // dessert_syssend_msg(msg); //forward to sys
-        return DESSERT_MSG_DROP;
+        proc->lflags |= DESSERT_RX_FLAG_L25_BROADCAST;
+        return aodv_forward_broadcast(msg, len, proc, iface, id);
     }
 
     return DESSERT_MSG_KEEP;

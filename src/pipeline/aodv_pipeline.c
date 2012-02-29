@@ -326,13 +326,13 @@ int aodv_handle_hello(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc
         hello_msg->hello_interval = hello_interval; 
         mac_copy(msg->l2h.ether_dhost, msg->l2h.ether_shost);
         dessert_meshsend(msg, iface);
-        // dessert_trace("got hello-req from " MAC, EXPLODE_ARRAY6(msg->l2h.ether_shost));
+        dessert_trace("got hello-req from " MAC, EXPLODE_ARRAY6(msg->l2h.ether_shost));
     }
     else {
         //hello rep
         if(mac_equal(iface->hwaddr, msg->l2h.ether_dhost)) {
             aodv_db_pdr_cap_hellorsp(msg->l2h.ether_shost, hello_msg->hello_interval, hello_msg->hello_rcvd_count, &ts);
-            // dessert_trace("got hello-rep from " MAC, EXPLODE_ARRAY6(msg->l2h.ether_dhost));
+            dessert_trace("got hello-rep from " MAC, EXPLODE_ARRAY6(msg->l2h.ether_dhost));
             aodv_db_cap2Dneigh(msg->l2h.ether_shost, msg->u16, iface, &ts);
         }
     }
@@ -349,9 +349,6 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
 
     struct aodv_msg_rreq* rreq_msg = (struct aodv_msg_rreq*) rreq_ext->data;
 
-    if(msg->ttl) {
-        msg->ttl--;
-    }
     msg->u8++; /* hop count */
 
     struct timeval ts;
@@ -430,6 +427,9 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
                 goto drop;
             }
             if(gossip_type == GOSSIP_NONE || aodv_gossip(msg)) {
+                if(msg->ttl) {
+                    msg->ttl--;
+                }
                 dessert_meshsend(msg, NULL);
                 comment = "rebroadcasted";
             }

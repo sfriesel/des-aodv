@@ -67,6 +67,7 @@ static aodv_rreq_series_t *aodv_pipeline_new_series(dessert_msg_t *msg) {
     if(pre_existing) {
         return NULL;
     }
+    dessert_trace("starting RREQ series");
     //we can safely start a new series
     aodv_rreq_series_t *series = malloc(sizeof(*series));
     series->msg = msg;
@@ -81,6 +82,7 @@ static aodv_rreq_series_t *aodv_pipeline_new_series(dessert_msg_t *msg) {
 // Don't call this directly, but one of the two (locking) versions below
 static void aodv_pipeline_delete_series_unlocked(aodv_rreq_series_t *series) {
     if(!series->stop) {
+        dessert_trace("stopping RREQ series");
         DL_DELETE(series_list, series);
         series->stop = true; //mark for deletion by the owner
         struct ether_header* l25h = dessert_msg_getl25ether(series->msg);
@@ -111,11 +113,13 @@ void aodv_pipeline_delete_series_ether(mac_addr addr) {
 static void aodv_pipeline_reschedule_series(struct timeval when, aodv_rreq_series_t *series) {
     pthread_rwlock_wrlock(&series_list_lock);
     if(!series->stop) {
+        dessert_trace("rescheduling RREQ series...");
         struct ether_header* l25h = dessert_msg_getl25ether(series->msg);
         //pass ownership to the db
         aodv_db_addschedule(&when, l25h->ether_dhost, AODV_SC_REPEAT_RREQ, series);
     }
     else {
+        dessert_trace("destroying stopped RREQ series...");
         dessert_msg_destroy(series->msg);
         free(series);
     }
@@ -229,7 +233,6 @@ static void aodv_send_rreq_real(aodv_rreq_series_t *series) {
         aodv_pipeline_delete_series(series);
         return;
     }
-    dessert_trace("add task to repeat RREQ");
 
     /* RING_TRAVERSAL_TIME equals NET_TRAVERSAL_TIME if ring_search is off */
     uintmax_t ring_traversal_time = 2 * NODE_TRAVERSAL_TIME * min(NET_DIAMETER, msg->ttl);

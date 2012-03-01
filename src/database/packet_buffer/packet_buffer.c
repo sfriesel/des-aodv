@@ -56,7 +56,7 @@ typedef struct pb {
 
 pb_t pbt;
 
-void purge_packets(struct timeval* timestamp, void* src_object, void* object) {
+static void purge_packets(struct timeval* timestamp, void* src_object, void* object) {
     dessert_debug("purging packet buffer");
     pb_el_t* pb_el = object;
     fifo_list_el_t* fl_el = pb_el->fl.head;
@@ -80,7 +80,7 @@ int pb_init() {
     return timeslot_create(&pbt.ts, &timeout, NULL, purge_packets);
 }
 
-void fl_push_packet(fifo_list_t* fl, dessert_msg_t* msg) {
+static void fl_push_packet(fifo_list_t* fl, dessert_msg_t* msg) {
     fifo_list_el_t* new_el = malloc(sizeof(fifo_list_el_t));
 
     if(new_el == NULL) {
@@ -113,7 +113,7 @@ void fl_push_packet(fifo_list_t* fl, dessert_msg_t* msg) {
     }
 }
 
-dessert_msg_t* fl_pop_packet(fifo_list_t* fl) {
+static dessert_msg_t* fl_pop_packet(fifo_list_t* fl) {
     dessert_msg_t* msg;
     fifo_list_el_t* head_el;
 

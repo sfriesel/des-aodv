@@ -21,14 +21,14 @@ For further information and questions please use the web site
        http://www.des-testbed.net
 *******************************************************************************/
 
-#include "../../config.h"
+#include "rerr_log.h"
 #include "../timeslot.h"
 
 timeslot_t* rerr_log_ts = NULL;
 uint32_t rerr_count = 0;
 void* rerr_pseudo_pointer = 0;
 
-void rerr_decrement_counter(struct timeval* timestamp, void* src_object, void* object) {
+static void rerr_decrement_counter(struct timeval* timestamp, void* src_object, void* object) {
     rerr_count--;
 }
 
@@ -40,7 +40,7 @@ int aodv_db_rerrl_init(void) {
     return timeslot_create(&rerr_log_ts, &timeout, NULL, rerr_decrement_counter);
 }
 
-int aodv_db_rerrl_cleanup(struct timeval* timestamp) {
+static int aodv_db_rerrl_cleanup(struct timeval* timestamp) {
     return timeslot_purgeobjects(rerr_log_ts, timestamp);
 }
 

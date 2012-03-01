@@ -36,15 +36,15 @@ For further information and questions please use the web site
 
 pthread_rwlock_t db_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 
-void aodv_db_rlock(void) {
+static inline void aodv_db_rlock(void) {
     pthread_rwlock_rdlock(&db_rwlock);
 }
 
-void aodv_db_wlock(void) {
+static inline void aodv_db_wlock(void) {
     pthread_rwlock_wrlock(&db_rwlock);
 }
 
-void aodv_db_unlock(void) {
+static inline void aodv_db_unlock(void) {
     pthread_rwlock_unlock(&db_rwlock);
 }
 

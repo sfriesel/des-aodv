@@ -36,7 +36,7 @@ typedef struct aodv_ds {
 
 data_seq_t ds;
 
-data_packet_id_t* ds_entry_create(mac_addr src_addr, uint16_t seq_num) {
+static data_packet_id_t* ds_entry_create(mac_addr src_addr, uint16_t seq_num) {
     data_packet_id_t* new_entry;
     new_entry = malloc(sizeof(data_packet_id_t));
 
@@ -51,7 +51,7 @@ data_packet_id_t* ds_entry_create(mac_addr src_addr, uint16_t seq_num) {
     return new_entry;
 }
 
-void db_nt_on_ds_timeout(struct timeval* timestamp, void* src_object, void* object) {
+static void db_nt_on_ds_timeout(struct timeval* timestamp, void* src_object, void* object) {
     data_packet_id_t* curr_entry = object;
     dessert_debug("data seq timeout:" MAC " last_seq_num=% " PRIu16 "", EXPLODE_ARRAY6(curr_entry->src_addr), curr_entry->seq_num);
     HASH_DEL(ds.entries, curr_entry);

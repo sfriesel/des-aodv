@@ -39,11 +39,11 @@ typedef struct schedule {
     UT_hash_handle      hh;
 } schedule_t;
 
-schedule_t* first_schedule = NULL;
+static schedule_t* first_schedule = NULL;
 
-schedule_t* hash_table = NULL;
+static schedule_t* hash_table = NULL;
 
-schedule_t* create_schedule(struct timeval* execute_ts, mac_addr ether_addr, uint8_t type, void* param) {
+static schedule_t* create_schedule(struct timeval* execute_ts, mac_addr ether_addr, uint8_t type, void* param) {
     schedule_t* s = malloc(sizeof(schedule_t));
 
     if(s == NULL) {

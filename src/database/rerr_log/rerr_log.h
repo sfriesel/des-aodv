@@ -24,6 +24,7 @@ For further information and questions please use the web site
 #ifndef AODV_RERR_LOG
 #define AODV_RERR_LOG
 
+#include "../../config.h"
 #include <time.h>
 
 int aodv_db_rerrl_init(void);

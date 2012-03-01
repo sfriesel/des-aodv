@@ -27,7 +27,7 @@ For further information and questions please use the web site
 #include "../config.h"
 #include "../helper.h"
 
-int create_new_ts_element(timeslot_element_t** ts_el_out, struct timeval* timestamp, void* object) {
+static int create_new_ts_element(timeslot_element_t** ts_el_out, struct timeval* timestamp, void* object) {
     timeslot_element_t* new_el;
 
     new_el = malloc(sizeof(timeslot_element_t));

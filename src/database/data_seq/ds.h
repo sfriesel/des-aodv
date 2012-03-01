@@ -32,7 +32,7 @@ For further information and questions please use the web site
 #endif
 
 /** initialize neighbor table */
-int db_ds_init();
+int db_ds_init(void);
 
 int aodv_db_ds_capt_data_seq(mac_addr src_addr, uint16_t data_seq_num, uint8_t hop_count, struct timeval* timestamp);
 

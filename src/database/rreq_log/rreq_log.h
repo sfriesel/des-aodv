@@ -26,7 +26,7 @@ For further information and questions please use the web site
 
 #include <time.h>
 
-int aodv_db_rl_init();
+int aodv_db_rl_init(void);
 
 void aodv_db_rl_putrreq(struct timeval* timestamp);
 

@@ -32,7 +32,7 @@ void rerr_decrement_counter(struct timeval* timestamp, void* src_object, void* o
     rerr_count--;
 }
 
-int aodv_db_rerrl_init() {
+int aodv_db_rerrl_init(void) {
     // 1 sec timeout since we are interested for number of sent RERR in last 1 sec
     struct timeval timeout;
     timeout.tv_sec = 1;

@@ -60,7 +60,7 @@ typedef struct pdr_neighbor_table {
 pdr_neighbor_table_t pdr_nt;
 
 /**Initialize PDR Tracker Structure*/
-int aodv_db_pdr_nt_init();
+int aodv_db_pdr_nt_init(void);
 
 /**Updates a neighbor entry, if neighbor changed hello interval*/
 void pdr_neighbor_entry_update(pdr_neighbor_entry_t* update_entry, uint16_t new_interval);

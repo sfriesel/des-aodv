@@ -31,7 +31,7 @@ For further information and questions please use the web site
 #endif
 
 /** initialize neighbor table */
-int db_nt_init();
+int db_nt_init(void);
 
 int aodv_db_nt_neighbor_reset(uint32_t* count_out);
 

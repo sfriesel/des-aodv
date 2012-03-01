@@ -80,7 +80,7 @@ typedef struct nht_entry {
     UT_hash_handle			hh;
 } nht_entry_t;
 
-int aodv_db_rt_init();
+int aodv_db_rt_init(void);
 
 int aodv_db_rt_capt_rreq(mac_addr destination_host,
                          mac_addr originator_host,

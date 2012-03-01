@@ -32,7 +32,7 @@ void rreq_decrement_counter(struct timeval* timestamp, void* src_object, void* o
     rreq_count--;
 }
 
-int aodv_db_rl_init() {
+int aodv_db_rl_init(void) {
     // 1 sek timeout since we are interested for number of sent RREQ in last 1 sec
     struct timeval timeout;
     timeout.tv_sec = 1;

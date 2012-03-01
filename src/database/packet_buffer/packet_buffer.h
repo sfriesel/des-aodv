@@ -30,8 +30,7 @@ For further information and questions please use the web site
 #include <linux/if_ether.h>
 #endif
 
-
-int pb_init();
+int pb_init(void);
 
 void pb_push_packet(mac_addr dhost_ether, dessert_msg_t* msg, struct timeval* timestamp);
 

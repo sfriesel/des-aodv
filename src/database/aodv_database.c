@@ -22,7 +22,6 @@ For further information and questions please use the web site
 *******************************************************************************/
 
 #include <pthread.h>
-#include <dessert.h>
 
 #include "aodv_database.h"
 #include "../config.h"

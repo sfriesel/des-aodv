@@ -28,7 +28,6 @@ For further information and questions please use the web site
 #include <linux/if_ether.h>
 #endif
 
-#include <dessert.h>
 #include "../config.h"
 
 extern pthread_rwlock_t pp_rwlock;

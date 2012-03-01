@@ -24,7 +24,7 @@ For further information and questions please use the web site
 #ifndef PACKET_BUFFER
 #define PACKET_BUFFER
 
-#include <dessert.h>
+#include "../../config.h"
 
 #ifdef ANDROID
 #include <linux/if_ether.h>

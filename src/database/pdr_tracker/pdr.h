@@ -24,7 +24,7 @@ For further information and questions please use the web site
 #ifndef AODV_PDR
 #define AODV_PDR
 
-#include <dessert.h>
+#include "../../config.h"
 #include <utlist.h>
 #include <uthash.h>
 #include "../timeslot.h"

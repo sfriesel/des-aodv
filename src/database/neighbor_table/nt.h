@@ -24,7 +24,7 @@ For further information and questions please use the web site
 #ifndef AODV_NT
 #define AODV_NT
 
-#include <dessert.h>
+#include "../../config.h"
 
 #ifdef ANDROID
 #include <linux/if_ether.h>

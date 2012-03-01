@@ -21,7 +21,7 @@ For further information and questions please use the web site
        http://www.des-testbed.net
 *******************************************************************************/
 
-#include <dessert.h>
+#include "../../config.h"
 #include <uthash.h>
 #include "../timeslot.h"
 #include "../../config.h"

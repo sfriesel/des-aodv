@@ -24,8 +24,6 @@ For further information and questions please use the web site
 #ifndef AODV_DATABASE
 #define AODV_DATABASE
 
-#include <dessert.h>
-
 #ifdef ANDROID
 #include <linux/if_ether.h>
 #endif

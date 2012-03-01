@@ -22,7 +22,6 @@ For further information and questions please use the web site
 *******************************************************************************/
 
 #include <pthread.h>
-#include <dessert.h>
 
 #include "aodv_database.h"
 #include "../config.h"
@@ -37,19 +36,19 @@ For further information and questions please use the web site
 
 pthread_rwlock_t db_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 
-void aodv_db_rlock() {
+static inline void aodv_db_rlock(void) {
     pthread_rwlock_rdlock(&db_rwlock);
 }
 
-void aodv_db_wlock() {
+static inline void aodv_db_wlock(void) {
     pthread_rwlock_wrlock(&db_rwlock);
 }
 
-void aodv_db_unlock() {
+static inline void aodv_db_unlock(void) {
     pthread_rwlock_unlock(&db_rwlock);
 }
 
-int aodv_db_init() {
+int aodv_db_init(void) {
     int success = true;
     aodv_db_wlock();
     success &= db_nt_init();

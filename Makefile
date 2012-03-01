@@ -21,8 +21,16 @@ FILE_DEFAULT = etc/$(DAEMONNAME).default
 FILE_ETC = etc/$(DAEMONNAME).conf
 FILE_INIT = etc/$(DAEMONNAME).init
 
+WFLAGS := -Wall -Wextra -Werror \
+		-Wmissing-include-dirs \
+		-Wno-unused \
+		-Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wundef \
+		-Wformat-security -Wmissing-format-attribute \
+		-Winit-self -Wmissing-field-initializers -Warray-bounds -Woverride-init \
+		-Wlogical-op -Wstrict-overflow=4
+
 LIBS = -ldessert -lpthread -lcli
-CFLAGS += -std=gnu99 -D_GNU_SOURCE
+CFLAGS += -std=gnu99 -D_GNU_SOURCE $(WFLAGS)
 
 all: build
 

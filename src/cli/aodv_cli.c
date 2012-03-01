@@ -21,11 +21,9 @@ For further information and questions please use the web site
        http://www.des-testbed.net
 *******************************************************************************/
 
-#include <dessert.h>
 #include <string.h>
 #include <time.h>
 
-#include "../config.h"
 #include "aodv_cli.h"
 #include "../database/aodv_database.h"
 #include "../pipeline/aodv_pipeline.h"

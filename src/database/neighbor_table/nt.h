@@ -24,14 +24,14 @@ For further information and questions please use the web site
 #ifndef AODV_NT
 #define AODV_NT
 
-#include <dessert.h>
+#include "../../config.h"
 
 #ifdef ANDROID
 #include <linux/if_ether.h>
 #endif
 
 /** initialize neighbor table */
-int db_nt_init();
+int db_nt_init(void);
 
 int aodv_db_nt_neighbor_reset(uint32_t* count_out);
 

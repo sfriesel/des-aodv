@@ -21,18 +21,18 @@ For further information and questions please use the web site
        http://www.des-testbed.net
 *******************************************************************************/
 
-#include "../../config.h"
+#include "rreq_log.h"
 #include "../timeslot.h"
 
 timeslot_t* rreq_log_ts = NULL;
 uint32_t rreq_count = 0;
 void* rreq_pseudo_pointer = 0;
 
-void rreq_decrement_counter(struct timeval* timestamp, void* src_object, void* object) {
+static void rreq_decrement_counter(struct timeval* timestamp, void* src_object, void* object) {
     rreq_count--;
 }
 
-int aodv_db_rl_init() {
+int aodv_db_rl_init(void) {
     // 1 sek timeout since we are interested for number of sent RREQ in last 1 sec
     struct timeval timeout;
     timeout.tv_sec = 1;
@@ -40,7 +40,7 @@ int aodv_db_rl_init() {
     return timeslot_create(&rreq_log_ts, &timeout, NULL, rreq_decrement_counter);
 }
 
-int aodv_db_rl_cleanup(struct timeval* timestamp) {
+static int aodv_db_rl_cleanup(struct timeval* timestamp) {
     return timeslot_purgeobjects(rreq_log_ts, timestamp);
 }
 

@@ -25,7 +25,6 @@ For further information and questions please use the web site
 #include "../helper.h"
 #include "aodv_pipeline.h"
 
-#include <dessert.h>
 #include <pthread.h>
 #include <utlist.h>
 
@@ -48,7 +47,7 @@ int aodv_gossip_0(){
     return (random() < (((long double) gossip_p)*((long double) RAND_MAX)));
 }
 
-dessert_per_result_t aodv_gossip_3(void *data __attribute__((unused)),
+static dessert_per_result_t aodv_gossip_3(void *data __attribute__((unused)),
                                    struct timeval *scheduled,
                                    struct timeval *interval __attribute__((unused))) {
      pthread_mutex_lock(&hold_queue_mutex);

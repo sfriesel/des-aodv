@@ -21,6 +21,7 @@ For further information and questions please use the web site
        http://www.des-testbed.net
 *******************************************************************************/
 
+#include "../config.h"
 #include <libcli.h>
 
 #ifdef ANDROID

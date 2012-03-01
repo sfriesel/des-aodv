@@ -24,7 +24,7 @@ For further information and questions please use the web site
 #include "pdr.h"
 #include "../../config.h"
 
-pdr_neighbor_entry_t* pdr_neighbor_entry_create(mac_addr ether_neighbor_addr, uint16_t hello_interv) {
+static pdr_neighbor_entry_t* pdr_neighbor_entry_create(mac_addr ether_neighbor_addr, uint16_t hello_interv) {
     pdr_neighbor_entry_t* new_entry;
     new_entry = malloc(sizeof(pdr_neighbor_entry_t));
 
@@ -51,7 +51,7 @@ pdr_neighbor_entry_t* pdr_neighbor_entry_create(mac_addr ether_neighbor_addr, ui
     return new_entry;
 }
 
-pdr_neighbor_hello_msg_t* pdr_hello_entry_create(uint16_t hello_seq) {
+static pdr_neighbor_hello_msg_t* pdr_hello_entry_create(uint16_t hello_seq) {
     pdr_neighbor_hello_msg_t* new_entry;
     new_entry = malloc(sizeof(pdr_neighbor_hello_msg_t));
 

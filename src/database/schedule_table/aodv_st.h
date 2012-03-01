@@ -24,8 +24,8 @@ For further information and questions please use the web site
 #ifndef AODV_ST
 #define AODV_ST
 
+#include "../../config.h"
 #include <time.h>
-#include <dessert.h>
 
 int aodv_db_sc_addschedule(struct timeval* execute_ts, mac_addr ether_addr, uint8_t type, void* param);
 

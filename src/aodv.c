@@ -50,7 +50,7 @@ uint16_t tracking_factor = PDR_TRACKING_FACTOR;
 dessert_periodic_t* send_hello_periodic;
 dessert_periodic_t* send_rreq_periodic;
 
-static void register_names() {
+static void register_names(void) {
     dessert_register_ptr_name((void*)aodv_periodic_send_hello, "aodv_periodic_send_hello");
     dessert_register_ptr_name((void*)aodv_periodic_cleanup_database, "aodv_periodic_cleanup_database");
     dessert_register_ptr_name((void*)aodv_periodic_scexecute, "aodv_periodic_scexecute");

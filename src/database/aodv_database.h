@@ -24,8 +24,6 @@ For further information and questions please use the web site
 #ifndef AODV_DATABASE
 #define AODV_DATABASE
 
-#include <dessert.h>
-
 #ifdef ANDROID
 #include <linux/if_ether.h>
 #endif
@@ -33,7 +31,7 @@ For further information and questions please use the web site
 #include "../config.h"
 
 /** initialize all tables of routing database */
-int aodv_db_init();
+int aodv_db_init(void);
 
 int aodv_db_neighbor_reset(uint32_t* count_out);
 

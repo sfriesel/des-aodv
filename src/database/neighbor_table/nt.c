@@ -43,7 +43,7 @@ typedef struct neighbor_table {
 
 neighbor_table_t nt;
 
-neighbor_entry_t* db_neighbor_entry_create(mac_addr ether_neighbor_addr, dessert_meshif_t* iface) {
+static neighbor_entry_t* db_neighbor_entry_create(mac_addr ether_neighbor_addr, dessert_meshif_t* iface) {
     neighbor_entry_t* new_entry;
     new_entry = malloc(sizeof(neighbor_entry_t));
 
@@ -133,7 +133,7 @@ int db_nt_init() {
     return true;
 }
 
-int aodv_db_nt_neighbor_destroy(uint32_t* count_out) {
+static int aodv_db_nt_neighbor_destroy(uint32_t* count_out) {
     *count_out = 0;
 
     neighbor_entry_t* neigh = NULL;

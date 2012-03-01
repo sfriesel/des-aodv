@@ -27,7 +27,7 @@ For further information and questions please use the web site
 aodv_rt_t				rt;
 nht_entry_t*				nht = NULL;
 
-void purge_rt_entry(struct timeval* timestamp, void* src_object, void* del_object) {
+static void purge_rt_entry(struct timeval* timestamp, void* src_object, void* del_object) {
     aodv_rt_entry_t* rt_entry = del_object;
 
     // delete precursor list from routing entry
@@ -73,7 +73,7 @@ int aodv_db_rt_init() {
     return timeslot_create(&rt.ts, &mrt, &rt, purge_rt_entry);
 }
 
-int rt_entry_create(aodv_rt_entry_t** rreqt_entry_out, mac_addr destination_host, struct timeval* timestamp) {
+static int rt_entry_create(aodv_rt_entry_t** rreqt_entry_out, mac_addr destination_host, struct timeval* timestamp) {
 
     aodv_rt_entry_t* rt_entry = malloc(sizeof(aodv_rt_entry_t));
 
@@ -95,7 +95,7 @@ int rt_entry_create(aodv_rt_entry_t** rreqt_entry_out, mac_addr destination_host
     return true;
 }
 
-int nht_destlist_entry_create(nht_destlist_entry_t** entry_out, mac_addr destination_host, aodv_rt_entry_t* rt_entry) {
+static int nht_destlist_entry_create(nht_destlist_entry_t** entry_out, mac_addr destination_host, aodv_rt_entry_t* rt_entry) {
     nht_destlist_entry_t* entry = malloc(sizeof(nht_destlist_entry_t));
 
     if(entry == NULL) {
@@ -110,7 +110,7 @@ int nht_destlist_entry_create(nht_destlist_entry_t** entry_out, mac_addr destina
     return true;
 }
 
-int nht_entry_create(nht_entry_t** entry_out, mac_addr destination_host_next_hop) {
+static int nht_entry_create(nht_entry_t** entry_out, mac_addr destination_host_next_hop) {
     nht_entry_t* entry = malloc(sizeof(nht_entry_t));
 
     if(entry == NULL) {

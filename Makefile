@@ -21,8 +21,10 @@ FILE_DEFAULT = etc/$(DAEMONNAME).default
 FILE_ETC = etc/$(DAEMONNAME).conf
 FILE_INIT = etc/$(DAEMONNAME).init
 
+WFLAGS := -Wall -Wextra -Werror -Wno-unused
+
 LIBS = -ldessert -lpthread -lcli
-CFLAGS += -std=gnu99 -D_GNU_SOURCE
+CFLAGS += -std=gnu99 -D_GNU_SOURCE $(WFLAGS)
 
 all: build
 

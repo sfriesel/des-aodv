@@ -131,6 +131,7 @@ void aodv_gossip_capt_rreq(dessert_msg_t *msg) {
     pthread_mutex_lock(&hold_queue_mutex);
     hold_queue_elem_t *el = aodv_gossip_hold_queue_search(msg);
     if(!el) {
+        pthread_mutex_unlock(&hold_queue_mutex);
         return;
     }
 

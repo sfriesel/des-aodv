@@ -172,6 +172,7 @@ int aodv_metric_do(metric_t* metric, mac_addr last_hop, dessert_meshif_t* iface,
 
 int aodv_gossip(dessert_msg_t* msg);
 int aodv_gossip_0();
+void aodv_gossip_capt_rreq(dessert_msg_t *msg);
 
 // ------------------------------ helper ------------------------------------------------------
 

@@ -65,6 +65,7 @@ static aodv_rreq_series_t *aodv_pipeline_new_series(dessert_msg_t *msg) {
     pthread_rwlock_wrlock(&series_list_lock);
     aodv_rreq_series_t *pre_existing = aodv_pipeline_find_series_unlocked(l25h->ether_dhost);
     if(pre_existing) {
+        pthread_rwlock_unlock(&series_list_lock);
         return NULL;
     }
     //we can safely start a new series

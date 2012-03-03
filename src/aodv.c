@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
                 break;
             case 'c':
                 if(used == size) {
-                    config_names = realloc(config_names, size *= 2);
+                    config_names = realloc(config_names, sizeof(char *) * (size *= 2));
                 }
                 config_names[used++] = optarg;
                 break;

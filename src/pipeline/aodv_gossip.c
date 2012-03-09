@@ -42,8 +42,6 @@ static pthread_mutex_t hold_queue_mutex = PTHREAD_MUTEX_INITIALIZER;
 static dessert_periodic_t *hold_queue_periodic = NULL;
 static hold_queue_t *hold_queue = NULL;
 
-static const struct timeval hold_queue_poll_interval = { 0, 1000 * NODE_TRAVERSAL_TIME };
-
 int aodv_gossip_0(){
     return (random() < (((long double) gossip_p)*((long double) RAND_MAX)));
 }
@@ -106,6 +104,9 @@ static void aodv_gossip_hold_queue_add(dessert_msg_t *msg) {
     if(!el) {
         hold_queue_elem_t *el = malloc(sizeof(*el));
         gettimeofday(&el->timeout, NULL);
+        struct timeval hold_queue_duration;
+        dessert_ms2timeval(3 * NODE_TRAVERSAL_TIME, &hold_queue_duration);
+        dessert_timevaladd2(&el->timeout, &el->timeout, &hold_queue_duration);
         DL_APPEND(hold_queue, el);
         el->quantity = 1;
     }
@@ -114,6 +115,8 @@ static void aodv_gossip_hold_queue_add(dessert_msg_t *msg) {
     }
     dessert_msg_clone(&el->msg, msg, false);
     if(!hold_queue_periodic) {
+        struct timeval hold_queue_poll_interval;
+        dessert_ms2timeval(NODE_TRAVERSAL_TIME, &hold_queue_poll_interval);
         dessert_periodic_add(aodv_gossip_3, NULL, NULL, &hold_queue_poll_interval);
     }
 }

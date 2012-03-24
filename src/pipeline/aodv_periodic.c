@@ -28,6 +28,7 @@ For further information and questions please use the web site
 #include <string.h>
 #include <pthread.h>
 #include <utlist.h>
+#include <assert.h>
 
 #undef assert
 #include <assert.h>
@@ -102,27 +103,32 @@ dessert_msg_t* aodv_create_rerr(aodv_link_break_element_t** destlist) {
     rerr_msg->iface_addr_count = ifaces_count;
 
     while(*destlist) {
-        unsigned long dl_len = 0;
+        int dl_len = 0;
 
         //count the length of destlist up to MAX_MAC_SEQ_PER_EXT elements
         aodv_link_break_element_t* count_iter;
 
-        for(count_iter = *destlist;
-            (dl_len <= MAX_MAC_SEQ_PER_EXT) && count_iter;
-            ++dl_len, count_iter = count_iter->next) {
+        DL_FOREACH(*destlist, count_iter) {
+            if(dl_len == MAX_MAC_SEQ_PER_EXT) {
+                break;
+            }
+            dl_len++;
         }
 
         if(dessert_msg_addext(msg, &ext, RERRDL_EXT_TYPE, dl_len * sizeof(struct aodv_mac_seq)) != DESSERT_OK) {
             break;
         }
 
-        struct aodv_mac_seq* start = (struct aodv_mac_seq*) ext->data, *iter;
+        struct aodv_mac_seq *mac_seq = (struct aodv_mac_seq*) ext->data;
 
-        for(iter = start; iter < start + dl_len; ++iter) {
+        for(int i = 0; i < dl_len; ++i) {
             aodv_link_break_element_t* el = *destlist;
-            mac_copy(iter->host, el->host);
-            iter->sequence_number = el->sequence_number;
-            dessert_debug("create rerr to: " MAC " seq=%" PRIu32 "", EXPLODE_ARRAY6(iter->host), iter->sequence_number);
+            if(!el) {
+                break;
+            }
+            mac_copy(mac_seq[i].host, el->host);
+            mac_seq[i].sequence_number = el->sequence_number;
+            dessert_debug("create rerr to: " MAC " seq=%" PRIu32 "", EXPLODE_ARRAY6(mac_seq[i].host), mac_seq[i].sequence_number);
             DL_DELETE(*destlist, el);
             free(el);
         }

@@ -308,7 +308,11 @@ int aodv_db_pdr_nt_get_etx_mul(mac_addr ether_neighbor_addr, metric_t* etx_out, 
 
     /* this is equivalent to round_trip_pdr = AODV_MAX_METRIC * pdr * nb_pdr, just reordered operations to allow integer arithmetic */
     uintmax_t round_trip_pdr  = (uintmax_t) AODV_MAX_METRIC * rcvd_hellos * nb_rcvd_hellos;
-              round_trip_pdr /= (uintmax_t) curr_entry->expected_hellos * pdr_nt.nb_expected_hellos;
+    uintmax_t expected = (uintmax_t) curr_entry->expected_hellos * pdr_nt.nb_expected_hellos;
+    if(expected < 1) {
+        return false;
+    }
+    round_trip_pdr /= expected;
 
     *etx_out = (metric_t) round_trip_pdr;
     return true;
@@ -333,8 +337,9 @@ int aodv_db_pdr_nt_get_etx_add(mac_addr ether_neighbor_addr, metric_t* etx_out, 
     uintmax_t nb_rcvd_hellos  = min(curr_entry->nb_rcvd_hello_count, pdr_nt.nb_expected_hellos);
 
     /* this is equivalent to etx = 256 / (pdr * nb_pdr), just reordered operations to allow integer arithmetic */
-    uintmax_t etx  = (uintmax_t) 0x100 * curr_entry->expected_hellos * pdr_nt.nb_expected_hellos;
-              etx /= (uintmax_t) rcvd_hellos * nb_rcvd_hellos;
+    uintmax_t etx = (uintmax_t) 0x100 * curr_entry->expected_hellos * pdr_nt.nb_expected_hellos;
+    uintmax_t rcvd = (uintmax_t) rcvd_hellos * nb_rcvd_hellos;
+    etx = rcvd ? etx/rcvd : UINTMAX_MAX;
 
     *etx_out = (metric_t) min(etx, (uintmax_t)AODV_MAX_METRIC);
     return true;

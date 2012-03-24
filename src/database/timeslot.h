@@ -24,8 +24,7 @@ For further information and questions please use the web site
 #ifndef TIMESLOT
 #define TIMESLOT
 
-#include <stdlib.h>
-#include <uthash.h>
+#include <sys/time.h>
 
 typedef void object_purger_t(struct timeval* purge_time, void* src_object, void* object);
 

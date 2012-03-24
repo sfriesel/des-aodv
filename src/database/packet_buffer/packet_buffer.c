@@ -24,6 +24,7 @@ For further information and questions please use the web site
 #include "packet_buffer.h"
 #include "../../config.h"
 #include "../timeslot.h"
+#include <uthash.h>
 
 
 typedef struct fifo_list_el {

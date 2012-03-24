@@ -23,6 +23,7 @@ For further information and questions please use the web site
 
 #include "aodv_rt.h"
 #include "../neighbor_table/nt.h"
+#include "../schedule_table/aodv_st.h"
 
 #undef assert
 #include <assert.h>

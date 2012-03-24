@@ -21,13 +21,14 @@ For further information and questions please use the web site
        http://www.des-testbed.net
 *******************************************************************************/
 
-#include <pthread.h>
-#include <string.h>
-#include <utlist.h>
 #include "../database/aodv_database.h"
 #include "aodv_pipeline.h"
 #include "../config.h"
 #include "../helper.h"
+#include <pthread.h>
+#include <string.h>
+#include <utlist.h>
+#include <assert.h>
 
 #undef assert
 #include <assert.h>

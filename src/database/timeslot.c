@@ -22,11 +22,11 @@ For further information and questions please use the web site
 *******************************************************************************/
 
 #include "timeslot.h"
-#include "../config.h"
-#include "../helper.h"
+#include <dessert.h>
 #include <stdio.h>
 #include <time.h>
 #include <utlist.h>
+#include <stdlib.h>
 #undef assert
 #include <assert.h>
 
@@ -158,7 +158,7 @@ void timeslot_report(timeslot_t* ts, char** str_out) {
         return;
     }
 
-    snprintf(buf + used, size - used, "---------- Time Slot  -------------\n");
+    tmp = snprintf(buf + used, size - used, "---------- Time Slot  -------------\n");
     assert(tmp >= 0 && tmp < size - used);
     used += tmp;
 

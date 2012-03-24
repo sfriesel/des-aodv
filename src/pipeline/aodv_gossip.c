@@ -28,6 +28,7 @@ For further information and questions please use the web site
 #include <dessert.h>
 #include <pthread.h>
 #include <utlist.h>
+#include <assert.h>
 
 typedef struct hold_queue {
     struct timeval timeout;

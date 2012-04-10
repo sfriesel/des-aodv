@@ -44,8 +44,8 @@ install:
 
 build: $(DAEMONNAME)
 
-$(DAEMONNAME): $(addsuffix .o,$(MODULES))
-	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+$(DAEMONNAME): $(addsuffix .c,$(MODULES))
+	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $^ $(LIBS)
 
 android: CC=android-gcc
 android: CFLAGS=-I$(DESSERT_LIB)/include

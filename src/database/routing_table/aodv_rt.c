@@ -217,13 +217,6 @@ int aodv_db_rt_capt_rrep(mac_addr destination_host,
         }
         HASH_ADD_KEYPTR(hh, rt.entries, rt_entry->addr, ETH_ALEN, rt_entry);
     }
-#ifndef ANDROID
-    if(signal_strength_threshold > 0) {
-        /* preemptive rreq is turned on */
-        //this is a routing update, so reset the max rssi val of the next hop
-        db_nt_reset_rssi(destination_host_next_hop, output_iface, timestamp);
-    }
-#endif
 
     int next_hop_known = !(rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN);
     bool old = hf_comp_u32(rt_entry->sequence_number, destination_sequence_number) > 0;

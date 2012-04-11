@@ -45,7 +45,6 @@ bool ring_search = RING_SEARCH;
 aodv_gossip_t gossip_type = GOSSIP_NONE;
 aodv_metric_t metric_type = AODV_METRIC_RFC;
 uint16_t metric_startvalue = AODV_METRIC_STARTVAL;
-int8_t signal_strength_threshold = AODV_SIGNAL_STRENGTH_THRESHOLD;
 uint16_t tracking_factor = PDR_TRACKING_FACTOR;
 
 dessert_periodic_t* send_hello_periodic;
@@ -146,9 +145,6 @@ int main(int argc, char** argv) {
 
     cli_register_command(dessert_cli, dessert_cli_set, "gossip", cli_set_gossip, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set gossip");
     cli_register_command(dessert_cli, dessert_cli_show, "gossip", cli_show_gossip, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show gossip");
-
-    cli_register_command(dessert_cli, dessert_cli_set, "signal_strength_threshold", cli_set_preemptive_rreq_signal_strength_threshold, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set preemptive rreq signal strength threshold");
-    cli_register_command(dessert_cli, dessert_cli_show, "signal_strength_threshold", cli_show_preemptive_rreq_signal_strength_threshold, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show preemptive rreq signal strength threshold");
 
     cli_register_command(dessert_cli, dessert_cli_set, "gossip_p", cli_set_gossip_p, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set p for gossip  p in [0.0,...,1.0]");
     cli_register_command(dessert_cli, dessert_cli_show, "gossip_p", cli_show_gossip_p, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show p for gossip p in [0.0,...,1.0]");

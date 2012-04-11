@@ -199,20 +199,6 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
             }
             break;
         }
-#ifndef ANDROID
-        case AODV_SC_UPDATE_RSSI: {
-            dessert_meshif_t* iface = (dessert_meshif_t*)(schedule_param);
-            int8_t diff = aodv_db_update_rssi(ether_addr, iface, &timestamp);
-
-            if(diff > signal_strength_threshold) {
-                //walking away -> we need to send a new warn
-                dessert_debug("%s <= W => " MAC, iface->if_name, EXPLODE_ARRAY6(ether_addr));
-                aodv_db_addschedule(&timestamp, ether_addr, AODV_SC_SEND_OUT_RWARN, 0);
-            }
-
-            break;
-        }
-#endif
         default: {
             dessert_crit("unknown schedule type=%" PRIu8 "", schedule_type);
         }

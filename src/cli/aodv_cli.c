@@ -319,42 +319,6 @@ int cli_set_metric(struct cli_def* cli, char* command, char* argv[], int argc) {
     return CLI_OK;
 }
 
-int cli_set_preemptive_rreq_signal_strength_threshold(struct cli_def* cli, char* command, char* argv[], int argc) {
-
-    if(argc != 1) {
-        cli_print(cli, "usage %s [threshold in dbm]\n", command);
-        return CLI_ERROR;
-    }
-
-    signal_strength_threshold = strtol(argv[0], NULL, 10);
-
-    if(signal_strength_threshold == 0) {
-        cli_print(cli, "preemptive RREQ is off");
-        dessert_notice("preemptive RREQ is off");
-        return CLI_OK;
-    }
-
-    uint32_t count_out = 0;
-    aodv_db_neighbor_reset(&count_out);
-
-    cli_print(cli, "preemptive RREQ treshold is %" PRId8 " dbm - %" PRIu32 " neighbors invalidated...", signal_strength_threshold, count_out);
-    dessert_notice("preemptive RREQ treshold is %" PRId8 " dbm - %" PRIu32 " neighbors invalidated...", signal_strength_threshold, count_out);
-
-    return CLI_OK;
-}
-
-int cli_show_preemptive_rreq_signal_strength_threshold(struct cli_def* cli, char* command, char* argv[], int argc) {
-
-    if(signal_strength_threshold == 0) {
-        cli_print(cli, "preemptive RREQ is off");
-    }
-    else {
-        cli_print(cli, "preemptive RREQ treshold is %" PRId8 " dbm", signal_strength_threshold);
-    }
-
-    return CLI_OK;
-}
-
 int cli_show_metric(struct cli_def* cli, char* command, char* argv[], int argc) {
 
     char* metric_string = NULL;

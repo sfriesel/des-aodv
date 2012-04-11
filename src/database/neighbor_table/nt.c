@@ -31,7 +31,6 @@ typedef struct neighbor_entry {
         uint8_t             ether_neighbor[ETH_ALEN];
         dessert_meshif_t*   iface;
         uint16_t            last_hello_seq;
-        int8_t              max_rssi;
     };
     UT_hash_handle          hh;
 } neighbor_entry_t;
@@ -54,7 +53,6 @@ neighbor_entry_t* db_neighbor_entry_create(mac_addr ether_neighbor_addr, dessert
     mac_copy(new_entry->ether_neighbor, ether_neighbor_addr);
     new_entry->iface = iface;
     new_entry->last_hello_seq = 0; /* initial */
-    new_entry->max_rssi = AODV_SIGNAL_STRENGTH_INIT;
     return new_entry;
 }
 
@@ -68,54 +66,6 @@ void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void*
     free(curr_entry);
 }
 
-#ifndef ANDROID
-int db_nt_reset_rssi(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp) {
-    neighbor_entry_t* curr_entry = NULL;
-    uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
-    mac_copy(addr_sum, ether_neighbor_addr);
-    memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
-    HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
-
-    if(curr_entry == NULL) {
-        return false;
-    }
-
-    dessert_debug("neighbor reset rssi: " MAC " -> %" PRId8 ":%" PRId8 "", EXPLODE_ARRAY6(ether_neighbor_addr), curr_entry->max_rssi, AODV_SIGNAL_STRENGTH_INIT);
-    curr_entry->max_rssi = AODV_SIGNAL_STRENGTH_INIT;
-
-    return true;
-}
-
-int8_t db_nt_update_rssi(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp) {
-
-    neighbor_entry_t* curr_entry = NULL;
-    uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
-    mac_copy(addr_sum, ether_neighbor_addr);
-    memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
-    HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
-
-    if(curr_entry == NULL) {
-        return 0;
-    }
-
-    int8_t new = AODV_SIGNAL_STRENGTH_INIT;
-    avg_node_result_t neigh_result = dessert_rssi_avg(ether_neighbor_addr, curr_entry->iface);
-
-    if(neigh_result.avg_rssi != 0) {
-        new = neigh_result.avg_rssi;
-    }
-
-    int8_t diff = (curr_entry->max_rssi - new);
-
-    if(diff < 0) {
-        //walking to the ap
-        dessert_debug("%s <= R %" PRId8 " > %" PRId8 " => " MAC, iface->if_name, curr_entry->max_rssi, new, EXPLODE_ARRAY6(ether_neighbor_addr));
-        curr_entry->max_rssi = new;
-    }
-
-    return diff;
-}
-#endif
 
 int db_nt_init() {
     timeslot_t* new_ts;
@@ -139,7 +89,6 @@ int aodv_db_nt_neighbor_destroy(uint32_t* count_out) {
     neighbor_entry_t* neigh = NULL;
     neighbor_entry_t* tmp = NULL;
     HASH_ITER(hh, nt.entries, neigh, tmp) {
-        aodv_db_sc_dropschedule(neigh->ether_neighbor, AODV_SC_UPDATE_RSSI);
         HASH_DEL(nt.entries, neigh);
         free(neigh);
         (*count_out)++;
@@ -178,10 +127,6 @@ int db_nt_cap2Dneigh(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_m
 
     curr_entry->last_hello_seq = hello_seq;
 
-    if(signal_strength_threshold > 0) {
-        /* preemptive rreq is turned on */
-        aodv_db_sc_addschedule(timestamp, curr_entry->ether_neighbor, AODV_SC_UPDATE_RSSI, (void*) iface);
-    }
 
     timeslot_addobject(nt.ts, timestamp, curr_entry);
     return true;

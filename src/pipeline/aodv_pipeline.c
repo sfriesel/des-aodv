@@ -35,16 +35,17 @@ For further information and questions please use the web site
 static uint32_t seq_num_global = 0;
 static pthread_rwlock_t seq_num_lock = PTHREAD_RWLOCK_INITIALIZER;
 
-/* tracks a running series of RREQs to msg->dhost_ether */
-/* Nachbedingung: die Serie wird nicht mehr referenziert. Es kann sofort eine neue Serie zum ziel gestartet werden. */
-//Invariante: Es gibt nur zwei mögliche Zustände für eine Serie: geschedulet oder in Verarbeitung durch send_rreq, dass noch MINDESTENS EINMAL die markierung prüft
-//Invariante: a series is either owned by a invocation of send_rreq, delete_series, reschedule_series or of the schedule table
-//Invariante: a schedule is only added by a valid series and dropped or popped before the series is deleted
+/**
+ * tracks a running series of RREQs to msg->dhost_ether
+ * invariant: a series is either owned by a invocation of send_rreq, delete_series, reschedule_series or by the schedule table
+ * Invariante: a schedule is only added by a valid series and dropped or popped before the series is deleted
+ */
+//TODO: move into db
 struct aodv_rreq_series {
     dessert_msg_t *msg;
     int retries;
     uint64_t key;
-    /* the series is not in the series_list anymore. Implies the series should be terminated at the next possibility */
+    /* whether the series is not in the series_list anymore. Implies the series should be terminated at the next possibility */
     bool stop;
     struct aodv_rreq_series *prev, *next;
 };
@@ -61,7 +62,7 @@ static aodv_rreq_series_t *aodv_pipeline_find_series_unlocked(mac_addr addr) {
 
 /** creates a series if one is not already running
  *  takes ownership of msg
- *  @return the newly created series (destroy with aodv_pipeline_delete_series) or NULL if a series for the msg's destination is running already
+ *  @return the newly created series (destroy with aodv_pipeline_delete_series) or NULL if a series to the msg's destination is running already
  */
 static aodv_rreq_series_t *aodv_pipeline_new_series(dessert_msg_t *msg) {
     struct ether_header* l25h = dessert_msg_getl25ether(msg);

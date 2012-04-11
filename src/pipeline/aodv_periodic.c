@@ -55,27 +55,6 @@ dessert_per_result_t aodv_periodic_send_hello(void* data, struct timeval* schedu
     return DESSERT_PER_KEEP;
 }
 
-dessert_per_result_t aodv_periodic_send_rreq(void* data, struct timeval* scheduled, struct timeval* interval) {
-    dessert_trace("call periodic send rreq");
-
-    struct timeval timestamp;
-    gettimeofday(&timestamp, NULL);
-
-    aodv_link_break_element_t* head = NULL;
-
-    if(!aodv_db_get_active_routes(&head)) {
-        return DESSERT_PER_UNREGISTER;
-    }
-
-    aodv_link_break_element_t* dest, *tmp;
-    DL_FOREACH_SAFE(head, dest, tmp) {
-        dessert_debug("periodic send rreq to: " MAC " - interval=%" PRIu16 " ms", EXPLODE_ARRAY6(dest->host), rreq_interval);
-        aodv_send_rreq(dest->host, &timestamp);
-        free(dest);
-    }
-    return DESSERT_PER_KEEP;
-}
-
 dessert_per_result_t aodv_periodic_cleanup_database(void* data, struct timeval* scheduled, struct timeval* interval) {
     struct timeval timestamp;
     gettimeofday(&timestamp, NULL);

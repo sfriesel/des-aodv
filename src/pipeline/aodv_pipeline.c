@@ -292,7 +292,7 @@ int aodv_drop_errors(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     // Hint: RERR must be resent in both directions.
     if((dessert_msg_getext(msg, &ext, RREQ_EXT_TYPE, 0) != 0) || (dessert_msg_getext(msg, &ext, RREP_EXT_TYPE, 0) != 0)) {
         if(aodv_db_is_neighbor(msg->l2h.ether_shost, iface, &ts) != true) {
-            dessert_debug("DROP RREQ/RREP from " MAC " metric=%" AODV_PRI_METRIC " hop_count=%" PRIu8 " ttl=%" PRIu8 "-> neighbor is unidirectional!", EXPLODE_ARRAY6(msg->l2h.ether_shost), msg->u16, msg->u8, msg->ttl);
+            dessert_trace("DROP RREQ/RREP from " MAC " metric=%" AODV_PRI_METRIC " hc=%" PRIu8 " ttl=%" PRIu8 "-> neighbor is unidirectional!", EXPLODE_ARRAY6(msg->l2h.ether_shost), msg->u16, msg->u8, msg->ttl);
             return DESSERT_MSG_DROP;
         }
     }
@@ -437,7 +437,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         }
     }
 drop:
-    dessert_debug("incoming RREQ from " MAC " over " MAC " to " MAC " seq=%ju ttl=%ju | %s", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), (uintmax_t)rreq_msg->originator_sequence_number, (uintmax_t)msg->ttl, comment);
+    dessert_debug("incoming RREQ from " MAC " over " MAC " to " MAC " orig_seq=%ju dest_seq=%ju hc=%ju ttl=%ju | %s", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), (uintmax_t)rreq_msg->originator_sequence_number, (uintmax_t)rreq_msg->destination_sequence_number, (uintmax_t)msg->u8, (uintmax_t)msg->ttl, comment);
     return DESSERT_MSG_DROP;
 }
 
@@ -559,7 +559,7 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         aodv_send_packets_from_buffer(l25h->ether_shost, msg->l2h.ether_shost, iface);
     }
 drop:
-    dessert_debug("incoming RREP from " MAC " over " MAC " to " MAC " ttl=%ju hops=%ju | %s", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), (uintmax_t)msg->ttl, (uintmax_t)msg->u8, comment);
+    dessert_debug("incoming RREP from " MAC " over " MAC " to " MAC " seq=%ju hc=%ju ttl=%ju | %s", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), (uintmax_t) rrep_msg->destination_sequence_number, (uintmax_t)msg->ttl, (uintmax_t)msg->u8, comment);
     return DESSERT_MSG_DROP;
 }
 

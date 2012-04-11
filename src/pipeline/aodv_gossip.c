@@ -181,8 +181,7 @@ int aodv_gossip(dessert_msg_t* msg){
             }
         }
         default: {
-            assert(false);
-            return true;
+            abort();
         }
     }
 }

@@ -32,6 +32,8 @@ For further information and questions please use the web site
 #include "cli/aodv_cli.h"
 #include "pipeline/aodv_pipeline.h"
 #include "database/aodv_database.h"
+#undef assert
+#include <assert.h>
 
 uint16_t hello_size = HELLO_SIZE;
 uint16_t hello_interval = HELLO_INTERVAL;
@@ -60,6 +62,7 @@ int main(int argc, char** argv) {
     int size = 2;
     FILE **config_files = NULL;
     char **config_names = malloc(sizeof(char *) * size);
+    assert(config_names);
     char path[100];
     uint16_t logcfg_flags = 0;
 
@@ -73,6 +76,7 @@ int main(int argc, char** argv) {
             case 'c':
                 if(used == size) {
                     config_names = realloc(config_names, sizeof(char *) * (size *= 2));
+                    assert(config_names);
                 }
                 config_names[used++] = optarg;
                 break;

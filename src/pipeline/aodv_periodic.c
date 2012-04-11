@@ -28,6 +28,9 @@ For further information and questions please use the web site
 #include <pthread.h>
 #include <utlist.h>
 
+#undef assert
+#include <assert.h>
+
 uint16_t seq_num_hello = 0;
 pthread_rwlock_t hello_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 

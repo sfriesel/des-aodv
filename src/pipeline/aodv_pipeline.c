@@ -29,6 +29,9 @@ For further information and questions please use the web site
 #include "../config.h"
 #include "../helper.h"
 
+#undef assert
+#include <assert.h>
+
 static uint32_t seq_num_global = 0;
 static pthread_rwlock_t seq_num_lock = PTHREAD_RWLOCK_INITIALIZER;
 

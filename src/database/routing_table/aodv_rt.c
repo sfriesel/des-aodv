@@ -24,6 +24,9 @@ For further information and questions please use the web site
 #include "aodv_rt.h"
 #include "../neighbor_table/nt.h"
 
+#undef assert
+#include <assert.h>
+
 aodv_rt_t				rt;
 nht_entry_t*				nht = NULL;
 

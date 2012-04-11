@@ -36,12 +36,11 @@ void aodv_send_packets_from_buffer(mac_addr ether_dhost, mac_addr next_hop, dess
     // drop RREQ schedule, since we already know the route to destination
     aodv_pipeline_delete_series_ether(ether_dhost);
 
-    dessert_debug("new route to " MAC " over " MAC " found -> send out packet from buffer", EXPLODE_ARRAY6(ether_dhost), EXPLODE_ARRAY6(next_hop));
-
     // send out packets from buffer
     dessert_msg_t* buffered_msg;
 
     while((buffered_msg = aodv_db_pop_packet(ether_dhost)) != NULL) {
+        dessert_debug("new route to " MAC " over " MAC " found -> send out packet from buffer", EXPLODE_ARRAY6(ether_dhost), EXPLODE_ARRAY6(next_hop));
         struct ether_header* l25h = dessert_msg_getl25ether(buffered_msg);
         uint16_t data_seq_copy = 0;
         pthread_rwlock_wrlock(&data_seq_lock);

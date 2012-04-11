@@ -319,51 +319,6 @@ int cli_set_metric(struct cli_def* cli, char* command, char* argv[], int argc) {
     return CLI_OK;
 }
 
-int cli_set_periodic_rreq_interval(struct cli_def* cli, char* command, char* argv[], int argc) {
-
-    if(argc != 1) {
-        cli_print(cli, "usage %s [interval in ms]\n", command);
-        return CLI_ERROR;
-    }
-
-    rreq_interval = strtol(argv[0], NULL, 10);
-
-    dessert_periodic_del(send_rreq_periodic);
-    send_rreq_periodic = NULL;
-
-    if(rreq_interval == 0) {
-        cli_print(cli, "periodic RREQ is off");
-        dessert_notice("periodic RREQ is off");
-        return CLI_OK;
-    }
-
-    struct timeval schedule_rreq_interval;
-
-    schedule_rreq_interval.tv_sec = rreq_interval / 1000;
-
-    schedule_rreq_interval.tv_usec = (rreq_interval % 1000) * 1000;
-
-    send_rreq_periodic = dessert_periodic_add(aodv_periodic_send_rreq, NULL, NULL, &schedule_rreq_interval);
-
-    cli_print(cli, "periodic RREQ Interval set to %" PRIu16 " ms", rreq_interval);
-
-    dessert_notice("periodic RREQ Interval set to %" PRIu16 " ms", rreq_interval);
-
-    return CLI_OK;
-}
-
-int cli_show_periodic_rreq_interval(struct cli_def* cli, char* command, char* argv[], int argc) {
-
-    if(rreq_interval == 0) {
-        cli_print(cli, "periodic RREQ is off");
-    }
-    else {
-        cli_print(cli, "periodic RREQ Interval = %" PRIu16 " ms", rreq_interval);
-    }
-
-    return CLI_OK;
-}
-
 int cli_set_preemptive_rreq_signal_strength_threshold(struct cli_def* cli, char* command, char* argv[], int argc) {
 
     if(argc != 1) {

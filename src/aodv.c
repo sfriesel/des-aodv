@@ -43,18 +43,15 @@ bool ring_search = RING_SEARCH;
 aodv_gossip_t gossip_type = GOSSIP_NONE;
 aodv_metric_t metric_type = AODV_METRIC_RFC;
 uint16_t metric_startvalue = AODV_METRIC_STARTVAL;
-uint16_t rreq_interval = RREQ_INTERVAL;
 int8_t signal_strength_threshold = AODV_SIGNAL_STRENGTH_THRESHOLD;
 uint16_t tracking_factor = PDR_TRACKING_FACTOR;
 
 dessert_periodic_t* send_hello_periodic;
-dessert_periodic_t* send_rreq_periodic;
 
 static void register_names() {
     dessert_register_ptr_name((void*)aodv_periodic_send_hello, "aodv_periodic_send_hello");
     dessert_register_ptr_name((void*)aodv_periodic_cleanup_database, "aodv_periodic_cleanup_database");
     dessert_register_ptr_name((void*)aodv_periodic_scexecute, "aodv_periodic_scexecute");
-    dessert_register_ptr_name((void*)aodv_periodic_send_rreq, "aodv_periodic_send_rreq");
 }
 
 int main(int argc, char** argv) {
@@ -145,9 +142,6 @@ int main(int argc, char** argv) {
 
     cli_register_command(dessert_cli, dessert_cli_set, "gossip", cli_set_gossip, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set gossip");
     cli_register_command(dessert_cli, dessert_cli_show, "gossip", cli_show_gossip, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show gossip");
-
-    cli_register_command(dessert_cli, dessert_cli_set, "periodic_rreq_interval", cli_set_periodic_rreq_interval, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set periodic rreq interval");
-    cli_register_command(dessert_cli, dessert_cli_show, "periodic_rreq_interval", cli_show_periodic_rreq_interval, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show periodic rreq interval");
 
     cli_register_command(dessert_cli, dessert_cli_set, "signal_strength_threshold", cli_set_preemptive_rreq_signal_strength_threshold, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "set preemptive rreq signal strength threshold");
     cli_register_command(dessert_cli, dessert_cli_show, "signal_strength_threshold", cli_show_preemptive_rreq_signal_strength_threshold, PRIVILEGE_UNPRIVILEGED, MODE_EXEC, "show preemptive rreq signal strength threshold");

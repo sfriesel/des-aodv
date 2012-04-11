@@ -91,7 +91,6 @@ typedef uint16_t metric_t;
 #define PDR_MIN_TRACKING_INTERVAL	500 /* minimum tracking interval in ms */
 
 #define REPORT_RT_STR_LEN			150 /* default: 150 (should not be switched, needed for string inits)*/
-#define RREQ_INTERVAL				0 /* off */
 
 #define AODV_DATA_SEQ_TIMEOUT		MY_ROUTE_TIMEOUT /* wait MY_ROUTE_TIMEOUT for dropping data seq information -> this is the time a route is valid */
 
@@ -125,7 +124,6 @@ typedef uint16_t metric_t;
 
 extern dessert_periodic_t* 			send_hello_periodic;
 
-extern dessert_periodic_t* 			send_rreq_periodic;
 extern uint16_t 					rreq_interval;
 
 extern uint16_t 					hello_size;

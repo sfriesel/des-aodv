@@ -170,7 +170,7 @@ int aodv_db_capt_rrep(mac_addr destination_host, mac_addr destination_host_next_
     return result;
 }
 
-int aodv_db_getroute2dest(mac_addr dhost_ether, mac_addr dhost_next_hop_out, dessert_meshif_t** output_iface_out, struct timeval* timestamp, uint8_t flags) {
+int aodv_db_getroute2dest(mac_addr dhost_ether, mac_addr dhost_next_hop_out, dessert_meshif_t** output_iface_out, struct timeval* timestamp) {
     aodv_db_wlock();
     int result =  aodv_db_rt_getroute2dest(dhost_ether, dhost_next_hop_out, output_iface_out, timestamp);
     aodv_db_unlock();

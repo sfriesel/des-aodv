@@ -129,7 +129,7 @@ int aodv_forward(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, des
     dessert_meshif_t* output_iface;
     mac_addr next_hop;
 
-    if(aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &timestamp, AODV_FLAGS_UNUSED)) {
+    if(aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &timestamp)) {
         mac_copy(msg->l2h.ether_dhost, next_hop);
 
         dessert_meshsend(msg, output_iface);
@@ -214,7 +214,7 @@ int aodv_sys2rp(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, dess
         dessert_meshif_t* output_iface;
         struct timeval ts;
         gettimeofday(&ts, NULL);
-        int a = aodv_db_getroute2dest(l25h->ether_dhost, dhost_next_hop, &output_iface, &ts, AODV_FLAGS_ROUTE_LOCAL_USED);
+        int a = aodv_db_getroute2dest(l25h->ether_dhost, dhost_next_hop, &output_iface, &ts);
 
         if(a == true) {
             pthread_rwlock_wrlock(&data_seq_lock);

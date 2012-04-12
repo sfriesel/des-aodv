@@ -539,7 +539,7 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         mac_addr next_hop;
         dessert_meshif_t* output_iface;
 
-        int reverse_route_found = aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &ts, AODV_FLAGS_UNUSED);
+        int reverse_route_found = aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &ts);
 
         if(reverse_route_found) {
             aodv_db_add_precursor(l25h->ether_shost, next_hop, output_iface);

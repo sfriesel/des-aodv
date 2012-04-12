@@ -224,7 +224,7 @@ int aodv_sys2rp(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, dess
             mac_copy(msg->l2h.ether_dhost, dhost_next_hop);
             dessert_meshsend(msg, output_iface);
 
-            dessert_trace("send data packet to mesh - to " MAC " over " MAC " id=%" PRIu16 " route is known", EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(dhost_next_hop), msg->u16);
+            dessert_trace("send data packet to mesh - to " MAC " over " MAC " id=%" PRIu16 " route is known", EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(msg->l2h.ether_dhost), msg->u16);
         }
         else {
             aodv_db_push_packet(l25h->ether_dhost, msg, &ts);

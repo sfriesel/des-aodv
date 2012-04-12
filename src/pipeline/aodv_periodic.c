@@ -59,15 +59,8 @@ dessert_per_result_t aodv_periodic_send_hello(void* data, struct timeval* schedu
 }
 
 dessert_per_result_t aodv_periodic_cleanup_database(void* data, struct timeval* scheduled, struct timeval* interval) {
-    struct timeval timestamp;
-    gettimeofday(&timestamp, NULL);
-
-    if(aodv_db_cleanup(&timestamp)) {
-        return DESSERT_PER_KEEP;
-    }
-    else {
-        return DESSERT_PER_UNREGISTER;
-    }
+    aodv_db_cleanup(scheduled);
+    return DESSERT_PER_KEEP;
 }
 
 dessert_msg_t* aodv_create_rerr(aodv_link_break_element_t** destlist) {

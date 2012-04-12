@@ -51,6 +51,17 @@ neighbor_entry_t* db_neighbor_entry_create(mac_addr ether_neighbor_addr, dessert
     return new_entry;
 }
 
+struct neighbor {
+    mac_addr          addr;
+    dessert_meshif_t *iface;
+    nt_neighbor_t       *prev, *next;
+};
+
+struct neighbor_table {
+    neighbor_entry_t  *entries;
+    timeslot_t  *ts;
+} nt;
+
 void db_nt_on_neighbor_timeout(struct timeval* timestamp, void* src_object, void* object) {
     neighbor_entry_t* curr_entry = object;
     dessert_debug("%s <= x => " MAC, curr_entry->iface->if_name, EXPLODE_ARRAY6(curr_entry->ether_neighbor));
@@ -60,17 +71,6 @@ void db_nt_on_neighbor_timeout(struct timeval* timestamp, void* src_object, void
     aodv_db_sc_dropschedule(curr_entry->ether_neighbor, AODV_SC_UPDATE_RSSI);
     free(curr_entry);
 }
-struct neighbor {
-    mac_addr          addr;
-    dessert_meshif_t *iface;
-    nt_neighbor_t       *prev, *next;
-};
-
-struct neighbor_table {
-    nt_neighbor_t  *entries;
-    timeslot_t  *ts;
-} nt;
-
 
 int aodv_db_nt_init() {
     struct timeval timeout;
@@ -98,7 +98,7 @@ int aodv_db_nt_neighbor_destroy(uint32_t* count_out) {
 }
 
 int aodv_db_nt_reset(uint32_t* count_out) {
-    aodv_db_nt_destroy(count_out);
+    aodv_db_nt_neighbor_destroy(count_out);
     aodv_db_nt_init();
     return true;
 }

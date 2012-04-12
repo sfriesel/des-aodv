@@ -281,7 +281,7 @@ int aodv_db_rt_capt_rrep(mac_addr destination_host,
     return true;
 }
 
-int aodv_db_rt_getroute2dest(mac_addr destination_host, mac_addr next_hop_out,
+int aodv_db_rt_getroute2dest(mac_addr destination_host, mac_addr *next_hop_out,
                              dessert_meshif_t** output_iface_out, struct timeval* timestamp) {
     aodv_rt_entry_t* rt_entry;
     HASH_FIND(hh, rt.entries, destination_host, ETH_ALEN, rt_entry);
@@ -291,7 +291,7 @@ int aodv_db_rt_getroute2dest(mac_addr destination_host, mac_addr next_hop_out,
         return false;
     }
 
-    mac_copy(next_hop_out, rt_entry->next_hop);
+    mac_copy(*next_hop_out, rt_entry->next_hop);
     *output_iface_out = rt_entry->output_iface;
     timeslot_addobject(rt.ts, timestamp, rt_entry);
     return true;

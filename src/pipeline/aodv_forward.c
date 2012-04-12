@@ -129,7 +129,7 @@ int aodv_forward(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, des
     dessert_meshif_t* output_iface;
     mac_addr next_hop;
 
-    if(aodv_db_getroute2dest(l25h->ether_dhost, next_hop, &output_iface, &timestamp)) {
+    if(aodv_db_getroute2dest(l25h->ether_dhost, &next_hop, &output_iface, &timestamp)) {
         mac_copy(msg->l2h.ether_dhost, next_hop);
 
         dessert_meshsend(msg, output_iface);
@@ -210,18 +210,18 @@ int aodv_sys2rp(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc, dess
         dessert_meshsend(msg, NULL);
     }
     else {
-        mac_addr dhost_next_hop;
+        mac_addr next_hop;
         dessert_meshif_t* output_iface;
         struct timeval ts;
         gettimeofday(&ts, NULL);
-        int a = aodv_db_getroute2dest(l25h->ether_dhost, dhost_next_hop, &output_iface, &ts);
+        int a = aodv_db_getroute2dest(l25h->ether_dhost, &next_hop, &output_iface, &ts);
 
         if(a == true) {
             pthread_rwlock_wrlock(&data_seq_lock);
             msg->u16 = ++data_seq_global;
             pthread_rwlock_unlock(&data_seq_lock);
 
-            mac_copy(msg->l2h.ether_dhost, dhost_next_hop);
+            mac_copy(msg->l2h.ether_dhost, next_hop);
             dessert_meshsend(msg, output_iface);
 
             dessert_trace("send data packet to mesh - to " MAC " over " MAC " id=%" PRIu16 " route is known", EXPLODE_ARRAY6(l25h->ether_dhost), EXPLODE_ARRAY6(msg->l2h.ether_dhost), msg->u16);

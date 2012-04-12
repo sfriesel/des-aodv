@@ -102,7 +102,7 @@ int aodv_db_rt_capt_rrep(mac_addr destination_host,
                          struct timeval* timestamp);
 
 int aodv_db_rt_getroute2dest(mac_addr destination_host, mac_addr destination_host_next_hop_out,
-                             dessert_meshif_t** output_iface_out, struct timeval* timestamp, uint8_t flags);
+                             dessert_meshif_t** output_iface_out, struct timeval* timestamp);
 
 int aodv_db_rt_getnexthop(mac_addr destination_host, mac_addr destination_host_next_hop_out);
 

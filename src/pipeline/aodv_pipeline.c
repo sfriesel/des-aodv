@@ -358,12 +358,12 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
 
     struct ether_header* l25h = dessert_msg_getl25ether(msg);
 
-    aodv_capt_rreq_result_t capt_result;
+    aodv_capt_result_t capt_result;
     aodv_db_capt_rreq(l25h->ether_dhost, l25h->ether_shost, msg->l2h.ether_shost, iface, rreq_msg->originator_sequence_number, msg->u16, msg->u8, &ts, &capt_result);
 
     aodv_gossip_capt_rreq(msg);
 
-    if(capt_result == AODV_CAPT_RREQ_OLD) {
+    if(capt_result == AODV_CAPT_OLD) {
         comment = "discarded";
         goto drop;
     }
@@ -381,7 +381,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         uint32_t rrep_seq_num;
         /* increase our sequence number on metric hit, so that the updated
          * RREP doesn't get discarded as old */
-        if(capt_result == AODV_CAPT_RREQ_METRIC_HIT) {
+        if(capt_result == AODV_CAPT_METRIC_HIT) {
             seq_num_global++;
         }
         /* set our sequence number to the maximum of the current value and

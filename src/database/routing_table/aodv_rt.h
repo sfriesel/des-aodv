@@ -91,7 +91,7 @@ int aodv_db_rt_capt_rreq(mac_addr destination_host,
                          metric_t metric,
                          uint8_t hop_count,
                          struct timeval* timestamp,
-                         aodv_capt_rreq_result_t* result_out);
+                         aodv_capt_result_t* result_out);
 
 int aodv_db_rt_capt_rrep(mac_addr destination_host,
                          mac_addr destination_host_next_hop,

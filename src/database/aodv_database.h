@@ -65,11 +65,11 @@ void aodv_db_push_packet(mac_addr dhost_ether, dessert_msg_t* msg, struct timeva
 
 dessert_msg_t* aodv_db_pop_packet(mac_addr dhost_ether);
 
-typedef enum aodv_capt_rreq_result {
-    AODV_CAPT_RREQ_OLD,
-    AODV_CAPT_RREQ_NEW,
-    AODV_CAPT_RREQ_METRIC_HIT
-} aodv_capt_rreq_result_t;
+typedef enum aodv_capt_result {
+    AODV_CAPT_OLD,
+    AODV_CAPT_NEW,
+    AODV_CAPT_METRIC_HIT
+} aodv_capt_result_t;
 
 /**
  * Captures seq_num of the source. Also add prev_hop to precursor list of
@@ -93,7 +93,7 @@ int aodv_db_capt_rreq(mac_addr              destination_host,
                       metric_t              metric,
                       uint8_t               hop_count,
                       struct timeval       *timestamp,
-                      aodv_capt_rreq_result_t   *result_out);
+                      aodv_capt_result_t   *result_out);
 
 int aodv_db_capt_rrep(mac_addr              destination_host,
                       mac_addr              prev_hop,

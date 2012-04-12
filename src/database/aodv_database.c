@@ -156,7 +156,7 @@ dessert_msg_t* aodv_db_pop_packet(mac_addr dhost_ether) {
  * this destination. All messages to source (example: RREP) must be sent
  * over shost_prev_hop (nodes output interface: output_iface).
  */
-int aodv_db_capt_rreq(mac_addr destination_host, mac_addr originator_host, mac_addr prev_hop, dessert_meshif_t* iface, uint32_t originator_sequence_number, metric_t metric, uint8_t hop_count, struct timeval* timestamp, aodv_capt_rreq_result_t* result_out) {
+int aodv_db_capt_rreq(mac_addr destination_host, mac_addr originator_host, mac_addr prev_hop, dessert_meshif_t* iface, uint32_t originator_sequence_number, metric_t metric, uint8_t hop_count, struct timeval* timestamp, aodv_capt_result_t* result_out) {
     aodv_db_wlock();
     int result = aodv_db_rt_capt_rreq(destination_host, originator_host, prev_hop, iface, originator_sequence_number, metric, hop_count, timestamp, result_out);
     aodv_db_unlock();

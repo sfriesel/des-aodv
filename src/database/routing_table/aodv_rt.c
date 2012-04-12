@@ -141,7 +141,7 @@ int aodv_db_rt_capt_rreq(mac_addr destination_host,
                          metric_t metric,
                          uint8_t hop_count,
                          struct timeval* timestamp,
-                         aodv_capt_rreq_result_t* result_out) {
+                         aodv_capt_result_t* result_out) {
 
     aodv_rt_entry_t* dest_entry;
     aodv_rt_entry_t* orig_entry;
@@ -178,10 +178,10 @@ int aodv_db_rt_capt_rreq(mac_addr destination_host,
     if(newer || (same_seq_num && metric_hit)) {
 
         if(same_seq_num && metric_hit) {
-            *result_out = AODV_CAPT_RREQ_METRIC_HIT;
+            *result_out = AODV_CAPT_METRIC_HIT;
         }
         else {
-            *result_out = AODV_CAPT_RREQ_NEW;
+            *result_out = AODV_CAPT_NEW;
         }
 
         mac_copy(orig_entry->next_hop, prev_hop);
@@ -192,7 +192,7 @@ int aodv_db_rt_capt_rreq(mac_addr destination_host,
         orig_entry->flags &= ~AODV_FLAGS_ROUTE_NEW;
     }
     else {
-        *result_out = AODV_CAPT_RREQ_OLD;
+        *result_out = AODV_CAPT_OLD;
     }
     return true;
 }

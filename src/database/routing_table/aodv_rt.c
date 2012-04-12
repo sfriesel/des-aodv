@@ -73,7 +73,7 @@ int aodv_db_rt_init() {
     struct timeval	mrt; // my route timeout
     mrt.tv_sec = MY_ROUTE_TIMEOUT / 1000;
     mrt.tv_usec = (MY_ROUTE_TIMEOUT % 1000) * 1000;
-    rt.ts = timeslot_create(&mrt, &rt, purge_rt_entry);
+    rt.timeslot = timeslot_create(&mrt, &rt, purge_rt_entry);
     return true;
 }
 
@@ -93,7 +93,7 @@ int rt_entry_create(aodv_rt_entry_t** rreqt_entry_out, mac_addr destination_host
     rt_entry->metric = AODV_MAX_METRIC; //initial
     rt_entry->hop_count = UINT8_MAX; //initial
 
-    timeslot_addobject(rt.ts, timestamp, rt_entry);
+    timeslot_addobject(rt.timeslot, timestamp, rt_entry);
 
     *rreqt_entry_out = rt_entry;
     return true;
@@ -293,7 +293,7 @@ int aodv_db_rt_getroute2dest(mac_addr destination_host, mac_addr *next_hop_out,
 
     mac_copy(*next_hop_out, rt_entry->next_hop);
     *output_iface_out = rt_entry->output_iface;
-    timeslot_addobject(rt.ts, timestamp, rt_entry);
+    timeslot_addobject(rt.timeslot, timestamp, rt_entry);
     return true;
 }
 
@@ -527,7 +527,7 @@ int aodv_db_rt_routing_reset(uint32_t* count_out) {
 }
 
 int aodv_db_rt_cleanup(struct timeval* timestamp) {
-    timeslot_purgeobjects(rt.ts, timestamp);
+    timeslot_purgeobjects(rt.timeslot, timestamp);
     return true;
 }
 

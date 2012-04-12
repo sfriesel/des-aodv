@@ -63,7 +63,7 @@ typedef struct aodv_rt_entry {
 
 typedef struct aodv_rt {
     aodv_rt_entry_t*	entries;
-    timeslot_t*			ts;
+    timeslot_t*			timeslot;
 } aodv_rt_t;
 
 /**

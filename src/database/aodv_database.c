@@ -66,7 +66,7 @@ int aodv_db_init() {
 int aodv_db_cleanup(struct timeval* timestamp) {
     int success = true;
     aodv_db_wlock();
-    success &= db_nt_cleanup(timestamp);
+    success &= aodv_db_nt_cleanup(timestamp);
     success &= db_ds_cleanup(timestamp);
     success &= aodv_db_rt_cleanup(timestamp);
     success &= pb_cleanup(timestamp);

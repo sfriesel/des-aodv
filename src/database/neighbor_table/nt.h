@@ -40,12 +40,11 @@ int db_nt_cap2Dneigh(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_m
 typedef struct neighbor nt_neighbor_t;
 
 int aodv_db_nt_init();
+int aodv_db_nt_cleanup(struct timeval* timestamp);
 /**
  * Check whether given neighbor is 1 hop bidirectional neighbor
  */
 int db_nt_check2Dneigh(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp);
-
-int db_nt_cleanup(struct timeval* timestamp);
 
 void nt_report(char** str_out);
 

@@ -153,7 +153,7 @@ void nt_report(char** str_out) {
     timeslot_report(nt.ts, str_out);
 }
 
-int db_nt_cleanup(struct timeval* timestamp) {
+int aodv_db_nt_cleanup(struct timeval* timestamp) {
     timeslot_purgeobjects(nt.ts, timestamp);
     return true;
 }

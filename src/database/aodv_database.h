@@ -135,8 +135,6 @@ int aodv_db_addschedule(struct timeval* execute_ts, mac_addr ether_addr, uint8_t
 
 int aodv_db_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, uint8_t* type, void* param);
 
-int aodv_db_schedule_exists(mac_addr ether_addr, uint8_t type);
-
 int aodv_db_dropschedule(mac_addr ether_addr, uint8_t type);
 
 void aodv_db_putrreq(struct timeval* timestamp);

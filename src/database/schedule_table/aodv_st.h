@@ -31,8 +31,6 @@ int aodv_db_sc_addschedule(struct timeval* execute_ts, mac_addr ether_addr, uint
 
 int aodv_db_sc_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, uint8_t* type, void** param);
 
-int aodv_db_sc_schedule_exists(mac_addr ether_addr, uint8_t type);
-
 int aodv_db_sc_dropschedule(mac_addr ether_addr, uint8_t type);
 
 #endif

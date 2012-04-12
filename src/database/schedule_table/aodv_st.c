@@ -127,21 +127,6 @@ int aodv_db_sc_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, u
     return false;
 }
 
-int aodv_db_sc_schedule_exists(mac_addr ether_addr, uint8_t type) {
-    schedule_t* schedule;
-    uint8_t key[ETH_ALEN + sizeof(uint8_t)];
-    mac_copy(key, ether_addr);
-    memcpy(key + ETH_ALEN, &type, sizeof(uint8_t));
-    HASH_FIND(hh, hash_table, key, ETH_ALEN + sizeof(uint8_t), schedule);
-
-    if(schedule == NULL) {
-        return false;
-    }
-    else {
-        return true;
-    }
-}
-
 int aodv_db_sc_dropschedule(mac_addr ether_addr, uint8_t type) {
     schedule_t* schedule;
     uint8_t key[ETH_ALEN + sizeof(uint8_t)];

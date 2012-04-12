@@ -303,13 +303,6 @@ int aodv_db_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, uint
     return result;
 }
 
-int aodv_db_schedule_exists(mac_addr ether_addr, uint8_t type) {
-    aodv_db_wlock();
-    int result =  aodv_db_sc_schedule_exists(ether_addr, type);
-    aodv_db_unlock();
-    return result;
-}
-
 int aodv_db_dropschedule(mac_addr ether_addr, uint8_t type) {
     aodv_db_wlock();
     int result =  aodv_db_sc_dropschedule(ether_addr, type);

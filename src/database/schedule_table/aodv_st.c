@@ -43,7 +43,7 @@ schedule_t* first_schedule = NULL;
 
 schedule_t* hash_table = NULL;
 
-schedule_t* create_schedule(struct timeval* execute_ts, mac_addr ether_addr, uint8_t type, void* param) {
+schedule_t* create_schedule(struct timeval* execute_ts, mac_addr const ether_addr, uint8_t type, void* param) {
     schedule_t* s = malloc(sizeof(schedule_t));
 
     if(s == NULL) {
@@ -58,7 +58,7 @@ schedule_t* create_schedule(struct timeval* execute_ts, mac_addr ether_addr, uin
     return s;
 }
 
-int aodv_db_sc_addschedule(struct timeval* execute_ts, mac_addr ether_addr, uint8_t type, void* param) {
+int aodv_db_sc_addschedule(struct timeval* execute_ts, mac_addr const ether_addr, uint8_t type, void* param) {
     aodv_db_sc_dropschedule(ether_addr, type);
 
     schedule_t* next_el = first_schedule;
@@ -127,7 +127,7 @@ int aodv_db_sc_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, u
     return false;
 }
 
-int aodv_db_sc_dropschedule(mac_addr ether_addr, uint8_t type) {
+int aodv_db_sc_dropschedule(mac_addr const ether_addr, uint8_t type) {
     schedule_t* schedule;
     uint8_t key[ETH_ALEN + sizeof(uint8_t)];
     mac_copy(key, ether_addr);

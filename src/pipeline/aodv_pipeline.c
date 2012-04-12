@@ -331,7 +331,7 @@ int aodv_handle_hello(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc
         if(mac_equal(iface->hwaddr, msg->l2h.ether_dhost)) {
             aodv_db_pdr_cap_hellorsp(msg->l2h.ether_shost, hello_msg->hello_interval, hello_msg->hello_rcvd_count, &ts);
             // dessert_trace("got hello-rep from " MAC, EXPLODE_ARRAY6(msg->l2h.ether_dhost));
-            aodv_db_cap2Dneigh(msg->l2h.ether_shost, msg->u16, iface, &ts);
+            aodv_db_capt_hellorsp(msg->l2h.ether_shost, msg->u16, iface, &ts);
         }
     }
 

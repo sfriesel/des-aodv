@@ -74,9 +74,7 @@ struct neighbor_table {
 
 int aodv_db_nt_init() {
     struct timeval timeout;
-    uint32_t hello_int_msek = hello_interval * (ALLOWED_HELLO_LOST + 1);
-    timeout.tv_sec = hello_int_msek / 1000;
-    timeout.tv_usec = (hello_int_msek % 1000) * 1000;
+    dessert_ms2timeval(hello_interval * (ALLOWED_HELLO_LOST + 1), &timeout);
 
     nt.ts = timeslot_create(&timeout, NULL, db_nt_on_neighbor_timeout);
     assert(nt.ts);

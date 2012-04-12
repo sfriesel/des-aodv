@@ -125,7 +125,7 @@ int aodv_db_capt_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_seq, dess
 /**
  * Check whether given neighbor is 1 hop bidirectional neighbor
  */
-int aodv_db_check2Dneigh(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp);
+int aodv_db_is_neighbor(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp);
 
 int aodv_db_reset_rssi(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp);
 

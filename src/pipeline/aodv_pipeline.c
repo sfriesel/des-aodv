@@ -291,7 +291,7 @@ int aodv_drop_errors(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     // check whether control messages were sent over bidirectional links, otherwise DROP
     // Hint: RERR must be resent in both directions.
     if((dessert_msg_getext(msg, &ext, RREQ_EXT_TYPE, 0) != 0) || (dessert_msg_getext(msg, &ext, RREP_EXT_TYPE, 0) != 0)) {
-        if(aodv_db_check2Dneigh(msg->l2h.ether_shost, iface, &ts) != true) {
+        if(aodv_db_is_neighbor(msg->l2h.ether_shost, iface, &ts) != true) {
             dessert_debug("DROP RREQ/RREP from " MAC " metric=%" AODV_PRI_METRIC " hop_count=%" PRIu8 " ttl=%" PRIu8 "-> neighbor is unidirectional!", EXPLODE_ARRAY6(msg->l2h.ether_shost), msg->u16, msg->u8, msg->ttl);
             return DESSERT_MSG_DROP;
         }

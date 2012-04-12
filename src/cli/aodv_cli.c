@@ -192,7 +192,7 @@ int cli_send_rreq(struct cli_def* cli, char* command, char* argv[], int argc) {
         return CLI_ERROR_ARG;
     }
 
-    metric_t initial_metric = metric_startvalue;
+    metric_t initial_metric;
     initial_metric = atoi(argv[1]);
 
     cli_print(cli, MAC " -> using %" AODV_PRI_METRIC " as initial_metric\n", EXPLODE_ARRAY6(host), initial_metric);

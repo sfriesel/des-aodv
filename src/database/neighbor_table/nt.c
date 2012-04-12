@@ -72,7 +72,7 @@ struct neighbor_table {
 } nt;
 
 
-int db_nt_init() {
+int aodv_db_nt_init() {
     struct timeval timeout;
     uint32_t hello_int_msek = hello_interval * (ALLOWED_HELLO_LOST + 1);
     timeout.tv_sec = hello_int_msek / 1000;

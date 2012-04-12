@@ -52,7 +52,7 @@ void aodv_db_unlock() {
 int aodv_db_init() {
     int success = true;
     aodv_db_wlock();
-    success &= db_nt_init();
+    success &= aodv_db_nt_init();
     success &= aodv_db_pdr_nt_init();
     success &= db_ds_init();
     success &= aodv_db_rt_init();

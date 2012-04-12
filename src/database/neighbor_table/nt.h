@@ -30,9 +30,6 @@ For further information and questions please use the web site
 #include <linux/if_ether.h>
 #endif
 
-/** initialize neighbor table */
-int db_nt_init();
-
 int aodv_db_nt_neighbor_reset(uint32_t* count_out);
 
 /**
@@ -42,6 +39,7 @@ int aodv_db_nt_neighbor_reset(uint32_t* count_out);
 int db_nt_cap2Dneigh(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp);
 typedef struct neighbor nt_neighbor_t;
 
+int aodv_db_nt_init();
 /**
  * Check whether given neighbor is 1 hop bidirectional neighbor
  */

@@ -41,6 +41,7 @@ typedef struct neighbor nt_neighbor_t;
 
 int aodv_db_nt_init();
 int aodv_db_nt_cleanup(struct timeval* timestamp);
+void aodv_db_nt_report(char** str_out);
 /**
  * Check whether given neighbor is 1 hop bidirectional neighbor
  */

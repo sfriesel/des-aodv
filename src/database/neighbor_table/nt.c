@@ -149,7 +149,7 @@ int db_nt_check2Dneigh(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, st
     return true;
 }
 
-void nt_report(char** str_out) {
+void aodv_db_nt_report(char** str_out) {
     timeslot_report(nt.ts, str_out);
 }
 

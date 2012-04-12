@@ -359,7 +359,7 @@ int aodv_db_view_pdr_nt(char** str_out) {
 
 void aodv_db_neighbor_timeslot_report(char** str_out) {
     aodv_db_rlock();
-    nt_report(str_out);
+    aodv_db_nt_report(str_out);
     aodv_db_unlock();
 }
 

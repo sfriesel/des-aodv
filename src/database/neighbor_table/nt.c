@@ -56,7 +56,7 @@ neighbor_entry_t* db_neighbor_entry_create(mac_addr ether_neighbor_addr, dessert
     return new_entry;
 }
 
-void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void* object) {
+void db_nt_on_neighbor_timeout(struct timeval* timestamp, void* src_object, void* object) {
     neighbor_entry_t* curr_entry = object;
     dessert_debug("%s <= x => " MAC, curr_entry->iface->if_name, EXPLODE_ARRAY6(curr_entry->ether_neighbor));
     HASH_DEL(nt.entries, curr_entry);
@@ -68,18 +68,15 @@ void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void*
 
 
 int db_nt_init() {
-    timeslot_t* new_ts;
     struct timeval timeout;
     uint32_t hello_int_msek = hello_interval * (ALLOWED_HELLO_LOST + 1);
     timeout.tv_sec = hello_int_msek / 1000;
     timeout.tv_usec = (hello_int_msek % 1000) * 1000;
 
-    if(timeslot_create(&new_ts, &timeout, NULL, db_nt_on_neigbor_timeout) != true) {
-        return false;
-    }
+    nt.ts = timeslot_create(&timeout, NULL, db_nt_on_neighbor_timeout);
+    assert(nt.ts);
 
     nt.entries = NULL;
-    nt.ts = new_ts;
     return true;
 }
 
@@ -93,14 +90,14 @@ int aodv_db_nt_neighbor_destroy(uint32_t* count_out) {
         free(neigh);
         (*count_out)++;
     }
+    timeslot_destroy(nt.ts);
     return true;
 }
 
 int aodv_db_nt_neighbor_reset(uint32_t* count_out) {
-
     int result = true;
     result &= aodv_db_nt_neighbor_destroy(count_out);
-    result &= timeslot_destroy(nt.ts);
+    timeslot_destroy(nt.ts);
     result &= db_nt_init();
 
     return result;
@@ -152,5 +149,6 @@ void nt_report(char** str_out) {
 }
 
 int db_nt_cleanup(struct timeval* timestamp) {
-    return timeslot_purgeobjects(nt.ts, timestamp);
+    timeslot_purgeobjects(nt.ts, timestamp);
+    return true;
 }

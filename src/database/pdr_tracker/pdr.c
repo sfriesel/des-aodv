@@ -112,7 +112,8 @@ int aodv_db_pdr_nt_init() {
     struct timeval def_purge_tv;
     dessert_ms2timeval(def_purge_ms, &def_purge_tv);
 
-    return timeslot_create(&pdr_nt.ts, &def_purge_tv, &pdr_nt, pdr_nt_purge_nb);
+    pdr_nt.ts = timeslot_create(&def_purge_tv, &pdr_nt, pdr_nt_purge_nb);
+    return pdr_nt.ts != NULL;
 }
 
 int aodv_db_pdr_nt_upd_expected(uint16_t new_interval) {
@@ -161,7 +162,8 @@ int aodv_db_pdr_nt_neighbor_reset(uint32_t* count_out) {
 }
 
 int aodv_db_pdr_nt_cleanup(struct timeval* timestamp) {
-    return timeslot_purgeobjects(pdr_nt.ts, timestamp);
+    timeslot_purgeobjects(pdr_nt.ts, timestamp);
+    return true;
 }
 
 int aodv_db_pdr_nt_cap_hello(mac_addr ether_neighbor_addr, uint16_t hello_seq, uint16_t hello_interv, struct timeval* timestamp) {
@@ -189,7 +191,8 @@ int aodv_db_pdr_nt_cap_hello(mac_addr ether_neighbor_addr, uint16_t hello_seq, u
             dessert_ms2timeval(PDR_MIN_TRACKING_INTERVAL, &pdr_watch_interval);
         }
 
-        if(timeslot_create(&(curr_entry->ts), &pdr_watch_interval, curr_entry, pdr_nt_purge_hello_msg) != true) {
+        curr_entry->ts = timeslot_create(&pdr_watch_interval, curr_entry, pdr_nt_purge_hello_msg);
+        if(!curr_entry->ts) {
             return false;
         }
 
@@ -244,7 +247,8 @@ int aodv_db_pdr_nt_cap_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_int
             dessert_ms2timeval(PDR_MIN_TRACKING_INTERVAL, &pdr_watch_interval);
         }
 
-        if(timeslot_create(&(curr_entry->ts), &pdr_watch_interval, curr_entry, pdr_nt_purge_hello_msg) != true) {
+        curr_entry->ts = timeslot_create(&pdr_watch_interval, curr_entry, pdr_nt_purge_hello_msg);
+        if(!curr_entry->ts) {
             return false;
         }
 
@@ -264,8 +268,8 @@ int aodv_db_pdr_nt_cap_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_int
 }
 
 int pdr_nt_cleanup(pdr_neighbor_entry_t* given_entry, struct timeval* timestamp) {
-    pdr_neighbor_entry_t* curr_entry = given_entry;
-    return timeslot_purgeobjects(curr_entry->ts, timestamp);
+    timeslot_purgeobjects(given_entry->ts, timestamp);
+    return true;
 }
 
 int aodv_db_pdr_nt_get_pdr(mac_addr ether_neighbor_addr, metric_t* pdr_out, struct timeval* timestamp) {

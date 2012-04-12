@@ -66,7 +66,8 @@ int db_ds_init() {
     timeout.tv_sec = ds_int_msek / 1000;
     timeout.tv_usec = (ds_int_msek % 1000) * 1000;
 
-    if(timeslot_create(&new_ts, &timeout, NULL, db_nt_on_ds_timeout) != true) {
+    new_ts = timeslot_create(&timeout,NULL, db_nt_on_ds_timeout);
+    if(!new_ts) {
         return false;
     }
 
@@ -112,6 +113,7 @@ void ds_report(char** str_out) {
 }
 
 int db_ds_cleanup(struct timeval* timestamp) {
-    return timeslot_purgeobjects(ds.ts, timestamp);
+    timeslot_purgeobjects(ds.ts, timestamp);
+    return true;
 }
 

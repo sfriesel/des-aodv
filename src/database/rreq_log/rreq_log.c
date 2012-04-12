@@ -37,11 +37,13 @@ int aodv_db_rl_init() {
     struct timeval timeout;
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
-    return timeslot_create(&rreq_log_ts, &timeout, NULL, rreq_decrement_counter);
+    rreq_log_ts = timeslot_create(&timeout, NULL, rreq_decrement_counter);
+    return rreq_log_ts != NULL;
 }
 
 int aodv_db_rl_cleanup(struct timeval* timestamp) {
-    return timeslot_purgeobjects(rreq_log_ts, timestamp);
+    timeslot_purgeobjects(rreq_log_ts, timestamp);
+    return true;
 }
 
 void aodv_db_rl_putrreq(struct timeval* timestamp) {

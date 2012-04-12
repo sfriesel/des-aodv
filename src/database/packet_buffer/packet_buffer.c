@@ -77,7 +77,8 @@ int pb_init() {
     struct timeval timeout;
     timeout.tv_sec = BLACKLIST_TIMEOUT / 1000;
     timeout.tv_usec = (BLACKLIST_TIMEOUT % 1000) * 1000;
-    return timeslot_create(&pbt.ts, &timeout, NULL, purge_packets);
+    pbt.ts = timeslot_create(&timeout, NULL, purge_packets);
+    return pbt.ts != NULL;
 }
 
 void fl_push_packet(fifo_list_t* fl, dessert_msg_t* msg) {
@@ -183,6 +184,7 @@ void pb_report(char** str_out) {
 }
 
 int pb_cleanup(struct timeval* timestamp) {
-    return timeslot_purgeobjects(pbt.ts, timestamp);
+    timeslot_purgeobjects(pbt.ts, timestamp);
+    return true;
 }
 

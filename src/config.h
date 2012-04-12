@@ -90,8 +90,6 @@ typedef uint16_t metric_t;
 #define PDR_TRACKING_PURGE_FACTOR	2  /* timeout for nb entry in pdr tracker := nb_hello_interval * PDR_TRACKING_FACTOR * PDR_TRACKING_PURGE_FACTOR */
 #define PDR_MIN_TRACKING_INTERVAL	500 /* minimum tracking interval in ms */
 
-#define REPORT_RT_STR_LEN			150 /* default: 150 (should not be switched, needed for string inits)*/
-
 #define AODV_DATA_SEQ_TIMEOUT		MY_ROUTE_TIMEOUT /* wait MY_ROUTE_TIMEOUT for dropping data seq information -> this is the time a route is valid */
 
 /**

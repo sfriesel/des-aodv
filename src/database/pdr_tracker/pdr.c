@@ -358,6 +358,7 @@ int aodv_db_pdr_nt_get_rcvdhellocount(mac_addr ether_neighbor_addr, uint8_t* cou
 }
 
 int aodv_db_pdr_nt_report(char** str_out) {
+    const int REPORT_RT_STR_LEN = 150;
     pdr_neighbor_entry_t* current_entry = pdr_nt.entries;
     char* output;
     char entry_str[REPORT_RT_STR_LEN  + 1];

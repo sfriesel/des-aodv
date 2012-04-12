@@ -128,7 +128,7 @@ static void aodv_pipeline_reschedule_series(struct timeval when, aodv_rreq_serie
 
 // ---------------------------- help functions ---------------------------------------
 
-dessert_msg_t* _create_rreq(mac_addr dhost_ether, uint8_t ttl, metric_t initial_metric) {
+static dessert_msg_t* _create_rreq(mac_addr dhost_ether, uint8_t ttl, metric_t initial_metric) {
     dessert_msg_t* msg;
     dessert_ext_t* ext;
     dessert_msg_new(&msg);
@@ -172,7 +172,7 @@ dessert_msg_t* _create_rreq(mac_addr dhost_ether, uint8_t ttl, metric_t initial_
     return msg;
 }
 
-dessert_msg_t* _create_rrep(mac_addr route_dest, mac_addr route_source, mac_addr rrep_next_hop, uint32_t destination_sequence_number, uint8_t flags, uint8_t hop_count, metric_t initial_metric) {
+static dessert_msg_t* _create_rrep(mac_addr route_dest, mac_addr route_source, mac_addr rrep_next_hop, uint32_t destination_sequence_number, uint8_t flags, uint8_t hop_count, metric_t initial_metric) {
     dessert_msg_t* msg;
     dessert_ext_t* ext;
     dessert_msg_new(&msg);

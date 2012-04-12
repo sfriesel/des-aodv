@@ -75,23 +75,6 @@ typedef enum aodv_capt_rreq_result {
  * Captures seq_num of the source. Also add prev_hop to precursor list of
  * this destination.
  */
-int aodv_db_capt_rreq(mac_addr destination_host,
-                      mac_addr originator_host,
-                      mac_addr prev_hop,
-                      dessert_meshif_t* iface,
-                      uint32_t originator_sequence_number,
-                      metric_t metric,
-                      uint8_t hop_count,
-                      struct timeval* timestamp,
-                      aodv_capt_rreq_result_t* result_out);
-
-int aodv_db_capt_rrep(mac_addr destination_host,
-                      mac_addr destination_host_next_hop,
-                      dessert_meshif_t* output_iface,
-                      uint32_t destination_sequence_number,
-                      metric_t metric,
-                      uint8_t hop_count,
-                      struct timeval* timestamp);
 
 int aodv_db_getroute2dest(mac_addr dhost_ether, mac_addr dhost_next_hop_out,
                           dessert_meshif_t** output_iface_out, struct timeval* timestamp, uint8_t flags);
@@ -102,6 +85,23 @@ int aodv_db_get_destination_sequence_number(mac_addr dhost_ether, uint32_t* dest
 
 int aodv_db_get_hopcount(mac_addr dhost_ether, uint8_t* hop_count_out);
 int aodv_db_get_metric(mac_addr dhost_ether, metric_t* last_metric_out);
+int aodv_db_capt_rreq(mac_addr              destination_host,
+                      mac_addr              originator_host,
+                      mac_addr              prev_hop,
+                      dessert_meshif_t     *iface,
+                      uint32_t              originator_sequence_number,
+                      metric_t              metric,
+                      uint8_t               hop_count,
+                      struct timeval       *timestamp,
+                      aodv_capt_rreq_result_t   *result_out);
+
+int aodv_db_capt_rrep(mac_addr              destination_host,
+                      mac_addr              prev_hop,
+                      dessert_meshif_t     *output_iface,
+                      uint32_t              destination_sequence_number,
+                      metric_t              metric,
+                      uint8_t               hop_count,
+                      struct timeval       *timestamp);
 
 int aodv_db_markrouteinv(mac_addr dhost_ether, uint32_t destination_sequence_number);
 int aodv_db_remove_nexthop(mac_addr next_hop);

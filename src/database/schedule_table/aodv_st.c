@@ -72,9 +72,7 @@ int aodv_db_sc_addschedule(struct timeval* execute_ts, mac_addr const ether_addr
 
     // search for appropriate place to insert new element
     while(next_el != NULL && next_el->next != NULL && dessert_timevalcmp(execute_ts, &next_el->execute_ts) > 0) {
-        if(next_el->next != NULL) {
-            next_el = next_el->next;
-        }
+        next_el = next_el->next;
     }
 
     if(next_el == NULL) {

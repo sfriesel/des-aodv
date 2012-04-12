@@ -135,6 +135,7 @@ extern aodv_metric_t				metric_type;
 extern uint16_t 					metric_startvalue;
 extern int8_t						signal_strength_threshold;
 
+//TODO should be somewhere else
 typedef struct aodv_link_break_element {
     mac_addr host;
     uint32_t sequence_number;

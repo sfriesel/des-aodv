@@ -37,13 +37,6 @@ typedef struct neighbor_entry {
     UT_hash_handle          hh;
 } neighbor_entry_t;
 
-typedef struct neighbor_table {
-    neighbor_entry_t*   entries;
-    timeslot_t*         ts;
-} neighbor_table_t;
-
-neighbor_table_t nt;
-
 neighbor_entry_t* db_neighbor_entry_create(mac_addr ether_neighbor_addr, dessert_meshif_t* iface) {
     neighbor_entry_t* new_entry;
     new_entry = malloc(sizeof(neighbor_entry_t));
@@ -67,6 +60,11 @@ void db_nt_on_neighbor_timeout(struct timeval* timestamp, void* src_object, void
     aodv_db_sc_dropschedule(curr_entry->ether_neighbor, AODV_SC_UPDATE_RSSI);
     free(curr_entry);
 }
+
+struct neighbor_table {
+    nt_neighbor_t  *entries;
+    timeslot_t  *ts;
+} nt;
 
 
 int db_nt_init() {

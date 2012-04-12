@@ -62,7 +62,7 @@ struct neighbor_table {
     timeslot_t  *ts;
 } nt;
 
-void db_nt_on_neighbor_timeout(struct timeval* timestamp, void* src_object, void* object) {
+static void db_nt_on_neighbor_timeout(struct timeval* timestamp, void* src_object, void* object) {
     neighbor_entry_t* curr_entry = object;
     dessert_debug("%s <= x => " MAC, curr_entry->iface->if_name, EXPLODE_ARRAY6(curr_entry->ether_neighbor));
     HASH_DEL(nt.entries, curr_entry);

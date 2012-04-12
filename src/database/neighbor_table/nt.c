@@ -60,6 +60,11 @@ void db_nt_on_neighbor_timeout(struct timeval* timestamp, void* src_object, void
     aodv_db_sc_dropschedule(curr_entry->ether_neighbor, AODV_SC_UPDATE_RSSI);
     free(curr_entry);
 }
+struct neighbor {
+    mac_addr          addr;
+    dessert_meshif_t *iface;
+    nt_neighbor_t       *prev, *next;
+};
 
 struct neighbor_table {
     nt_neighbor_t  *entries;

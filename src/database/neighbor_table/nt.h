@@ -40,6 +40,7 @@ int aodv_db_nt_neighbor_reset(uint32_t* count_out);
  * 1 hop bidirectional neighbor
  */
 int db_nt_cap2Dneigh(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp);
+typedef struct neighbor nt_neighbor_t;
 
 /**
  * Check whether given neighbor is 1 hop bidirectional neighbor

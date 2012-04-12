@@ -133,7 +133,7 @@ int8_t aodv_db_update_rssi(mac_addr ether_neighbor, dessert_meshif_t* iface, str
 
 int aodv_db_addschedule(struct timeval* execute_ts, mac_addr ether_addr, uint8_t type, void* param);
 
-int aodv_db_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, uint8_t* type, void* param);
+int aodv_db_popschedule(struct timeval* timestamp, mac_addr *ether_addr_out, uint8_t* type, void* param);
 
 int aodv_db_dropschedule(mac_addr ether_addr, uint8_t type);
 

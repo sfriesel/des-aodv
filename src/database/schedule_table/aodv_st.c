@@ -105,7 +105,7 @@ int aodv_db_sc_addschedule(struct timeval* execute_ts, mac_addr const ether_addr
     return true;
 }
 
-int aodv_db_sc_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, uint8_t* type, void** param) {
+int aodv_db_sc_popschedule(struct timeval* timestamp, mac_addr *ether_addr_out, uint8_t* type, void** param) {
     if(first_schedule != NULL && dessert_timevalcmp(&first_schedule->execute_ts, timestamp) <= 0) {
         schedule_t* sc = first_schedule;
         first_schedule = first_schedule->next;
@@ -114,7 +114,7 @@ int aodv_db_sc_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, u
             first_schedule->prev = NULL;
         }
 
-        mac_copy(ether_addr_out, sc->ether_addr);
+        mac_copy(*ether_addr_out, sc->ether_addr);
         *type = sc->schedule_id;
         *param = sc->schedule_param;
         HASH_DEL(hash_table, sc);

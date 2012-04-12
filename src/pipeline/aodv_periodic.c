@@ -137,7 +137,7 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
     struct timeval timestamp;
     gettimeofday(&timestamp, NULL);
 
-    if(aodv_db_popschedule(&timestamp, ether_addr, &schedule_type, &schedule_param) == false) {
+    if(aodv_db_popschedule(&timestamp, &ether_addr, &schedule_type, &schedule_param) == false) {
         //nothing to do come back later
         return DESSERT_PER_KEEP;
     }

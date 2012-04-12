@@ -296,7 +296,7 @@ int aodv_db_addschedule(struct timeval* execute_ts, mac_addr ether_addr, uint8_t
     return result;
 }
 
-int aodv_db_popschedule(struct timeval* timestamp, mac_addr ether_addr_out, uint8_t* type, void* param) {
+int aodv_db_popschedule(struct timeval* timestamp, mac_addr *ether_addr_out, uint8_t* type, void* param) {
     aodv_db_wlock();
     int result =  aodv_db_sc_popschedule(timestamp, ether_addr_out, type, param);
     aodv_db_unlock();

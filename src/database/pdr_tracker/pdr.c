@@ -267,8 +267,8 @@ int aodv_db_pdr_nt_cap_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_int
     return true;
 }
 
-int pdr_nt_cleanup(pdr_neighbor_entry_t* given_entry, struct timeval* timestamp) {
-    timeslot_purgeobjects(given_entry->ts, timestamp);
+int pdr_nt_cleanup(pdr_neighbor_entry_t* entry, struct timeval* timestamp) {
+    timeslot_purgeobjects(entry->ts, timestamp);
     return true;
 }
 

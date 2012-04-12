@@ -50,18 +50,18 @@ For further information and questions please use the web site
 #define HELLO_EXT_TYPE				(DESSERT_EXT_USER + 4)
 #define BROADCAST_EXT_TYPE			(DESSERT_EXT_USER + 5)
 
-#define FIFO_BUFFER_MAX_ENTRY_SIZE	UINT32_MAX /* maximal packet count that can be stored in FIFO for one destination */
-#define DB_CLEANUP_INTERVAL			NET_TRAVERSAL_TIME /* not in rfc */
-#define SCHEDULE_CHECK_INTERVAL		20 /* ms not in rfc */
+#define FIFO_BUFFER_MAX_ENTRY_SIZE  UINT32_MAX /* maximal packet count that can be stored in FIFO for one destination */
+#define DB_CLEANUP_INTERVAL         NET_TRAVERSAL_TIME /* not in rfc */
+#define SCHEDULE_CHECK_INTERVAL     20 /* ms not in rfc */
 
-#define HELLO_INTERVAL				1000 /* ms rfc=1000 */
+#define HELLO_INTERVAL              1000 /* ms rfc=1000 */
 
-#define HELLO_SIZE					128 /* bytes */
-#define RREQ_SIZE					128 /* bytes */
+#define HELLO_SIZE                  128 /* bytes */
+#define RREQ_SIZE                   128 /* bytes */
 
-#define GOSSIP_P					1 /* flooding */
-#define DEST_ONLY					false /* only destination answer a RRequest */
-#define RING_SEARCH			 		true /* use expanding ring search */
+#define GOSSIP_P                    1 /* flooding */
+#define DEST_ONLY                   false /* only destination answer a RRequest */
+#define RING_SEARCH                 true /* use expanding ring search */
 
 typedef enum aodv_gossip {
     GOSSIP_NONE,
@@ -114,7 +114,7 @@ typedef uint16_t metric_t;
 #define AODV_FLAGS_ROUTE_LOCAL_USED		(1 << 3)
 #define AODV_FLAGS_ROUTE_NEW	    	(1 << 4)
 
-#define MAX_MESH_IFACES_COUNT			8
+#define MAX_MESH_IFACES_COUNT       8
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))

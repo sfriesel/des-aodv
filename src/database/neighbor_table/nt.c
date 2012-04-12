@@ -83,7 +83,7 @@ int aodv_db_nt_init() {
     return true;
 }
 
-int aodv_db_nt_neighbor_destroy(uint32_t* count_out) {
+int aodv_db_nt_destroy(uint32_t* count_out) {
     *count_out = 0;
 
     neighbor_entry_t* neigh = NULL;
@@ -98,7 +98,7 @@ int aodv_db_nt_neighbor_destroy(uint32_t* count_out) {
 }
 
 int aodv_db_nt_reset(uint32_t* count_out) {
-    aodv_db_nt_neighbor_destroy(count_out);
+    aodv_db_nt_destroy(count_out);
     aodv_db_nt_init();
     return true;
 }

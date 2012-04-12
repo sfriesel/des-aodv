@@ -77,7 +77,7 @@ int aodv_db_cleanup(struct timeval* timestamp) {
 
 int aodv_db_neighbor_reset(uint32_t* count_out) {
     pthread_rwlock_wrlock(&db_rwlock);
-    int result = aodv_db_nt_neighbor_reset(count_out);
+    int result = aodv_db_nt_reset(count_out);
     pthread_rwlock_unlock(&db_rwlock);
     return result;
 }

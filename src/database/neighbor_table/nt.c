@@ -97,13 +97,10 @@ int aodv_db_nt_neighbor_destroy(uint32_t* count_out) {
     return true;
 }
 
-int aodv_db_nt_neighbor_reset(uint32_t* count_out) {
-    int result = true;
-    result &= aodv_db_nt_neighbor_destroy(count_out);
-    timeslot_destroy(nt.ts);
-    result &= db_nt_init();
-
-    return result;
+int aodv_db_nt_reset(uint32_t* count_out) {
+    aodv_db_nt_destroy(count_out);
+    aodv_db_nt_init();
+    return true;
 }
 
 int db_nt_cap2Dneigh(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp) {

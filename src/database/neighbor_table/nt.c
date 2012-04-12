@@ -25,6 +25,8 @@ For further information and questions please use the web site
 #include "../timeslot.h"
 #include "../../config.h"
 #include "../schedule_table/aodv_st.h"
+#undef assert
+#include <assert.h>
 
 typedef struct neighbor_entry {
     struct __attribute__((__packed__)) {  // key

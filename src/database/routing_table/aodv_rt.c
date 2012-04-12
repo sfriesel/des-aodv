@@ -531,50 +531,37 @@ int aodv_db_rt_cleanup(struct timeval* timestamp) {
     return true;
 }
 
-int aodv_db_rt_report(char** str_out) {
-    aodv_rt_entry_t* current_entry = rt.entries;
-    char* output;
-    char entry_str[REPORT_RT_STR_LEN  + 1];
+int aodv_db_rt_report(char **str_out) {
+    char entry_str[150];
 
-    uint32_t len = 0;
+    uint32_t len = HASH_COUNT(rt.entries);
 
-    while(current_entry != NULL) {
-        len += REPORT_RT_STR_LEN * 2;
-        current_entry = current_entry->hh.next;
-    }
+    *str_out = malloc(sizeof(entry_str) * (3 + 2 * len) + 1);
 
-    current_entry = rt.entries;
-    output = malloc(sizeof(char) * REPORT_RT_STR_LEN * (4 + len) + 1);
-
-    if(output == NULL) {
+    if(!*str_out) {
         return false;
     }
 
-    // initialize first byte to \0 to mark output as empty
-    output[0] = '\0';
-    strcat(output, "+-------------------+-------------------+-------------------+-------------+---------------+\n"
-           "|    destination    |      next hop     |  out iface addr   |  route inv  | next hop unkn |\n"
-           "+-------------------+-------------------+-------------------+-------------+---------------+\n");
+    strcpy(*str_out, "+-------------------+-------------------+-------------------+-------------+---------------+\n"
+                     "|    destination    |      next hop     |  out iface addr   |  route inv  | next hop unkn |\n"
+                     "+-------------------+-------------------+-------------------+-------------+---------------+\n");
 
-    while(current_entry != NULL) {		// first line for best output interface
-        if(current_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN) {
-            snprintf(entry_str, REPORT_RT_STR_LEN, "| " MAC " |                   |                   |   %5s     |     true      |\n",
-                     EXPLODE_ARRAY6(current_entry->addr),
-                     (current_entry->flags & AODV_FLAGS_ROUTE_INVALID) ? "true" : "false");
+    for(aodv_rt_entry_t *entry = rt.entries; entry; entry = entry->hh.next) {
+        if(entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN) {
+            snprintf(entry_str, sizeof(entry_str), "| " MAC " |                   |                   |   %5s     |     true      |\n",
+                     EXPLODE_ARRAY6(entry->addr),
+                     (entry->flags & AODV_FLAGS_ROUTE_INVALID) ? "true" : "false");
         }
         else {
-            snprintf(entry_str, REPORT_RT_STR_LEN, "| " MAC " | " MAC " | " MAC " |    %5s    |     false     |\n",
-                     EXPLODE_ARRAY6(current_entry->addr),
-                     EXPLODE_ARRAY6(current_entry->next_hop),
-                     EXPLODE_ARRAY6(current_entry->output_iface->hwaddr),
-                     (current_entry->flags & AODV_FLAGS_ROUTE_INVALID) ? "true" : "false");
+            snprintf(entry_str, sizeof(entry_str), "| " MAC " | " MAC " | " MAC " |    %5s    |     false     |\n",
+                     EXPLODE_ARRAY6(entry->addr),
+                     EXPLODE_ARRAY6(entry->next_hop),
+                     EXPLODE_ARRAY6(entry->output_iface->hwaddr),
+                     (entry->flags & AODV_FLAGS_ROUTE_INVALID) ? "true" : "false");
         }
 
-        strcat(output, entry_str);
-        strcat(output, "+-------------------+-------------------+-------------------+-------------+---------------+\n");
-        current_entry = current_entry->hh.next;
+        strcat(*str_out, entry_str);
+        strcat(*str_out, "+-------------------+-------------------+-------------------+-------------+---------------+\n");
     }
-
-    *str_out = output;
     return true;
 }

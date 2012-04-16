@@ -154,9 +154,9 @@ static dessert_msg_t* _create_rreq(mac_addr dhost_ether, uint8_t ttl, metric_t i
     if(!aodv_db_get_destination_sequence_number(rreq_l25h->ether_dhost, &last_destination_sequence_number)) {
         rreq_msg->flags |= AODV_FLAGS_RREQ_U;
     }
-
-
-    rreq_msg->destination_sequence_number = last_destination_sequence_number;
+    else {
+        rreq_msg->destination_sequence_number = last_destination_sequence_number;
+    }
 
     if(dest_only) {
         rreq_msg->flags |= AODV_FLAGS_RREQ_D;

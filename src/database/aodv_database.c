@@ -156,21 +156,21 @@ dessert_msg_t* aodv_db_pop_packet(mac_addr dhost_ether) {
  * this destination. All messages to source (example: RREP) must be sent
  * over shost_prev_hop (nodes output interface: output_iface).
  */
-int aodv_db_capt_rreq(mac_addr destination_host, mac_addr originator_host, mac_addr prev_hop, dessert_meshif_t* iface, uint32_t originator_sequence_number, metric_t metric, uint8_t hop_count, struct timeval* timestamp, aodv_capt_result_t* result_out) {
+int aodv_db_capt_rreq(mac_addr destination_host, mac_addr originator_host, mac_addr prev_hop, dessert_meshif_t *iface, uint32_t originator_sequence_number, metric_t metric, uint8_t hop_count, struct timeval const *timestamp, aodv_capt_result_t *result_out) {
     aodv_db_wlock();
     int result = aodv_db_rt_capt_rreq(destination_host, originator_host, prev_hop, iface, originator_sequence_number, metric, hop_count, timestamp, result_out);
     aodv_db_unlock();
     return result;
 }
 
-int aodv_db_capt_rrep(mac_addr destination_host, mac_addr destination_host_next_hop, dessert_meshif_t* output_iface, uint32_t destination_sequence_number, metric_t metric, uint8_t hop_count, struct timeval* timestamp) {
+int aodv_db_capt_rrep(mac_addr destination_host, mac_addr destination_host_next_hop, dessert_meshif_t* output_iface, uint32_t destination_sequence_number, metric_t metric, uint8_t hop_count, struct timeval const *timestamp) {
     aodv_db_wlock();
     int result =  aodv_db_rt_capt_rrep(destination_host, destination_host_next_hop, output_iface, destination_sequence_number, metric, hop_count, timestamp);
     aodv_db_unlock();
     return result;
 }
 
-int aodv_db_getroute2dest(mac_addr dhost_ether, mac_addr *next_hop_out, dessert_meshif_t** output_iface_out, struct timeval* timestamp) {
+int aodv_db_getroute2dest(mac_addr dhost_ether, mac_addr *next_hop_out, dessert_meshif_t** output_iface_out, struct timeval const *timestamp) {
     aodv_db_wlock();
     int result =  aodv_db_rt_getroute2dest(dhost_ether, next_hop_out, output_iface_out, timestamp);
     aodv_db_unlock();

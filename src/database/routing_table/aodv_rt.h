@@ -90,7 +90,7 @@ int aodv_db_rt_capt_rreq(mac_addr destination_host,
                          uint32_t originator_sequence_number,
                          metric_t metric,
                          uint8_t hop_count,
-                         struct timeval* timestamp,
+                         struct timeval const *timestamp,
                          aodv_capt_result_t* result_out);
 
 int aodv_db_rt_capt_rrep(mac_addr destination_host,
@@ -99,10 +99,10 @@ int aodv_db_rt_capt_rrep(mac_addr destination_host,
                          uint32_t destination_sequence_number,
                          metric_t metric,
                          uint8_t hop_count,
-                         struct timeval* timestamp);
+                         struct timeval const *timestamp);
 
 int aodv_db_rt_getroute2dest(mac_addr destination_host, mac_addr *next_hop_out,
-                             dessert_meshif_t** output_iface_out, struct timeval* timestamp);
+                             dessert_meshif_t** output_iface_out, struct timeval const *timestamp);
 
 int aodv_db_rt_getnexthop(mac_addr destination_host, mac_addr destination_host_next_hop_out);
 

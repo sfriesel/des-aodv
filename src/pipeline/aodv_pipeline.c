@@ -155,15 +155,10 @@ static dessert_msg_t* _create_rreq(mac_addr dhost_ether, uint8_t ttl, metric_t i
         rreq_msg->flags |= AODV_FLAGS_RREQ_U;
     }
 
-    if(dest_only) {
-        rreq_msg->flags |= AODV_FLAGS_RREQ_D;
-    }
 
     rreq_msg->destination_sequence_number = last_destination_sequence_number;
 
-    int d = aodv_db_get_warn_status(dhost_ether);
-
-    if(d == true) {
+    if(dest_only) {
         rreq_msg->flags |= AODV_FLAGS_RREQ_D;
     }
 

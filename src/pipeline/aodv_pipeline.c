@@ -151,7 +151,7 @@ static dessert_msg_t* _create_rreq(mac_addr dhost_ether, uint8_t ttl, metric_t i
     //this is for local repair, we know that the latest rrep we saw was last_destination_sequence_number
     uint32_t last_destination_sequence_number;
 
-    if(aodv_db_get_destination_sequence_number(dhost_ether, &last_destination_sequence_number) != true) {
+    if(!aodv_db_get_destination_sequence_number(rreq_l25h->ether_dhost, &last_destination_sequence_number)) {
         rreq_msg->flags |= AODV_FLAGS_RREQ_U;
     }
 

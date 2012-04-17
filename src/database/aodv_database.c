@@ -247,13 +247,6 @@ int aodv_db_get_warn_endpoints_from_neighbor_and_set_warn(mac_addr neighbor, aod
     return result;
 }
 
-int aodv_db_get_warn_status(mac_addr dhost_ether) {
-    aodv_db_wlock();
-    int result = aodv_db_rt_get_warn_status(dhost_ether);
-    aodv_db_unlock();
-    return result;
-}
-
 int aodv_db_get_active_routes(aodv_link_break_element_t** head) {
     pthread_rwlock_wrlock(&db_rwlock);
     int result = aodv_db_rt_get_active_routes(head);

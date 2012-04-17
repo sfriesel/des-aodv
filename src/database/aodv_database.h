@@ -100,7 +100,6 @@ int aodv_db_get_hopcount    (mac_addr dhost_ether, uint8_t* hop_count_out);
 int aodv_db_get_metric      (mac_addr dhost_ether, metric_t* last_metric_out);
 
 int aodv_db_markrouteinv(mac_addr dhost_ether, uint32_t destination_sequence_number);
-int aodv_db_remove_nexthop(mac_addr next_hop);
 int aodv_db_inv_over_nexthop(mac_addr next_hop);
 int aodv_db_get_destlist(mac_addr dhost_next_hop, aodv_link_break_element_t** destlist);
 int aodv_db_add_precursor(mac_addr destination, mac_addr precursor, dessert_meshif_t *iface);

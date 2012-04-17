@@ -78,7 +78,7 @@ typedef enum aodv_capt_result {
 
 int aodv_db_get_route2dest(mac_addr dhost_ether, mac_addr *next_hop_out, dessert_meshif_t** output_iface_out, struct timeval const *timestamp);
 
-int aodv_db_getnexthop(mac_addr dhost_ether, mac_addr dhost_next_hop_out);
+int aodv_db_get_nexthop(mac_addr dhost_ether, mac_addr dhost_next_hop_out);
 
 int aodv_db_get_dest_seq_num(mac_addr dhost_ether, uint32_t* destination_sequence_number_out);
 

@@ -240,13 +240,6 @@ int aodv_db_get_warn_endpoints_from_neighbor_and_set_warn(mac_addr neighbor, aod
     return result;
 }
 
-int aodv_db_get_active_routes(aodv_link_break_element_t** head) {
-    pthread_rwlock_wrlock(&db_rwlock);
-    int result = aodv_db_rt_get_active_routes(head);
-    pthread_rwlock_unlock(&db_rwlock);
-    return result;
-}
-
 int aodv_db_routing_reset(uint32_t* count_out) {
     pthread_rwlock_wrlock(&db_rwlock);
     int result = aodv_db_rt_routing_reset(count_out);

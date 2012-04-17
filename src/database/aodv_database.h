@@ -106,8 +106,6 @@ int aodv_db_add_precursor(mac_addr destination, mac_addr precursor, dessert_mesh
 
 int aodv_db_get_warn_endpoints_from_neighbor_and_set_warn(mac_addr neighbor, aodv_link_break_element_t** head);
 
-int aodv_db_get_active_routes(aodv_link_break_element_t** head);
-
 int aodv_db_routing_reset(uint32_t* count_out);
 
 /**

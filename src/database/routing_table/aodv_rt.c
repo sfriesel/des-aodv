@@ -297,7 +297,7 @@ int aodv_db_rt_getroute2dest(mac_addr destination_host, mac_addr *next_hop_out,
     return true;
 }
 
-int aodv_db_rt_getnexthop(mac_addr destination_host, mac_addr destination_host_next_hop_out) {
+int aodv_db_rt_getnexthop(mac_addr destination_host, mac_addr *next_hop_out) {
     aodv_rt_entry_t* rt_entry;
     HASH_FIND(hh, rt.entries, destination_host, ETH_ALEN, rt_entry);
 
@@ -305,7 +305,7 @@ int aodv_db_rt_getnexthop(mac_addr destination_host, mac_addr destination_host_n
         return false;
     }
 
-    mac_copy(destination_host_next_hop_out, rt_entry->next_hop);
+    mac_copy(*next_hop_out, rt_entry->next_hop);
     return true;
 }
 

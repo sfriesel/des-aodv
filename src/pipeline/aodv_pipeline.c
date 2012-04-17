@@ -459,7 +459,7 @@ int aodv_handle_rerr(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
             struct aodv_mac_seq* dest = &destination_list[i];
             mac_addr next_hop;
 
-            if(!aodv_db_get_nexthop(dest->host, next_hop)) {
+            if(!aodv_db_get_nexthop(dest->host, &next_hop)) {
                 continue;
             }
 

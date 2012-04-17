@@ -30,16 +30,16 @@ For further information and questions please use the web site
 #include <linux/if_ether.h>
 #endif
 
-/**
- * Take a record that the given neighbor seems to be bidirectional neighbor
- */
-int aodv_db_nt_capt_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp);
 typedef struct neighbor nt_neighbor_t;
 
 int aodv_db_nt_init();
 int aodv_db_nt_reset(uint32_t* count_out);
 int aodv_db_nt_cleanup(struct timeval* timestamp);
 void aodv_db_nt_report(char** str_out);
+/**
+ * Take a record that the given neighbor seems to be bidirectional neighbor
+ */
+int aodv_db_nt_capt_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp);
 /**
  * Check whether given neighbor is 1 hop bidirectional neighbor
  */

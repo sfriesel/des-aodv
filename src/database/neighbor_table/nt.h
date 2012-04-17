@@ -41,8 +41,6 @@ int aodv_db_nt_capt_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_seq, d
  */
 int db_nt_check2Dneigh(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp);
 
-void nt_report(char** str_out);
-
 void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void* object);
 
 #endif

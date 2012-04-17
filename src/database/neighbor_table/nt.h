@@ -26,10 +26,6 @@ For further information and questions please use the web site
 
 #include <dessert.h>
 
-#ifdef ANDROID
-#include <linux/if_ether.h>
-#endif
-
 typedef struct neighbor nt_neighbor_t;
 
 int aodv_db_nt_init();

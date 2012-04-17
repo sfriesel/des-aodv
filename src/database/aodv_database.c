@@ -274,7 +274,7 @@ int aodv_db_routing_reset(uint32_t* count_out) {
  */
 int aodv_db_capt_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp) {
     aodv_db_wlock();
-    int result = db_nt_cap2Dneigh(ether_neighbor_addr, hello_seq, iface, timestamp);
+    int result = aodv_db_nt_capt_hellorsp(ether_neighbor_addr, hello_seq, iface, timestamp);
     aodv_db_unlock();
     return result;
 }

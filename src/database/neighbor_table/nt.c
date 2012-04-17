@@ -103,7 +103,7 @@ int aodv_db_nt_reset(uint32_t* count_out) {
     return true;
 }
 
-int db_nt_cap2Dneigh(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp) {
+int aodv_db_nt_capt_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp) {
     neighbor_entry_t* curr_entry = NULL;
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
     mac_copy(addr_sum, ether_neighbor_addr);

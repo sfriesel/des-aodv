@@ -31,10 +31,9 @@ For further information and questions please use the web site
 #endif
 
 /**
- * Take a record that the given neighbor seems to be
- * 1 hop bidirectional neighbor
+ * Take a record that the given neighbor seems to be bidirectional neighbor
  */
-int db_nt_cap2Dneigh(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp);
+int aodv_db_nt_capt_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval* timestamp);
 typedef struct neighbor nt_neighbor_t;
 
 int aodv_db_nt_init();

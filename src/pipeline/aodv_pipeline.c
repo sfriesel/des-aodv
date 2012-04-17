@@ -151,7 +151,7 @@ static dessert_msg_t* _create_rreq(mac_addr dhost_ether, uint8_t ttl, metric_t i
     //this is for local repair, we know that the latest rrep we saw was last_destination_sequence_number
     uint32_t last_destination_sequence_number;
 
-    if(!aodv_db_get_destination_sequence_number(rreq_l25h->ether_dhost, &last_destination_sequence_number)) {
+    if(!aodv_db_get_dest_seq_num(rreq_l25h->ether_dhost, &last_destination_sequence_number)) {
         rreq_msg->flags |= AODV_FLAGS_RREQ_U;
     }
     else {
@@ -395,7 +395,7 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     else {
         uint16_t dest_only_flag = rreq_msg->flags & AODV_FLAGS_RREQ_D;
         uint32_t our_dest_seq_num;
-        int we_have_seq_num = aodv_db_get_destination_sequence_number(l25h->ether_dhost, &our_dest_seq_num);
+        int we_have_seq_num = aodv_db_get_dest_seq_num(l25h->ether_dhost, &our_dest_seq_num);
         // do local repair if D flag is not set and we have a valid route to dest
         bool local_repair = !dest_only_flag && we_have_seq_num;
         if(we_have_seq_num && !unknown_seq_num_flag) {

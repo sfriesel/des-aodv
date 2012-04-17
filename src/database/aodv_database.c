@@ -184,7 +184,7 @@ int aodv_db_getnexthop(mac_addr dhost_ether, mac_addr dhost_next_hop_out) {
     return result;
 }
 
-int aodv_db_get_destination_sequence_number(mac_addr dhost_ether, uint32_t* destination_sequence_number_out) {
+int aodv_db_get_dest_seq_num(mac_addr dhost_ether, uint32_t* destination_sequence_number_out) {
     aodv_db_rlock();
     int result = aodv_db_rt_get_destination_sequence_number(dhost_ether, destination_sequence_number_out);
     aodv_db_unlock();

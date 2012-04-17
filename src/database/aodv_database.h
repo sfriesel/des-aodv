@@ -80,7 +80,7 @@ int aodv_db_get_route2dest(mac_addr dhost_ether, mac_addr *next_hop_out, dessert
 
 int aodv_db_getnexthop(mac_addr dhost_ether, mac_addr dhost_next_hop_out);
 
-int aodv_db_get_destination_sequence_number(mac_addr dhost_ether, uint32_t* destination_sequence_number_out);
+int aodv_db_get_dest_seq_num(mac_addr dhost_ether, uint32_t* destination_sequence_number_out);
 
 int aodv_db_get_hopcount(mac_addr dhost_ether, uint8_t* hop_count_out);
 int aodv_db_get_metric(mac_addr dhost_ether, metric_t* last_metric_out);

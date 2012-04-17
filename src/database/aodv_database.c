@@ -212,7 +212,7 @@ int aodv_db_markrouteinv(mac_addr dhost_ether, uint32_t destination_sequence_num
     return result;
 }
 
-int aodv_db_add_precursor(mac_addr destination, mac_addr precursor_addr, dessert_meshif_t *iface) {
+int aodv_db_add_precursor(mac_addr destination, mac_addr precursor_addr, dessert_meshif_t* iface) {
     aodv_db_wlock();
     int result =  aodv_db_rt_add_precursor(destination, precursor_addr, iface);
     aodv_db_unlock();

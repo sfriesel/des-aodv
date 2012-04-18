@@ -124,8 +124,6 @@ int aodv_db_rt_add_precursor(mac_addr destination, mac_addr precursor, dessert_m
 
 int aodv_db_rt_get_warn_status(mac_addr dhost_ether);
 
-int aodv_db_rt_get_active_routes(aodv_link_break_element_t** head);
-
 int aodv_db_rt_cleanup(struct timeval* timestamp);
 int aodv_db_rt_routing_reset(uint32_t* count_out);
 

@@ -465,21 +465,6 @@ int aodv_db_rt_get_warn_status(mac_addr dhost_ether) {
     return ((rt_entry->flags & AODV_FLAGS_ROUTE_WARN) ? true : false);
 }
 
-int aodv_db_rt_get_active_routes(aodv_link_break_element_t** head) {
-    *head = NULL;
-    aodv_rt_entry_t* dest, *tmp;
-
-    HASH_ITER(hh, rt.entries, dest, tmp) {
-        if(dest->flags & AODV_FLAGS_ROUTE_LOCAL_USED) {
-            aodv_link_break_element_t* curr_el = malloc(sizeof(aodv_link_break_element_t));
-            memset(curr_el, 0x0, sizeof(aodv_link_break_element_t));
-            mac_copy(curr_el->host, dest->addr);
-            DL_APPEND(*head, curr_el);
-        }
-    }
-    return true;
-}
-
 int aodv_db_rt_routing_reset(uint32_t* count_out) {
 
     *count_out = 0;

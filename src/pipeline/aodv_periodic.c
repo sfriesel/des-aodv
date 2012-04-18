@@ -134,18 +134,16 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
     uint8_t schedule_type;
     void* schedule_param = NULL;
     mac_addr ether_addr;
-    struct timeval timestamp;
-    gettimeofday(&timestamp, NULL);
 
-    while(aodv_db_popschedule(&timestamp, &ether_addr, &schedule_type, &schedule_param)) {
+    while(aodv_db_popschedule(scheduled, &ether_addr, &schedule_type, &schedule_param)) {
         switch(schedule_type) {
             case AODV_SC_REPEAT_RREQ: {
-                aodv_send_rreq_repeat(&timestamp, (aodv_rreq_series_t*)schedule_param);
+                aodv_send_rreq_repeat(scheduled, (aodv_rreq_series_t*)schedule_param);
                 break;
             }
             case AODV_SC_SEND_OUT_RERR: {
                 uint32_t rerr_count;
-                aodv_db_getrerrcount(&timestamp, &rerr_count);
+                aodv_db_getrerrcount(scheduled, &rerr_count);
 
                 if(rerr_count >= RERR_RATELIMIT) {
                     return DESSERT_PER_KEEP;
@@ -170,7 +168,7 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
 
                     dessert_meshsend(rerr_msg, NULL);
                     dessert_msg_destroy(rerr_msg);
-                    aodv_db_putrerr(&timestamp);
+                    aodv_db_putrerr(scheduled);
                 }
 
                 break;
@@ -184,7 +182,7 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
                     dessert_debug("AODV_SC_SEND_OUT_RWARN: " MAC " -> " MAC,
                                   EXPLODE_ARRAY6(ether_addr),
                                   EXPLODE_ARRAY6(dest->host));
-                    aodv_send_rreq(dest->host, &timestamp);
+                    aodv_send_rreq(dest->host, scheduled);
                 }
                 break;
             }

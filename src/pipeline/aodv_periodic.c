@@ -177,19 +177,6 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
 
                 break;
             }
-            case AODV_SC_SEND_OUT_RWARN: {
-                aodv_link_break_element_t* head = NULL;
-                aodv_db_get_warn_endpoints_from_neighbor_and_set_warn(ether_addr, &head);
-
-                aodv_link_break_element_t* dest, *tmp;
-                DL_FOREACH_SAFE(head, dest, tmp) {
-                    dessert_debug("AODV_SC_SEND_OUT_RWARN: " MAC " -> " MAC,
-                                  EXPLODE_ARRAY6(ether_addr),
-                                  EXPLODE_ARRAY6(dest->host));
-                    aodv_send_rreq(dest->host, scheduled);
-                }
-                break;
-            }
             default: {
                 dessert_crit("unknown schedule type=%" PRIu8 "", schedule_type);
             }

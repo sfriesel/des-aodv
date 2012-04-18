@@ -27,6 +27,50 @@ For further information and questions please use the web site
 #undef assert
 #include <assert.h>
 
+typedef struct aodv_rt_precursor_list_entry {
+    mac_addr            addr; // ID
+    dessert_meshif_t*   iface;
+    UT_hash_handle      hh;
+} aodv_rt_precursor_list_entry_t;
+
+typedef struct aodv_rt_entry {
+    mac_addr            addr; // ID
+    mac_addr            next_hop;
+    dessert_meshif_t*	output_iface;
+    uint32_t            sequence_number;
+    metric_t			metric;
+    uint8_t				hop_count;
+    /**
+     * flags format: 0 0 0 0 0 0 U I
+     * I - Invalid flag; route is invalid due of link breakage
+     * U - next hop Unknown flag;
+     */
+    uint8_t				flags;
+    aodv_rt_precursor_list_entry_t* precursor_list;
+    UT_hash_handle		hh;
+} aodv_rt_entry_t;
+
+
+typedef struct aodv_rt {
+    aodv_rt_entry_t*	entries;
+    timeslot_t*			timeslot;
+} aodv_rt_t;
+
+/**
+ * Mapping next_hop -> destination list
+ */
+typedef struct nht_destlist_entry {
+    uint8_t				destination_host[ETH_ALEN];
+    aodv_rt_entry_t*	rt_entry;
+    UT_hash_handle		hh;
+} nht_destlist_entry_t;
+
+typedef struct nht_entry {
+    uint8_t				destination_host_next_hop[ETH_ALEN];
+    nht_destlist_entry_t*		dest_list;
+    UT_hash_handle			hh;
+} nht_entry_t;
+
 aodv_rt_t				rt;
 nht_entry_t*				nht = NULL;
 

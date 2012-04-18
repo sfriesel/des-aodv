@@ -105,20 +105,20 @@ int aodv_db_nt_reset(uint32_t* count_out) {
 int aodv_db_nt_capt_hellorsp(mac_addr addr, uint16_t hello_seq __attribute__((unused)), dessert_meshif_t* iface, struct timeval const *timestamp) {
     neighbor_entry_t* curr_entry = NULL;
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
-    mac_copy(addr_sum, ether_neighbor_addr);
+    mac_copy(addr_sum, addr);
     memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
     HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
 
     if(curr_entry == NULL) {
         //this neigbor is new, so create an entry
-        curr_entry = db_neighbor_entry_create(ether_neighbor_addr, iface);
+        curr_entry = db_neighbor_entry_create(addr, iface);
 
         if(curr_entry == NULL) {
             return false;
         }
 
         HASH_ADD_KEYPTR(hh, nt.entries, curr_entry->ether_neighbor, ETH_ALEN + sizeof(void*), curr_entry);
-        dessert_debug("%s <=====> " MAC, iface->if_name, EXPLODE_ARRAY6(ether_neighbor_addr));
+        dessert_debug("%s <=====> " MAC, iface->if_name, EXPLODE_ARRAY6(addr));
     }
 
     curr_entry->last_hello_seq = hello_seq;

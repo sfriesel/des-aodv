@@ -189,7 +189,6 @@ int aodv_db_rt_capt_rreq(mac_addr destination_host,
         orig_entry->sequence_number = originator_sequence_number;
         orig_entry->metric = metric;
         orig_entry->hop_count = hop_count;
-        orig_entry->flags &= ~AODV_FLAGS_ROUTE_NEW;
     }
     else {
         *result_out = AODV_CAPT_OLD;

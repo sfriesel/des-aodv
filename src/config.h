@@ -106,7 +106,6 @@ typedef uint16_t metric_t;
 #define AODV_FLAGS_UNUSED				0
 #define AODV_FLAGS_ROUTE_INVALID 		1
 #define AODV_FLAGS_NEXT_HOP_UNKNOWN		(1 << 1)
-#define AODV_FLAGS_ROUTE_NEW	    	(1 << 4)
 
 #define MAX_MESH_IFACES_COUNT       8
 

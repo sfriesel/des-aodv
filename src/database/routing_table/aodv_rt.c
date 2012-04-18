@@ -428,31 +428,6 @@ int aodv_db_rt_inv_over_nexthop(mac_addr next_hop) {
     return true;
 }
 
-/*
- * cleanup next hop table
- * returns true on success
- */
-int aodv_db_rt_remove_nexthop(mac_addr next_hop) {
-
-    nht_entry_t* nht_entry;
-    HASH_FIND(hh, nht, next_hop, ETH_ALEN, nht_entry);
-
-    if(nht_entry == NULL) {
-        return false;
-    }
-
-    struct nht_destlist_entry* dest, *tmp;
-
-    HASH_ITER(hh, nht_entry->dest_list, dest, tmp) {
-        HASH_DEL(nht_entry->dest_list, dest);
-        free(dest);
-    }
-
-    HASH_DEL(nht, nht_entry);
-    free(nht_entry);
-    return true;
-}
-
 int aodv_db_rt_routing_reset(uint32_t* count_out) {
 
     *count_out = 0;

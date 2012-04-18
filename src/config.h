@@ -118,8 +118,6 @@ typedef uint16_t metric_t;
 
 extern dessert_periodic_t* 			send_hello_periodic;
 
-extern uint16_t 					rreq_interval;
-
 extern uint16_t 					hello_size;
 extern uint16_t 					hello_interval;
 extern uint16_t 					rreq_size;

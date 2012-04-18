@@ -24,6 +24,7 @@ For further information and questions please use the web site
 #include "../database/aodv_database.h"
 #include "aodv_pipeline.h"
 #include "../config.h"
+#include "../helper.h"
 #include <string.h>
 #include <pthread.h>
 #include <utlist.h>

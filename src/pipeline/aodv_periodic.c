@@ -146,7 +146,11 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
                 aodv_db_getrerrcount(scheduled, &rerr_count);
 
                 if(rerr_count >= RERR_RATELIMIT) {
-                    return DESSERT_PER_KEEP;
+                    //rate limit reached; try to send later
+                    struct timeval later = hf_tv_add_ms(*scheduled, 20);
+                    aodv_db_addschedule(&later, ether_addr, schedule_type, schedule_param);
+                    break;
+
                 }
 
                 if(!aodv_db_inv_over_nexthop(ether_addr)) {

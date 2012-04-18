@@ -256,7 +256,6 @@ int aodv_db_rt_capt_rrep(mac_addr destination_host,
     rt_entry->hop_count = hop_count;
     rt_entry->flags &= ~AODV_FLAGS_NEXT_HOP_UNKNOWN;
     rt_entry->flags &= ~AODV_FLAGS_ROUTE_INVALID;
-    rt_entry->flags &= ~AODV_FLAGS_ROUTE_WARN;
 
     // insert this routing entry in the next hop destlist
     HASH_FIND(hh, nht, destination_host_next_hop, ETH_ALEN, nht_entry);

@@ -122,8 +122,6 @@ int aodv_db_rt_inv_over_nexthop(mac_addr next_hop);
 int aodv_db_rt_get_destlist(mac_addr dhost_next_hop, aodv_link_break_element_t** destlist);
 int aodv_db_rt_add_precursor(mac_addr destination, mac_addr precursor, dessert_meshif_t *iface);
 
-int aodv_db_rt_get_warn_status(mac_addr dhost_ether);
-
 int aodv_db_rt_cleanup(struct timeval* timestamp);
 int aodv_db_rt_routing_reset(uint32_t* count_out);
 

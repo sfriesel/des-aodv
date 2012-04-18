@@ -453,18 +453,6 @@ int aodv_db_rt_remove_nexthop(mac_addr next_hop) {
     return true;
 }
 
-int aodv_db_rt_get_warn_status(mac_addr dhost_ether) {
-    aodv_rt_entry_t* rt_entry;
-    HASH_FIND(hh, rt.entries, dhost_ether, ETH_ALEN, rt_entry);
-
-    if(rt_entry == NULL || rt_entry->flags & AODV_FLAGS_NEXT_HOP_UNKNOWN) {
-        return false;
-    }
-
-    dessert_debug("rt_entry->flags = %" PRIu8 "->%p", rt_entry->flags, rt_entry);
-    return ((rt_entry->flags & AODV_FLAGS_ROUTE_WARN) ? true : false);
-}
-
 int aodv_db_rt_routing_reset(uint32_t* count_out) {
 
     *count_out = 0;

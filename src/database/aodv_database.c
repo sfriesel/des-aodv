@@ -233,13 +233,6 @@ int aodv_db_get_destlist(mac_addr dhost_next_hop, aodv_link_break_element_t** de
     return result;
 }
 
-int aodv_db_get_warn_endpoints_from_neighbor_and_set_warn(mac_addr neighbor, aodv_link_break_element_t** head) {
-    aodv_db_wlock();
-    int result = aodv_db_rt_get_warn_endpoints_from_neighbor_and_set_warn(neighbor, head);
-    aodv_db_unlock();
-    return result;
-}
-
 int aodv_db_routing_reset(uint32_t* count_out) {
     pthread_rwlock_wrlock(&db_rwlock);
     int result = aodv_db_rt_routing_reset(count_out);

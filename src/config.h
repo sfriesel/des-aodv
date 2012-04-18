@@ -103,7 +103,6 @@ typedef uint16_t metric_t;
 #define AODV_SC_SEND_OUT_RERR		3
 
 // --- Database Flags
-#define AODV_FLAGS_UNUSED				0
 #define AODV_FLAGS_ROUTE_INVALID 		1
 #define AODV_FLAGS_NEXT_HOP_UNKNOWN		(1 << 1)
 

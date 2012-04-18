@@ -453,38 +453,6 @@ int aodv_db_rt_remove_nexthop(mac_addr next_hop) {
     return true;
 }
 
-//get all routes over one neighbor
-int aodv_db_rt_get_warn_endpoints_from_neighbor_and_set_warn(mac_addr neighbor, aodv_link_break_element_t** head) {
-    // find appropriate routing entry
-    nht_entry_t* nht_entry;
-    HASH_FIND(hh, nht, neighbor, ETH_ALEN, nht_entry);
-
-    if((nht_entry == NULL) || (nht_entry->dest_list == NULL)) {
-        return false;
-    }
-
-    *head = NULL;
-    struct nht_destlist_entry* dest, *tmp;
-
-    HASH_ITER(hh, nht_entry->dest_list, dest, tmp) {
-        if(dest->rt_entry->flags & AODV_FLAGS_ROUTE_WARN) {
-            continue;
-        }
-
-        if(!(dest->rt_entry->flags & AODV_FLAGS_ROUTE_LOCAL_USED)) {
-            continue;
-        }
-
-        dessert_debug("dest->rt_entry->flags = %" PRIu8 "->%p", dest->rt_entry->flags, dest->rt_entry);
-        aodv_link_break_element_t* curr_el = malloc(sizeof(aodv_link_break_element_t));
-        mac_copy(curr_el->host, dest->rt_entry->addr);
-        curr_el->sequence_number = dest->rt_entry->sequence_number;
-        DL_APPEND(*head, curr_el);
-        dest->rt_entry->flags |= AODV_FLAGS_ROUTE_WARN;
-    }
-    return true;
-}
-
 int aodv_db_rt_get_warn_status(mac_addr dhost_ether) {
     aodv_rt_entry_t* rt_entry;
     HASH_FIND(hh, rt.entries, dhost_ether, ETH_ALEN, rt_entry);

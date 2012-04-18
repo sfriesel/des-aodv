@@ -102,6 +102,21 @@ int aodv_db_nt_reset(uint32_t* count_out) {
     return true;
 }
 
+int db_nt_check2Dneigh(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp) {
+    timeslot_purgeobjects(nt.ts, timestamp);
+    neighbor_entry_t* curr_entry;
+    uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
+    mac_copy(addr_sum, ether_neighbor_addr);
+    memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
+    HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
+
+    if(curr_entry == NULL) {
+        return false;
+    }
+
+    return true;
+}
+
 int aodv_db_nt_capt_hellorsp(mac_addr addr, uint16_t hello_seq __attribute__((unused)), dessert_meshif_t* iface, struct timeval const *timestamp) {
     neighbor_entry_t* curr_entry = NULL;
     uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
@@ -125,21 +140,6 @@ int aodv_db_nt_capt_hellorsp(mac_addr addr, uint16_t hello_seq __attribute__((un
 
 
     timeslot_addobject(nt.ts, timestamp, curr_entry);
-    return true;
-}
-
-int db_nt_check2Dneigh(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp) {
-    timeslot_purgeobjects(nt.ts, timestamp);
-    neighbor_entry_t* curr_entry;
-    uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
-    mac_copy(addr_sum, ether_neighbor_addr);
-    memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
-    HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
-
-    if(curr_entry == NULL) {
-        return false;
-    }
-
     return true;
 }
 

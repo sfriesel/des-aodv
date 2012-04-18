@@ -108,9 +108,6 @@ int aodv_db_rt_getroute2dest(mac_addr              destination_host,
 
 int aodv_db_rt_getnexthop(mac_addr destination_host, mac_addr *next_hop_out);
 
-int aodv_db_rt_getprevhop(mac_addr destination_host, mac_addr originator_host,
-                          mac_addr originator_host_prev_hop_out, dessert_meshif_t** output_iface_out);
-
 int aodv_db_rt_get_destination_sequence_number(mac_addr destination_host, uint32_t* destination_sequence_number_out);
 
 int aodv_db_rt_get_hopcount(mac_addr destination_host, uint8_t* hop_count_out);

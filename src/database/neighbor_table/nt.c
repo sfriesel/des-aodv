@@ -68,7 +68,6 @@ static void db_nt_on_neighbor_timeout(struct timeval* timestamp, void* src_objec
     HASH_DEL(nt.entries, curr_entry);
 
     aodv_db_sc_addschedule(timestamp, curr_entry->ether_neighbor, AODV_SC_SEND_OUT_RERR, 0);
-    aodv_db_sc_dropschedule(curr_entry->ether_neighbor, AODV_SC_UPDATE_RSSI);
     free(curr_entry);
 }
 

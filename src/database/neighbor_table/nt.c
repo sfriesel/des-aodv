@@ -97,10 +97,6 @@ nt_neighbor_t const *aodv_db_nt_lookup(mac_addr addr, dessert_meshif_t *iface, s
     return aodv_db_nt_lookup_nonconst(addr, iface, timestamp);
 }
 
-int db_nt_check2Dneigh(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp) {
-    return NULL != aodv_db_nt_lookup(ether_neighbor_addr, iface, timestamp);
-}
-
 int aodv_db_nt_capt_hellorsp(mac_addr addr, uint16_t hello_seq __attribute__((unused)), dessert_meshif_t* iface, struct timeval const *timestamp) {
     nt_neighbor_t* curr_entry = aodv_db_nt_lookup_nonconst(addr, iface, timestamp);
 

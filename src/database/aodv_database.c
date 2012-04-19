@@ -256,7 +256,7 @@ int aodv_db_capt_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_seq, dess
  */
 int aodv_db_is_neighbor(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp) {
     aodv_db_wlock();
-    int result =  db_nt_check2Dneigh(ether_neighbor_addr, iface, timestamp);
+    int result = (aodv_db_nt_lookup(ether_neighbor_addr, iface, timestamp) != NULL);
     aodv_db_unlock();
     return result;
 }

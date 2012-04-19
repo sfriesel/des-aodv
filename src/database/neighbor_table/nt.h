@@ -36,11 +36,8 @@ void aodv_db_nt_report(char** str_out);
  * Take a record that the given neighbor seems to be bidirectional neighbor
  */
 int aodv_db_nt_capt_hellorsp(mac_addr ether_neighbor_addr, uint16_t hello_seq, dessert_meshif_t* iface, struct timeval const *timestamp);
-/**
- * Check whether given neighbor is 1 hop bidirectional neighbor
- */
-int db_nt_check2Dneigh(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp);
 
 void db_nt_on_neigbor_timeout(struct timeval* timestamp, void* src_object, void* object);
+nt_neighbor_t const *aodv_db_nt_lookup(mac_addr neighbor_addr, dessert_meshif_t* iface, struct timeval const *timestamp);
 
 #endif

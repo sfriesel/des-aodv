@@ -25,31 +25,9 @@ For further information and questions please use the web site
 #include "../timeslot.h"
 #include "../../config.h"
 #include "../schedule_table/aodv_st.h"
+#include <utlist.h>
 #undef assert
 #include <assert.h>
-
-typedef struct neighbor_entry {
-    struct __attribute__((__packed__)) {  // key
-        uint8_t             ether_neighbor[ETH_ALEN];
-        dessert_meshif_t*   iface;
-        uint16_t            last_hello_seq;
-    };
-    UT_hash_handle          hh;
-} neighbor_entry_t;
-
-neighbor_entry_t* db_neighbor_entry_create(mac_addr ether_neighbor_addr, dessert_meshif_t* iface) {
-    neighbor_entry_t* new_entry;
-    new_entry = malloc(sizeof(neighbor_entry_t));
-
-    if(new_entry == NULL) {
-        return NULL;
-    }
-
-    mac_copy(new_entry->ether_neighbor, ether_neighbor_addr);
-    new_entry->iface = iface;
-    new_entry->last_hello_seq = 0; /* initial */
-    return new_entry;
-}
 
 struct neighbor {
     mac_addr          addr;
@@ -58,16 +36,16 @@ struct neighbor {
 };
 
 struct neighbor_table {
-    neighbor_entry_t  *entries;
+    nt_neighbor_t  *entries;
     timeslot_t  *ts;
 } nt;
 
 static void db_nt_on_neighbor_timeout(struct timeval* timestamp, void* src_object, void* object) {
-    neighbor_entry_t* curr_entry = object;
-    dessert_debug("%s <= x => " MAC, curr_entry->iface->if_name, EXPLODE_ARRAY6(curr_entry->ether_neighbor));
-    HASH_DEL(nt.entries, curr_entry);
+    nt_neighbor_t* curr_entry = object;
+    dessert_debug("%s <= x => " MAC, curr_entry->iface->if_name, EXPLODE_ARRAY6(curr_entry->addr));
+    DL_DELETE(nt.entries, curr_entry);
 
-    aodv_db_sc_addschedule(timestamp, curr_entry->ether_neighbor, AODV_SC_SEND_OUT_RERR, 0);
+    aodv_db_sc_addschedule(timestamp, curr_entry->addr, AODV_SC_SEND_OUT_RERR, 0);
     free(curr_entry);
 }
 
@@ -85,11 +63,11 @@ int aodv_db_nt_init() {
 int aodv_db_nt_destroy(uint32_t* count_out) {
     *count_out = 0;
 
-    neighbor_entry_t* neigh = NULL;
-    neighbor_entry_t* tmp = NULL;
-    HASH_ITER(hh, nt.entries, neigh, tmp) {
-        HASH_DEL(nt.entries, neigh);
-        free(neigh);
+    nt_neighbor_t* ngbr = NULL;
+    nt_neighbor_t* tmp = NULL;
+    DL_FOREACH_SAFE(nt.entries, ngbr, tmp) {
+        DL_DELETE(nt.entries, ngbr);
+        free(ngbr);
         (*count_out)++;
     }
     timeslot_destroy(nt.ts);
@@ -102,43 +80,37 @@ int aodv_db_nt_reset(uint32_t* count_out) {
     return true;
 }
 
-int db_nt_check2Dneigh(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp) {
-    timeslot_purgeobjects(nt.ts, timestamp);
-    neighbor_entry_t* curr_entry;
-    uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
-    mac_copy(addr_sum, ether_neighbor_addr);
-    memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
-    HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
-
-    if(curr_entry == NULL) {
-        return false;
+static nt_neighbor_t *aodv_db_nt_lookup_nonconst(mac_addr addr, dessert_meshif_t *iface, struct timeval const *timestamp) {
+    if(timestamp) {
+        timeslot_purgeobjects(nt.ts, timestamp);
     }
+    nt_neighbor_t *ngbr;
+    DL_FOREACH(nt.entries, ngbr) {
+        if(mac_equal(addr, ngbr->addr) && iface == ngbr->iface) {
+            break;
+        }
+    }
+    return ngbr;
+}
 
-    return true;
+nt_neighbor_t const *aodv_db_nt_lookup(mac_addr addr, dessert_meshif_t *iface, struct timeval const *timestamp) {
+    return aodv_db_nt_lookup_nonconst(addr, iface, timestamp);
+}
+
+int db_nt_check2Dneigh(mac_addr ether_neighbor_addr, dessert_meshif_t* iface, struct timeval* timestamp) {
+    return NULL != aodv_db_nt_lookup(ether_neighbor_addr, iface, timestamp);
 }
 
 int aodv_db_nt_capt_hellorsp(mac_addr addr, uint16_t hello_seq __attribute__((unused)), dessert_meshif_t* iface, struct timeval const *timestamp) {
-    neighbor_entry_t* curr_entry = NULL;
-    uint8_t addr_sum[ETH_ALEN + sizeof(void*)];
-    mac_copy(addr_sum, addr);
-    memcpy(addr_sum + ETH_ALEN, &iface, sizeof(void*));
-    HASH_FIND(hh, nt.entries, addr_sum, ETH_ALEN + sizeof(void*), curr_entry);
+    nt_neighbor_t* curr_entry = aodv_db_nt_lookup_nonconst(addr, iface, timestamp);
 
     if(curr_entry == NULL) {
-        //this neigbor is new, so create an entry
-        curr_entry = db_neighbor_entry_create(addr, iface);
-
-        if(curr_entry == NULL) {
-            return false;
-        }
-
-        HASH_ADD_KEYPTR(hh, nt.entries, curr_entry->ether_neighbor, ETH_ALEN + sizeof(void*), curr_entry);
+        curr_entry = malloc(sizeof(*curr_entry));
+        mac_copy(curr_entry->addr, addr);
+        curr_entry->iface = iface;
+        DL_APPEND(nt.entries, curr_entry);
         dessert_debug("%s <=====> " MAC, iface->if_name, EXPLODE_ARRAY6(addr));
     }
-
-    curr_entry->last_hello_seq = hello_seq;
-
-
     timeslot_addobject(nt.ts, timestamp, curr_entry);
     return true;
 }

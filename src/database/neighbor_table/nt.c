@@ -42,7 +42,7 @@ struct neighbor_table {
 
 static void db_nt_on_neighbor_timeout(struct timeval* timestamp, void* src_object, void* object) {
     nt_neighbor_t* curr_entry = object;
-    dessert_debug("%s <= x => " MAC, curr_entry->iface->if_name, EXPLODE_ARRAY6(curr_entry->addr));
+    dessert_debug("neighbor " MAC " timed out on %s", EXPLODE_ARRAY6(curr_entry->addr), curr_entry->iface->if_name);
     DL_DELETE(nt.entries, curr_entry);
 
     aodv_db_sc_addschedule(timestamp, curr_entry->addr, AODV_SC_SEND_OUT_RERR, 0);
@@ -109,7 +109,7 @@ int aodv_db_nt_capt_hellorsp(mac_addr addr, uint16_t hello_seq __attribute__((un
         mac_copy(curr_entry->addr, addr);
         curr_entry->iface = iface;
         DL_APPEND(nt.entries, curr_entry);
-        dessert_debug("%s <=====> " MAC, iface->if_name, EXPLODE_ARRAY6(addr));
+        dessert_debug("neighbor " MAC " established on %s", EXPLODE_ARRAY6(curr_entry->addr), curr_entry->iface->if_name);
     }
     timeslot_addobject(nt.ts, timestamp, curr_entry);
     return true;

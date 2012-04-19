@@ -159,28 +159,21 @@ dessert_per_result_t aodv_periodic_scexecute(void* data, struct timeval* schedul
                     break;
                 }
 
-                if(!aodv_db_inv_over_nexthop(ether_addr)) {
-                    return 0; //nexthop not in nht
+                aodv_link_break_element_t* destlist = schedule_param;
+                dessert_msg_t* rerr_msg = aodv_create_rerr(&destlist);
+
+                if(!rerr_msg) {
+                    break; //no destinations were affected
                 }
 
-                aodv_link_break_element_t* destlist = NULL;
+                dessert_meshsend(rerr_msg, NULL);
+                dessert_msg_destroy(rerr_msg);
+                aodv_db_putrerr(scheduled);
 
-                if(!aodv_db_get_destlist(ether_addr, &destlist)) {
-                   return 0; //nexthop not in nht
+                if(destlist) {
+                    //reschedule to send RREQs for the remaining destinations
+                    aodv_db_addschedule(scheduled, ether_addr, schedule_type, destlist);
                 }
-
-                while(true) {
-                    dessert_msg_t* rerr_msg = aodv_create_rerr(&destlist);
-
-                    if(!rerr_msg) {
-                        break;
-                    }
-
-                    dessert_meshsend(rerr_msg, NULL);
-                    dessert_msg_destroy(rerr_msg);
-                    aodv_db_putrerr(scheduled);
-                }
-
                 break;
             }
             default: {

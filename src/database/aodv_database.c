@@ -219,20 +219,6 @@ int aodv_db_add_precursor(mac_addr destination, mac_addr precursor_addr, dessert
     return result;
 }
 
-int aodv_db_inv_over_nexthop(mac_addr next_hop) {
-    pthread_rwlock_wrlock(&db_rwlock);
-    int result = aodv_db_rt_inv_over_nexthop(next_hop);
-    pthread_rwlock_unlock(&db_rwlock);
-    return result;
-}
-
-int aodv_db_get_destlist(mac_addr dhost_next_hop, aodv_link_break_element_t** destlist) {
-    pthread_rwlock_wrlock(&db_rwlock);
-    int result = aodv_db_rt_get_destlist(dhost_next_hop, destlist);
-    pthread_rwlock_unlock(&db_rwlock);
-    return result;
-}
-
 int aodv_db_routing_reset(uint32_t* count_out) {
     pthread_rwlock_wrlock(&db_rwlock);
     int result = aodv_db_rt_routing_reset(count_out);

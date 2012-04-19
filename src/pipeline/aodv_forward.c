@@ -48,7 +48,6 @@ void aodv_send_packets_from_buffer(mac_addr ether_dhost, mac_addr next_hop, dess
         pthread_rwlock_unlock(&data_seq_lock);
         buffered_msg->u16 = data_seq_copy;
 
-        /*  no need to search for next hop. Next hop is the last_hop that send RREP */
         mac_copy(buffered_msg->l2h.ether_dhost, next_hop);
         dessert_meshsend(buffered_msg, iface);
 

@@ -25,7 +25,8 @@ For further information and questions please use the web site
 #include "../timeslot.h"
 #include "../../config.h"
 #include "../schedule_table/aodv_st.h"
-#include <utlist.h>
+//for aodv_db_rt_on_neighbor_lost
+#include "../routing_table/aodv_rt.h"
 #undef assert
 #include <assert.h>
 
@@ -43,9 +44,8 @@ struct neighbor_table {
 static void db_nt_on_neighbor_timeout(struct timeval* timestamp, void* src_object, void* object) {
     nt_neighbor_t* curr_entry = object;
     dessert_debug("neighbor " MAC " timed out on %s", EXPLODE_ARRAY6(curr_entry->addr), curr_entry->iface->if_name);
+    aodv_db_rt_inv_nexthop(curr_entry, timestamp);
     DL_DELETE(nt.entries, curr_entry);
-
-    aodv_db_sc_addschedule(timestamp, curr_entry->addr, AODV_SC_SEND_OUT_RERR, 0);
     free(curr_entry);
 }
 
@@ -65,8 +65,11 @@ int aodv_db_nt_destroy(uint32_t* count_out) {
 
     nt_neighbor_t* ngbr = NULL;
     nt_neighbor_t* tmp = NULL;
+    struct timeval now;
+    gettimeofday(&now, NULL);
     DL_FOREACH_SAFE(nt.entries, ngbr, tmp) {
         DL_DELETE(nt.entries, ngbr);
+        aodv_db_rt_inv_nexthop(ngbr, &now);
         free(ngbr);
         (*count_out)++;
     }
@@ -100,7 +103,7 @@ nt_neighbor_t const *aodv_db_nt_lookup(mac_addr addr, dessert_meshif_t *iface, s
 int aodv_db_nt_capt_hellorsp(mac_addr addr, uint16_t hello_seq __attribute__((unused)), dessert_meshif_t* iface, struct timeval const *timestamp) {
     nt_neighbor_t* curr_entry = aodv_db_nt_lookup_nonconst(addr, iface, timestamp);
 
-    if(curr_entry == NULL) {
+    if(!curr_entry) {
         curr_entry = malloc(sizeof(*curr_entry));
         mac_copy(curr_entry->addr, addr);
         curr_entry->iface = iface;
@@ -109,6 +112,14 @@ int aodv_db_nt_capt_hellorsp(mac_addr addr, uint16_t hello_seq __attribute__((un
     }
     timeslot_addobject(nt.ts, timestamp, curr_entry);
     return true;
+}
+
+const uint8_t *aodv_db_nt_get_addr(nt_neighbor_t const *ngbr) {
+    return ngbr->addr;
+}
+
+dessert_meshif_t *aodv_db_nt_get_iface(nt_neighbor_t const *ngbr) {
+    return ngbr->iface;
 }
 
 void aodv_db_nt_report(char** str_out) {

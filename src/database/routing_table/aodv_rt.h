@@ -32,6 +32,7 @@ For further information and questions please use the web site
 #include "../aodv_database.h"
 #include "../../config.h"
 #include "../../helper.h"
+#include "../neighbor_table/nt.h"
 
 #ifdef ANDROID
 #include <linux/if_ether.h>
@@ -59,7 +60,7 @@ int aodv_db_rt_capt_rrep(mac_addr              destination_host,
 
 int aodv_db_rt_getroute2dest(mac_addr              destination_host,
                              mac_addr             *next_hop_out,
-                             dessert_meshif_t    **output_iface_out,
+                             dessert_meshif_t    **iface_out,
                              struct timeval const *timestamp);
 
 int aodv_db_rt_getnexthop(mac_addr destination_host, mac_addr *next_hop_out);
@@ -70,9 +71,8 @@ int aodv_db_rt_get_hopcount(mac_addr destination_host, uint8_t* hop_count_out);
 int aodv_db_rt_get_metric(mac_addr destination_host, metric_t* last_metric_out);
 
 int aodv_db_rt_markrouteinv(mac_addr destination_host, uint32_t destination_sequence_number);
-int aodv_db_rt_inv_over_nexthop(mac_addr next_hop);
-int aodv_db_rt_get_destlist(mac_addr dhost_next_hop, aodv_link_break_element_t** destlist);
-int aodv_db_rt_add_precursor(mac_addr destination, mac_addr precursor, dessert_meshif_t *iface);
+int aodv_db_rt_inv_nexthop(nt_neighbor_t const *next_hop, struct timeval *timestamp);
+int aodv_db_rt_add_precursor(mac_addr destination, mac_addr precursor_addr, dessert_meshif_t* iface);
 
 int aodv_db_rt_cleanup(struct timeval* timestamp);
 int aodv_db_rt_routing_reset(uint32_t* count_out);

@@ -102,16 +102,14 @@ typedef uint16_t metric_t;
  */
 #define AODV_SC_SEND_OUT_RERR		3
 
-// --- Database Flags
-#define AODV_FLAGS_ROUTE_INVALID 		1
-#define AODV_FLAGS_NEXT_HOP_UNKNOWN		(1 << 1)
-
 #define MAX_MESH_IFACES_COUNT       8
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 
 extern dessert_periodic_t* 			send_hello_periodic;
+
+extern uint16_t 					rreq_interval;
 
 extern uint16_t 					hello_size;
 extern uint16_t 					hello_interval;

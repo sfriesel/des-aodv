@@ -196,8 +196,17 @@ int aodv_db_rt_capt_rrep(mac_addr              destination_host,
         return false;
     }
 
-    capt_rrep(rt_entry, prev_hop, destination_sequence_number, metric, hop_count, timestamp);
-    return true;
+    aodv_capt_result_t capt_result = capt_rrep(rt_entry, prev_hop, destination_sequence_number, metric, hop_count, timestamp);
+    switch(capt_result) {
+        case AODV_CAPT_NEW:
+            return true;
+        case AODV_CAPT_METRIC_HIT:
+            return true;
+        case AODV_CAPT_OLD:
+            return false;
+        default:
+            abort();
+    }
 }
 
 /** update db according to data in rreq

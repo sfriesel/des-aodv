@@ -551,7 +551,7 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         aodv_send_packets_from_buffer(l25h->ether_shost, msg->l2h.ether_shost, iface);
     }
 drop:
-    dessert_debug("incoming RREP from " MAC " over " MAC " to " MAC " seq=%ju hc=%ju ttl=%ju | %s", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), (uintmax_t) rrep_msg->destination_sequence_number, (uintmax_t)msg->ttl, (uintmax_t)msg->u8, comment);
+    dessert_debug("incoming RREP from " MAC " over " MAC " to " MAC " seq=%ju hc=%ju ttl=%ju | %s", EXPLODE_ARRAY6(l25h->ether_shost), EXPLODE_ARRAY6(msg->l2h.ether_shost), EXPLODE_ARRAY6(l25h->ether_dhost), (uintmax_t) rrep_msg->destination_sequence_number, (uintmax_t)msg->u8, (uintmax_t)msg->ttl, comment);
     return DESSERT_MSG_DROP;
 }
 

@@ -527,6 +527,10 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     }
 
     if(!(proc->lflags & DESSERT_RX_FLAG_L25_DST)) {
+        if(msg->ttl == 0) {
+            comment = "dropped (TTL)";
+            goto drop;
+        }
         // forward RREP to RREQ originator
         mac_addr next_hop;
         dessert_meshif_t* output_iface;

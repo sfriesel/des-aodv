@@ -518,13 +518,6 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
     struct ether_header* l25h = dessert_msg_getl25ether(msg);
 
     int rrep_used = aodv_db_capt_rrep(l25h->ether_shost, msg->l2h.ether_shost, iface, rrep_msg->destination_sequence_number, msg->u16, msg->u8, &ts);
-    if(!rrep_used) {
-        // capture and re-send only if route is unknown OR
-        // sequence number is greater then that in database OR
-        // if seq_nums are equal and known metric is worse than RREP's
-        comment = "discarded";
-        goto drop;
-    }
 
     if(!(proc->lflags & DESSERT_RX_FLAG_L25_DST)) {
         if(msg->ttl == 0) {
@@ -548,6 +541,14 @@ int aodv_handle_rrep(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         }
     }
     else {
+        if(!rrep_used) {
+            // capture and re-send only if route is unknown OR
+            // sequence number is greater then that in database OR
+            // if seq_nums are equal and known metric is worse than RREP's
+            comment = "discarded";
+            goto drop;
+        }
+
         comment = "for me";
         /* Pop all packets from FIFO buffer and send to destination
          * no need to search for next hop. Next hop is RREP.prev_hop */

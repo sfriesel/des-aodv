@@ -376,9 +376,16 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         if(capt_result == AODV_CAPT_METRIC_HIT) {
             seq_num_global++;
         }
-        /* set our sequence number to the maximum of the current value and
-         * the destination sequence number in the RREQ (RFC 6.6.1) */
-        if(!unknown_seq_num_flag && hf_comp_u32(rreq_msg->destination_sequence_number, seq_num_global) > 0) {
+
+        /* Set our sequence number to the maximum of the current value and
+         * the destination sequence number in the RREQ plus one (RFC 6.6.1). This differs from
+         * the RFC as seq_num_global is also incremented when both are equal. Otherwise the RREP
+         * gets discarded (see 6.7.ii) */
+        int seq_num_cmp = hf_comp_u32(rreq_msg->destination_sequence_number, seq_num_global);
+        if(seq_num_cmp >= 0) {
+            seq_num_global++;
+        }
+        if(!unknown_seq_num_flag && seq_num_cmp > 0) {
             seq_num_global = rreq_msg->destination_sequence_number;
         }
         rrep_seq_num = seq_num_global;
@@ -397,8 +404,12 @@ int aodv_handle_rreq(dessert_msg_t* msg, uint32_t len, dessert_msg_proc_t* proc,
         bool local_repair = !dest_only_flag && we_have_seq_num;
         if(we_have_seq_num && !unknown_seq_num_flag) {
             uint32_t rreq_dest_seq_num = rreq_msg->destination_sequence_number;
-            // but don't repair if rreq has newer dest_seq_num
-            if(hf_comp_u32(rreq_dest_seq_num, our_dest_seq_num) > 0) {
+            /*
+             * But don't repair if RREQ has newer or equal dest_seq_num. This differs from RFC (repair
+             * with greater *or equal* dest_seq_num, see 6.6.ii) because RREPs with same dest_seq_num
+             * get discarded by originator (see 6.7.ii).
+             */
+            if(hf_comp_u32(rreq_dest_seq_num, our_dest_seq_num) >= 0) {
                 local_repair = false;
             }
         }

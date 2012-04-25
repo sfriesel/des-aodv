@@ -26,7 +26,7 @@ For further information and questions please use the web site
 
 #include <dessert.h>
 
-#define RREQ_RETRIES				5 /* ferhat=5 rfc=2 stefan=0 */
+#define RREQ_RETRIES				0 /* ferhat=5 rfc=2 stefan=0 */
 #define RREQ_RATELIMIT				10 /* rfc=10 */
 #define TTL_START					1 /* rfc=1 */
 #define TTL_INCREMENT				2 /* rfc=2 */

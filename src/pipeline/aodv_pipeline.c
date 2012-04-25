@@ -220,7 +220,7 @@ static void aodv_send_rreq_real(aodv_rreq_series_t *series) {
     pthread_rwlock_unlock(&seq_num_lock);
 
     struct ether_header* l25h = dessert_msg_getl25ether(series->msg);
-    dessert_debug("sending RREQ to " MAC " ttl=%ju id=%ju", EXPLODE_ARRAY6(l25h->ether_dhost), (uintmax_t)msg->ttl, (uintmax_t)rreq->originator_sequence_number);
+    dessert_debug("sending RREQ to " MAC " ttl=%ju orig_seq=%ju dest_seq=%ju", EXPLODE_ARRAY6(l25h->ether_dhost), (uintmax_t)msg->ttl, (uintmax_t)rreq->originator_sequence_number, (uintmax_t)rreq->destination_sequence_number);
     dessert_meshsend(msg, NULL);
     gettimeofday(&ts, NULL);
     aodv_db_putrreq(&ts);

@@ -318,7 +318,6 @@ int aodv_db_rt_markrouteinv(mac_addr destination_host, uint32_t destination_sequ
         return false;
     }
     if(destination->seq_num_valid && hf_comp_u32(destination->sequence_number, destination_sequence_number) > 0) {
-        dessert_debug("route to " MAC " seq=%" PRIu32 ":%" PRIu32 " NOT marked as invalid", EXPLODE_ARRAY6(destination_host), destination->sequence_number, destination_sequence_number);
         return false;
     }
 

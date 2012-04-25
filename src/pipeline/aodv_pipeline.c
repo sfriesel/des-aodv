@@ -34,6 +34,7 @@ For further information and questions please use the web site
 #include <assert.h>
 
 static uint32_t seq_num_global = 0;
+static uintmax_t rreq_series_id = 0;
 static pthread_rwlock_t seq_num_lock = PTHREAD_RWLOCK_INITIALIZER;
 
 /**
@@ -48,6 +49,7 @@ struct aodv_rreq_series {
     uint64_t key;
     /* whether the series is not in the series_list anymore. Implies the series should be terminated at the next possibility */
     bool stop;
+    uintmax_t id;
     struct aodv_rreq_series *prev, *next;
 };
 static aodv_rreq_series_t *series_list = NULL;
@@ -79,6 +81,7 @@ static aodv_rreq_series_t *aodv_pipeline_new_series(dessert_msg_t *msg) {
     series->key = hf_mac_addr_to_uint64(l25h->ether_dhost);
     series->retries = 0;
     series->stop = false;
+    series->id = rreq_series_id++;
     DL_APPEND(series_list, series);
     pthread_rwlock_unlock(&series_list_lock);
     return series;
@@ -220,17 +223,17 @@ static void aodv_send_rreq_real(aodv_rreq_series_t *series) {
     pthread_rwlock_unlock(&seq_num_lock);
 
     struct ether_header* l25h = dessert_msg_getl25ether(series->msg);
-    dessert_debug("sending RREQ to " MAC " ttl=%ju orig_seq=%ju dest_seq=%ju", EXPLODE_ARRAY6(l25h->ether_dhost), (uintmax_t)msg->ttl, (uintmax_t)rreq->originator_sequence_number, (uintmax_t)rreq->destination_sequence_number);
+    dessert_debug("sending RREQ (series_id=%ju) to " MAC " ttl=%ju orig_seq=%ju dest_seq=%ju", series->id, EXPLODE_ARRAY6(l25h->ether_dhost), (uintmax_t)msg->ttl, (uintmax_t)rreq->originator_sequence_number, (uintmax_t)rreq->destination_sequence_number);
     dessert_meshsend(msg, NULL);
     gettimeofday(&ts, NULL);
     aodv_db_putrreq(&ts);
 
     if(series->retries >= RREQ_RETRIES) {
         /* RREQ has been tried for the max. number of times -- give up */
+        dessert_debug("RREQ series (id=%ju) to " MAC " ended without RREP", series->id, EXPLODE_ARRAY6(l25h->ether_dhost));
         aodv_pipeline_delete_series(series);
         return;
     }
-    dessert_trace("add task to repeat RREQ");
 
     /* RING_TRAVERSAL_TIME equals NET_TRAVERSAL_TIME if ring_search is off */
     uintmax_t ring_traversal_time = 2 * NODE_TRAVERSAL_TIME * min(NET_DIAMETER, msg->ttl);
